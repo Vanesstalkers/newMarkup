@@ -49,6 +49,7 @@ export class Metacom extends EventEmitter {
   static create(url, options) {
     const { transport } = Metacom;
     const Transport = url.startsWith('ws') ? transport.ws : transport.http;
+    console.log({url, options, Transport});
     return new Transport(url, options);
   }
 
@@ -60,6 +61,7 @@ export class Metacom extends EventEmitter {
 
   createStream(name, size) {
     const streamId = ++this.streamId;
+    console.log({streamId});
     const initData = { streamId, name, size };
     const transport = this;
     return new MetacomWritable(transport, initData);
@@ -69,6 +71,7 @@ export class Metacom extends EventEmitter {
     const name = blob.name || 'blob';
     const size = blob.size;
     const consumer = this.createStream(name, size);
+    console.log({consumer});
     return {
       streamId: consumer.streamId,
       upload: async () => {

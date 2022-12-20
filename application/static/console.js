@@ -448,7 +448,8 @@ class Application {
 
   async exec(line) {
     const args = line.split(' ');
-    if (args[0] === 'upload') {
+    console.log({ args });
+    if (args[0] === 'upload' || args[0] === 'u') {
       upload();
     } else if (args[0] === 'download') {
       const fileName = 'content/home.md';
@@ -466,19 +467,29 @@ class Application {
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
-  await application.metacom.load('auth', 'console', 'example', 'files');
+  await application.metacom.load(
+    'auth',
+    'console',
+    'example',
+    'files',
+    'markup',
+  );
   const token = localStorage.getItem('metarhia.session.token');
   let logged = false;
   if (token) {
     const res = await api.auth.restore({ token });
     logged = res.status === 'logged';
   }
+  console.log({ logged });
   if (!logged) {
+    await api.auth.register({ login: 'marcus', password: 'marcus' });
     const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
+    console.log({ res });
     if (res.token) {
       localStorage.setItem('metarhia.session.token', res.token);
     }
   }
+  document.cookie = `token=${localStorage.getItem('metarhia.session.token')}`;
   const { text } = await api.console.content({ name: 'home' });
   application.print(text);
   commandLoop();

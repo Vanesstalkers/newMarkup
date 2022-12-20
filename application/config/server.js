@@ -7,7 +7,7 @@
   timeouts: {
     bind: 2000,
     start: 30000,
-    stop: 5000,
+    stop: 25000,
     request: 5000,
     watch: 1000,
   },
