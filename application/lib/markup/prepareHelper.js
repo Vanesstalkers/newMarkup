@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { complex, form, errors }) {
+  addProxifiedContextToTplFunc(tplFunc, contextObj) {
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -17,12 +17,7 @@
       {
         context: npm.metavm.createContext(
           new Proxy(
-            {
-              parent: complex,
-              errors,
-              COMPLEX: (...args) => lib.markup.prepareComplex({ form, errors, parent: complex }, ...args).markup,
-              console,
-            },
+            { ...contextObj, console },
             {
               get: function (target, name) {
                 if (target[name]) return Reflect.get(target, name);
@@ -37,14 +32,14 @@
     );
     return f;
   },
-  fillData(data, { stylesFile }) {
+  prepareData(data, { styleList }) {
     const entries = [];
 
     for (const [key, value] of Object.entries(data)) {
       let stringifiedValue = '';
       switch (key) {
         case 'tpl':
-          stringifiedValue = this.prepareCss(value ? value.toString() : '', stylesFile);
+          stringifiedValue = this.prepareCss(value ? value.toString() : '', styleList);
           break;
         default:
           if (typeof value == 'object') stringifiedValue = JSON.stringify(value);
@@ -87,7 +82,7 @@
 
     return `{${entries.map(([key, str]) => `${key}: ${str}`)}}`;
   },
-  prepareCss(str, styles) {
+  prepareCss(str, styleList) {
     let cssPosStart = str.indexOf('`css');
     let cssPosEnd;
     while (cssPosStart != -1) {
@@ -97,11 +92,39 @@
       const cssStr = str.substring(cssPosStart, cssPosEnd).replace(/\*css\*/g, cssCode);
       // if (this.styleIndex[cssCode] == undefined) { // если потребуется, то это надо переделать на formStyleIndex
       // this.styleIndex[cssCode] = cssStr;
-      styles.push(!cssStr.includes(cssCode) ? `.${cssCode} {${cssStr}}` : cssStr); // возможна упрощенная запись css
+      styleList.push(!cssStr.includes(cssCode) ? `.${cssCode} {${cssStr}}` : cssStr); // возможна упрощенная запись css
       // }
       str = str.substring(0, cssPosStart - 4) + '" ' + cssCode + '"' + str.substring(cssPosEnd + 1);
       cssPosStart = str.indexOf('`css', cssPosStart + 1);
     }
     return str;
+  },
+
+  prepareEl(elPath, { funcList }) {
+    const [mainPath, elType] = elPath.split('|');
+    const [corePath, themePath, filePath] = mainPath.split('/');
+    const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
+    const el = elType ? elFile[elType] : elFile;
+
+    if (el) {
+      funcList.push(`window.el['${elPath}'] = {
+        ${[['tpl', el.tpl]].concat(Object.entries(el.front)).map(([key, value]) => `${key}:${value.toString()}`)}
+      }`);
+    }
+
+    //   if (j == 'stringFunc') funcFile += tmpProc[j].trim() + '\n\n';
+
+    //   // если элемент переиспользует часть функционала другого элемента, то его тоже нужно подргузить
+    //   (
+    //     (__.html.el[key].front.tpl.toString() + (__.html.el[key].front.prepare || '').toString()).match(
+    //       /window\.el\[[',"]__tpl(.*)[',"]\]\./g,
+    //     ) || []
+    //   ).forEach((k) => {
+    //     const includeKey = k.substr(11).substr(0, k.length - 11 - 3);
+    //     if (key != includeKey)
+    //       // иначе может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
+    //       pushTplToFront(includeKey);
+    //   });
+    // }
   },
 });

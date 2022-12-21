@@ -6,36 +6,60 @@ async ({ form, name, parent, queryFields = {} }) => {
     cache = exports;
   } catch (err) {
     const prepared = await lib.markup.prepareComplex(
-      {},
-      {
-        data: { name, blockName: form, tplType: 'form' },
-      },
+      { blockName: form, tplType: 'form' },
+      { name },
       domain[form][`form~${name}`].tpl,
     );
     cache = prepared.markup;
 
-    const cacheFile = [];
-    const stylesFile = [];
-    // cacheFile += 'exports.config = ' + JSON.stringify(SYS.get(__, "process['.'].config"));
-    // cacheFile += 'exports.lst = ' + JSON.stringify(__.lst);
-    cacheFile.push(['fields', JSON.stringify(prepared.form.queryFields)]);
+    const cacheList = [];
+    // cacheList += 'exports.config = ' + JSON.stringify(SYS.get(__, "process['.'].config"));
+    // cacheList += 'exports.lst = ' + JSON.stringify(__.lst);
+    cacheList.push(['fields', JSON.stringify(prepared.form.queryFields)]);
     const dataEntries = [];
     for (const [key, value] of Object.entries(prepared.form.data)) {
-      const stringifiedData = lib.markup.prepareHelper.fillData(value, { stylesFile });
+      const stringifiedData = lib.markup.prepareHelper.prepareData(value, { styleList: prepared.form.styleList });
       dataEntries.push([key, stringifiedData]);
-      // cacheFile += `exports.data['${key}'] = ${stringifiedData}\n`;
     }
-    cacheFile.push(['data', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+    cacheList.push(['data', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
-    // !!! el не должны загружаться много раз
+    for (const elPath of prepared.form.elList.filter((value, index, self) => self.indexOf(value) === index)) {
+      lib.markup.prepareHelper.prepareEl(elPath, { funcList: prepared.form.funcList });
+    }
 
-    await node.fsp.writeFile(`cache/${form}~${name}.js`, `({${cacheFile.map(([key, value]) => `${key}:${value}`)}})`);
+    let cacheFile = cacheList.map(([key, value]) => `${key}:${value}`).join(',');
+    for (const script of prepared.form.scriptList) {
+      const stringifiedScript = script.toString();
+      const scriptCode = node.crypto.createHash('md5').update(stringifiedScript).digest('hex');
+      cacheFile = cacheFile.replace(
+        new RegExp(stringifiedScript.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
+        '"f_' + scriptCode + '"',
+      );
+      prepared.form.funcList.push(`window.f_${scriptCode} = ${stringifiedScript}`);
+    }
+
+    await node.fsp.writeFile(`cache/${form}~${name}.js`, `({${cacheFile}})`);
     await node.fsp.writeFile(
       `cache/${form}~${name}.css`,
-      stylesFile.map((value) => `${value}\n\n`),
+      prepared.form.styleList.map((value) => `${value}\n\n`),
+    );
+    await node.fsp.writeFile(
+      `cache/${form}~${name}_func.js`,
+      prepared.form.funcList.map(
+        (value) =>
+          `${
+            typeof value === 'function'
+              ? value
+                  .toString()
+                  .trim()
+                  .match(/{([\s\S]*)}/gm)[0]
+                  ?.slice(1, -1)
+              : value.toString()
+          }\n\n`,
+      ),
     );
 
-    console.log({ cache: JSON.stringify(cache), cacheFile });
+    console.log({ cache: JSON.stringify(cache), cacheList });
     const { exports } = await npm.metavm.readScript(`cache/${form}~${name}.js`, { type: npm.metavm.COMMON_CONTEXT });
     cache = exports;
   }
