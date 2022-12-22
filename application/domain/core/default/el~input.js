@@ -1,9 +1,4 @@
 ({
-  config: {
-    multi: true,
-    customName: (key) => 'el_' + key,
-  },
-
   input: {
     config: {
       customType: 'html',
@@ -37,11 +32,11 @@
       customType: 'html',
     },
     tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_input'].tpl.bind(this)(_, d, data, tpl)];
+      return [window.el['core/default/el~input|input'].tpl.bind(this)(_, d, data, tpl)];
     },
     front: {
       prepare: function (tpl, data, doAfterLoad, realParent) {
-        window.el['__tpl~el_input'].prepare.bind(this)(tpl, data, doAfterLoad, realParent);
+        window.el['core/default/el~input|input'].prepare.bind(this)(tpl, data, doAfterLoad, realParent);
       },
     },
   },
@@ -51,7 +46,7 @@
       customType: 'html',
     },
     tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_label'].tpl.bind(this)(_, d, data, tpl)];
+      return [window.el['core/default/el~label|label'].tpl.bind(this)(_, d, data, tpl)];
     },
   },
 
@@ -60,7 +55,7 @@
       customType: 'html',
     },
     tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_label'].tpl.bind(this)(_, d, data, tpl)];
+      return [window.el['core/default/el~label|label'].tpl.bind(this)(_, d, data, tpl)];
     },
   },
 });

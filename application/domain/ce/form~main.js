@@ -29,7 +29,7 @@
       FIELD({
         name: 'num',
         label: 'Номер',
-        type: 'input',
+        type: 'input-',
         front: {
           onSave: (a, b, c) => {
             alert(1);
@@ -42,7 +42,10 @@
       FUNC(() => {
         console.log(2);
       }),
-      IF(false, () => [COMPLEX({ name: 'lvl2' }, ({ parent, data }) => [console.log({ parent, data })])]),
+      IF(true, () => [
+        COMPLEX({ name: 'lvl2' }, ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})]),
+        COMPLEX({ name: 'lvl2-1' }, ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})])
+      ]),
       DIV({ class: 'row' }, SPAN({ class: 'col-xs-8' }), SPAN({ class: 'col-xs-8' }), IMG({})),
     ]),
   ],

@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, contextObj) {
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, errors, parent, blockName, promiseList }) {
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -8,16 +8,57 @@
           return ( ${stringifiedFunc})(...args) 
         }catch(err){
           if(!errors.length){
-            console.log(err);
+            // console.log(err);
             err.message += \` at TPL-script: ${stringifiedFunc.replace(/[`]/g, '\\`')}\`; 
-            errors.push({message: err.message});
+            // errors.push({message: err.message});
           }
         }
       }`,
       {
         context: npm.metavm.createContext(
           new Proxy(
-            { ...contextObj, console },
+            {
+              parent,
+              errors,
+              COMPLEX: (...args) =>
+                // if (prepareCall) {
+                //   lib.markup.complex.prepare({ form, errors, parent, blockName }, ...args);
+                // } else {
+                //   return Promise.all([lib.markup.complex.get({ form, parent, errors }, ...args)]);
+                // }
+                prepareCall
+                  ? lib.markup.complex.prepare({ form, errors, parent, blockName }, ...args)
+                  : lib.markup.complex.get({ form, parent, errors, promiseList }, ...args),
+              HTML: (...args) => {
+                if (prepareCall) {
+                  lib.markup.html.prepare({ form, errors, parent, blockName }, ...args);
+                } else {
+                  return lib.markup.html.get({ form, errors, parent, promiseList }, ...args);
+                }
+              },
+              FIELD: (data) => {
+                if (typeof data != 'object') data = { name: data, keyvalue: data };
+                if (!data.type) data.type = 'input';
+                if (data.type.includes('*')) data.type = data.type.replace('*', 'json');
+                if (prepareCall) {
+                  const elPath = `core/default/el~${data.type.replace(/[+-]/g, '')}|${data.type}`;
+                  form.elList.push(elPath);
+                  form.queryFields[parent.linecode][data.name] = 1;
+                  if (data.lst) form.lstList.push(data.lst);
+                  if (data.front) form.scriptList.push(...Object.values(data.front));
+                } else {
+                  return { name: data.name, type: data.type };
+                }
+              },
+              IF: (check, result) => (prepareCall || check ? (typeof result == 'function' ? result() : result) : []),
+              FUNC: (f) => {
+                if (prepareCall) form.funcList.push(f);
+                // f(); // внутри f могут быть объявлены переиспользуемые функции, которые будут вызваны внутри шаблона ???
+              },
+              // SCRIPT: (f) => {
+              //   return [];
+              // },
+            },
             {
               get: function (target, name) {
                 if (target[name]) return Reflect.get(target, name);
@@ -99,32 +140,26 @@
     }
     return str;
   },
-
   prepareEl(elPath, { funcList }) {
     const [mainPath, elType] = elPath.split('|');
     const [corePath, themePath, filePath] = mainPath.split('/');
     const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
-    const el = elType ? elFile[elType] : elFile;
+    const el = elType ? elFile?.[elType] : elFile;
 
     if (el) {
-      funcList.push(`window.el['${elPath}'] = {
-        ${[['tpl', el.tpl]].concat(Object.entries(el.front)).map(([key, value]) => `${key}:${value.toString()}`)}
-      }`);
+      const stringifiedEl = [['tpl', el.tpl]]
+        .concat(Object.entries(el.front || {}))
+        .map(([key, value]) => `${key}:${value.toString()}`)
+        .join(',');
+      funcList.push(`window.el['${elPath}'] = {${stringifiedEl}}`);
+
+      const regexp = /(window\.el\[[',"])(.*)([',"]\]\.)/g;
+      // если элемент переиспользует часть функционала другого элемента, то его тоже нужно загрузить
+      for (const path of stringifiedEl.match(regexp) || []) {
+        const outElPath = path.replace(regexp, '$2');
+        // без следующей проверки может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
+        if (outElPath !== elPath) this.prepareEl(outElPath, { funcList });
+      }
     }
-
-    //   if (j == 'stringFunc') funcFile += tmpProc[j].trim() + '\n\n';
-
-    //   // если элемент переиспользует часть функционала другого элемента, то его тоже нужно подргузить
-    //   (
-    //     (__.html.el[key].front.tpl.toString() + (__.html.el[key].front.prepare || '').toString()).match(
-    //       /window\.el\[[',"]__tpl(.*)[',"]\]\./g,
-    //     ) || []
-    //   ).forEach((k) => {
-    //     const includeKey = k.substr(11).substr(0, k.length - 11 - 3);
-    //     if (key != includeKey)
-    //       // иначе может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
-    //       pushTplToFront(includeKey);
-    //   });
-    // }
   },
 });
