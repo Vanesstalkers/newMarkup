@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, errors, parent, blockName, promiseList }) {
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, errors, parent, blockName, promises }) {
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -21,19 +21,14 @@
               parent,
               errors,
               COMPLEX: (...args) =>
-                // if (prepareCall) {
-                //   lib.markup.complex.prepare({ form, errors, parent, blockName }, ...args);
-                // } else {
-                //   return Promise.all([lib.markup.complex.get({ form, parent, errors }, ...args)]);
-                // }
                 prepareCall
                   ? lib.markup.complex.prepare({ form, errors, parent, blockName }, ...args)
-                  : lib.markup.complex.get({ form, parent, errors, promiseList }, ...args),
+                  : lib.markup.complex.get({ form, parent, errors, promises }, ...args),
               HTML: (...args) => {
                 if (prepareCall) {
                   lib.markup.html.prepare({ form, errors, parent, blockName }, ...args);
                 } else {
-                  return lib.markup.html.get({ form, errors, parent, promiseList }, ...args);
+                  return lib.markup.html.get({ form, errors, parent, promises }, ...args);
                 }
               },
               FIELD: (data) => {

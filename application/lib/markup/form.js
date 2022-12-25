@@ -1,36 +1,52 @@
 ({
-  get: async ({ form, name }) => {
+  get: async ({ form, name, _id = true }) => {
     const cacheFilePath = `cache/${form}~${name}.js`;
     await node.fsp.access(cacheFilePath + 'null').catch(async () => {
       await lib.markup.form.prepare({ form, name });
     });
 
     const { exports: formCache } = await npm.metavm.readScript(cacheFilePath, { type: npm.metavm.COMMON_CONTEXT });
-    const promiseList = [];
+    const promises = {
+      db: [],
+      tpl: [],
+    };
     async function execPromises() {
-      if (promiseList.length) {
-        const promisesToExec = [...promiseList];
-        promiseList.splice(0, promiseList.length);
-        await Promise.all(promisesToExec);
+      if (promises.tpl.length) {
+        const promisesToExec = [...promises.tpl];
+        promises.tpl.splice(0, promises.tpl.length);
+        const db = await Promise.allSettled(promises.db);
+        promises.db.splice(0, promises.db.length);
+        const tpl = await Promise.all(promisesToExec);
         await execPromises();
       }
     }
-    const result = lib.markup.complex.get({ form: formCache, errors: [], promiseList }, {});
+
+    // !!! form храним в пользователе
+    const result = lib.markup.complex.get(
+      {
+        form: { ...formCache, codeCount: 0, data: { 0: { [`__${form}~${name}`]: { l: [true] } } } },
+        parent: { linecode: '.', code: 0 },
+        errors: [],
+        promises,
+      },
+      { name: `${form}~${name}`, col: form },
+    );
     await execPromises();
     return result;
   },
 
   prepare: async ({ form, name }) => {
+    const { tpl, id, func, script, style } = domain[form][`form~${name}`];
     const prepared = await lib.markup.complex.prepare(
       {
         blockName: form,
         tplType: 'form',
         errors: [],
         form: {
-          data: {},
+          markup: {},
           queryFields: {},
-          funcList: [],
-          styleList: [],
+          funcList: [func],
+          styleList: [style],
           lstList: [],
           elList: [
             /* 'core/default/el~complex|block', 'core/default/el~complex|item' */
@@ -38,9 +54,10 @@
           htmlList: [],
           scriptList: [],
         },
+        parent: { linecode: '.', root: true },
       },
-      { name },
-      domain[form][`form~${name}`].tpl,
+      { name: `${form}~${name}`, col: form, id },
+      tpl,
     );
 
     const cacheList = [];
@@ -48,22 +65,20 @@
     // cacheList += 'exports.lst = ' + JSON.stringify(__.lst);
     cacheList.push(['fields', JSON.stringify(prepared.queryFields)]);
     const dataEntries = [];
-    for (const [key, value] of Object.entries(prepared.data)) {
+    for (const [key, value] of Object.entries(prepared.markup)) {
       if (value.parent) {
         const parent = JSON.parse(value.parent);
-        prepared.data[parent].tpl = prepared.data[parent].tpl.replace(
-          new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
-          '',
-        );
-        for (const html of prepared.data[parent].htmlList) {
-          prepared.htmlList[html].tpl = prepared.htmlList[html].tpl.replace(
-            new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
-            '',
-          );
+        prepared.markup[parent].tpl = prepared.markup[parent].tpl
+          .replace(new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'), '')
+          .replace(/,[\s]*,/g, ',');
+        for (const html of prepared.markup[parent].htmlList) {
+          prepared.htmlList[html].tpl = prepared.htmlList[html].tpl
+            .replace(new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'), '')
+            .replace(/,[\s]*,/g, ',');
         }
       }
     }
-    for (const [key, value] of Object.entries(prepared.data)) {
+    for (const [key, value] of Object.entries(prepared.markup)) {
       const stringifiedData = lib.markup.helpers.prepareData(value, { styleList: prepared.styleList });
       dataEntries.push([key, stringifiedData]);
     }
@@ -71,7 +86,7 @@
       const stringifiedData = lib.markup.helpers.prepareData(value, { styleList: prepared.styleList });
       dataEntries.push([key, stringifiedData]);
     }
-    cacheList.push(['data', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+    cacheList.push(['markup', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
     for (const elPath of prepared.elList.filter((value, index, self) => self.indexOf(value) === index)) {
       lib.markup.helpers.prepareEl(elPath, { funcList: prepared.funcList });
