@@ -1,5 +1,6 @@
 ({
   addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, errors, parent, blockName, promises }) {
+    const appContext = { console, process, api, lib, db, bus, domain };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -19,6 +20,7 @@
         context: npm.metavm.createContext(
           new Proxy(
             {
+              ...appContext,
               parent,
               errors,
               COMPLEX: (...args) =>
@@ -33,7 +35,8 @@
                 }
               },
               FIELD: (data) => {
-                if (typeof data != 'object') data = { name: data, keyvalue: data };
+                if (typeof data != 'object') data = { name: data };
+                if (!data.keyvalue) data.keyvalue = data.name;
                 if (!data.type) data.type = 'input';
                 if (data.type.includes('*')) data.type = data.type.replace('*', 'json');
                 const elPath = `core/default/el~${data.type.replace(/[+-]/g, '')}|${data.type}`;
@@ -43,7 +46,8 @@
                   if (data.lst) form.lstList.push(data.lst);
                   if (data.on) form.scriptList.push(...Object.values(data.on));
                 } else {
-                  return { name: data.name, type: data.type, elPath };
+                  const value = form.data[parent.code]?.[data.keyvalue];
+                  return { name: data.name, type: data.type, value, elPath };
                 }
               },
               IF: (check, result) => (prepareCall || check ? (typeof result == 'function' ? result() : result) : []),
@@ -51,7 +55,6 @@
                 if (prepareCall) form.funcList.push(f);
                 // f(); // внутри f могут быть объявлены переиспользуемые функции, которые будут вызваны внутри шаблона ???
               },
-              console,
             },
             {
               get: function (target, name) {

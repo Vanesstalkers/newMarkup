@@ -1,5 +1,4 @@
 ({
-  id: () => {},
   tpl: () => {
     return [
       Z({
@@ -17,7 +16,12 @@
             }
         `,
       }),
-      COMPLEX({ name: 'lvl3' }, () => [FIELD({ name: 'test' })]),
+      COMPLEX(
+        {
+          name: 'lvl3',
+        },
+        () => [FIELD({ name: 'test' })],
+      ),
     ];
   },
 });

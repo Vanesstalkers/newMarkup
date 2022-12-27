@@ -29,8 +29,8 @@
         name: 'lvl1',
         config: { tag: 'table' },
         item: { add: true, config: { tag: 'tr' } },
-        id: (cb) => {
-          cb([true, true]);
+        id: async () => {
+          return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f')];
         },
         on: {
           load: (data) => {
@@ -63,13 +63,13 @@
           COMPLEX(
             {
               name: 'lvl2',
-              id: (cb) => {
-                cb([true]);
+              id: async () => {
+                return [true];
               },
             },
             ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})],
           ),
-          COMPLEX({ name: 'lvl2-1' }, ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})]),
+          COMPLEX({ name: 'lvl2-1' }, ({ data }) => [PPP({ _id: data._id }), SPAN({ class: 'col-xs-8' }), IMG({})]),
         ]),
         DIV({ class: 'row' }, SPAN({ class: 'col-xs-8' }), SPAN({ class: 'col-xs-8' }), IMG({})),
       ],

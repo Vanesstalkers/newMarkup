@@ -12,11 +12,12 @@
     };
     async function execPromises() {
       if (promises.tpl.length) {
-        const promisesToExec = [...promises.tpl];
+        const tplPromises = [...promises.tpl];
+        const dbPromises = [...promises.db];
         promises.tpl.splice(0, promises.tpl.length);
-        const db = await Promise.allSettled(promises.db);
         promises.db.splice(0, promises.db.length);
-        const tpl = await Promise.all(promisesToExec);
+        for (const dbFunc of dbPromises) await dbFunc();
+        for (const tplFunc of tplPromises) await tplFunc();
         await execPromises();
       }
     }
