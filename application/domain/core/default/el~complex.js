@@ -9,87 +9,109 @@
       customType: 'html',
     },
     tpl: function (_, d, data, tpl) {
-      var tag = data[0];
-      var childTag = tag == 'tr' ? 'td' : 'span';
+      const tag = data.config?.tag || 'div';
+      const itemTag = data.item.config?.tag || 'div';
 
-      var add = data[1].add;
+      let add = data.item.add;
       if (add && typeof add != 'object') add = add !== true ? { type: add } : {};
 
-      var controls = data[1].controls || {};
+      const controls = data.controls || {};
 
-      if (controls.show || data[1].l) {
+      if (controls.show || data.l) {
         if (typeof controls.show != 'object') controls.show = { label: controls.show };
 
-        if (data[1].l != undefined && data[1].showOnButton) controls.show.type = 'btn';
-        if (data[1].l != undefined && data[1].showOnScroll) controls.show.type = 'scroll';
+        if (data.l != undefined && data.showOnButton) controls.show.type = 'btn';
+        if (data.l != undefined && data.showOnScroll) controls.show.type = 'scroll';
 
         if (!controls.show.label) controls.show.label = 'Показать еще';
         if (!controls.show.type && controls.show.label) controls.show.type = 'btn';
       }
+
+      data.class =
+        (data.class || '') +
+        ' ' +
+        ['complex-block', data.name ? 'complex-' + data.name : undefined, add ? 'has-controls' : undefined]
+          .filter((item) => item)
+          .join(' ');
       return [
-        !add
-          ? []
-          : [
-              tag,
-              Object.assign(
-                {
-                  class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
-                  addField: add.field,
-                  code: data[1].code,
-                  id: false, // без id: false элемент подменит собой комплексный блок
-                },
-                data[1].front || {},
-              ),
-              [
-                [
-                  childTag,
-                  { class: 'control-add', text: !add.type ? add.label || 'Добавить' : undefined },
+        [
+          tag,
+          { class: data.class, code: data.code },
+          [
+            !add
+              ? []
+              : [
+                  // itemTag,
+                  // Object.assign(
+                  //   {
+                  //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
+                  //     addField: add.field,
+                  //     code: data.code,
+                  //     id: false, // без id: false элемент подменит собой комплексный блок
+                  //   },
+                  //   data.front || {},
+                  // ),
+                  // [
                   [
-                    add.type != 'file'
-                      ? []
-                      : [
-                          window.el['core/default/el~file'].tpl.bind(this)(
-                            _,
-                            d,
-                            { class: 'el control-el', addLabel: add.label, delete: false },
-                            tpl,
-                          ),
-                        ],
+                    itemTag,
+                    {
+                      class: 'complex-controls control-add',
+                      addField: add.field,
+                      code: data.code,
+                      text: !add.type ? add.label || 'Добавить' : undefined,
+                    },
+                    [
+                      add.type != 'file'
+                        ? []
+                        : [
+                            window.el['core/default/el~file'].tpl.bind(this)(
+                              _,
+                              d,
+                              { class: 'el control-el', addLabel: add.label, delete: false },
+                              tpl,
+                            ),
+                          ],
 
-                    add.type != 'search'
-                      ? []
-                      : [
-                          window.el['core/default/el~select2'].tpl.bind(this)(
-                            _,
-                            d,
-                            { class: 'el', label: add.label, onSave: 'addWithSearch', code: data[1].code, id: false },
-                            tpl,
-                          ),
-                        ],
+                      add.type != 'search'
+                        ? []
+                        : [
+                            window.el['core/default/el~select2'].tpl.bind(this)(
+                              _,
+                              d,
+                              { class: 'el', label: add.label, onSave: 'addWithSearch', code: data.code, id: false },
+                              tpl,
+                            ),
+                          ],
+                    ],
                   ],
+                  // ],
                 ],
-              ],
-            ],
-        [tag, data[1]],
+          ],
+        ],
 
-        !controls.show
-          ? []
-          : [
-              // все lastitem изначально hidden, который снимается только если сервер скажет что кнопка нужна (ищи по "lli")
-              controls.show.type != 'btn'
-                ? []
-                : [tag, { class: 'hidden lastitem btn-lastitem' }, [[childTag, { text: controls.show.label }]]],
-              controls.show.type != 'scroll' ? [] : [tag, { class: 'hidden lastitem scroll-lastitem' }],
-            ],
+        // !controls.show
+        //   ? []
+        //   : [
+        //       // все lastitem изначально hidden, который снимается только если сервер скажет что кнопка нужна (ищи по "lli")
+        //       controls.show.type != 'btn'
+        //         ? []
+        //         : [tag, { class: 'hidden lastitem btn-lastitem' }, [[itemTag, { text: controls.show.label }]]],
+        //       controls.show.type != 'scroll' ? [] : [tag, { class: 'hidden lastitem scroll-lastitem' }],
+        //     ],
       ];
     },
     front: {
-      prepare: function (tpl, data, doAfterLoad, realParent, $parent) {
-        $parent.attr('code', data[1].code);
-        $parent.addClass('complex-block');
-        if (data[1].name) $parent.addClass('complex-' + data[1].name).attr('complex-name', data[1].name);
-        $parent.attr('itemcount', 0);
-        if (data[1].l) $parent.attr('l', data[1].l).attr('o', 0);
+      prepare: function ({ $el, data }) {
+        //console.log('prepare complex', { $el, data });
+
+        $el.setAttribute('markup-code', data.code);
+        if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
+        for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
+        $el.dataset.itemcount = 0;
+        if (data.l) {
+          $el.dataset.l = data.l;
+          $el.dataset.o = 0;
+        }
 
         /*if(data[1].l != undefined && data[1].showOnScroll){
 				doAfterLoad.push(function(){
@@ -98,42 +120,42 @@
 				});
 			}*/
 
-        if (data[1].add) {
-          $parent.addClass('has-controls');
-          if (data[1].add.singleItem) $parent.addClass('single-item');
+        // if (data[1].add) {
+        //   $parent.addClass('has-controls');
+        //   if (data[1].add.singleItem) $parent.addClass('single-item');
 
-          switch (data[1].add.type) {
-            case 'file':
-              if (window.el['core/default/el~file'].prepare)
-                window.el['core/default/el~file'].prepare.bind(this)(tpl, {}, doAfterLoad, realParent);
-              break;
-            case 'search':
-              window.el['core/default/el~select2'].prepare.bind(this)(
-                tpl,
-                {
-                  lst: data[1].add.lst || 'addobj',
-                  ajax: data[1].add.lst == undefined,
-                  prepare: data[1].add.lst ? 'select2_obj_0' : 'select2_obj',
-                  addOption: data[1].add.option,
-                  code: data[1].code,
-                  addEmpty: (data[1].add || {}).addEmpty,
-                },
-                doAfterLoad,
-                realParent,
-              );
-              break;
-          }
-        }
+        //   switch (data[1].add.type) {
+        //     case 'file':
+        //       if (window.el['core/default/el~file'].prepare)
+        //         window.el['core/default/el~file'].prepare.bind(this)(tpl, {}, doAfterLoad, realParent);
+        //       break;
+        //     case 'search':
+        //       window.el['core/default/el~select2'].prepare.bind(this)(
+        //         tpl,
+        //         {
+        //           lst: data[1].add.lst || 'addobj',
+        //           ajax: data[1].add.lst == undefined,
+        //           prepare: data[1].add.lst ? 'select2_obj_0' : 'select2_obj',
+        //           addOption: data[1].add.option,
+        //           code: data[1].code,
+        //           addEmpty: (data[1].add || {}).addEmpty,
+        //         },
+        //         doAfterLoad,
+        //         realParent,
+        //       );
+        //       break;
+        //   }
+        // }
 
-        if (!data[1].controls) data[1].controls = {};
-        // controls зарезервировано html (((
-        $parent.attr(
-          'ctrl',
-          Object.keys(data[1].controls)
-            .filter((c) => data[1].controls[c])
-            .concat([data[1].add ? 'add' : ''])
-            .join(','),
-        );
+        // if (!data[1].controls) data[1].controls = {};
+        // // controls зарезервировано html (((
+        // $parent.attr(
+        //   'ctrl',
+        //   Object.keys(data[1].controls)
+        //     .filter((c) => data[1].controls[c])
+        //     .concat([data[1].add ? 'add' : ''])
+        //     .join(','),
+        // );
       },
     },
     script: () => {
@@ -463,55 +485,54 @@
       customType: 'html',
     },
     tpl: function (_, d, data, tpl) {
-      var tag = data[0];
-      var childTag = tag == 'tr' ? 'td' : 'div';
+      const tag = data.config?.tag || 'div';
+      const controls = (data.controls || '').split(',').filter((item) => item);
+      delete data.controls;
 
-      var controls = (data[1].controls || '').split(',').filter(function (c) {
-        return c;
-      });
-      delete data[1].controls;
+      data.class =
+        (data.class || '') +
+        ' ' +
+        ['complex-item', data.name ? 'complex-' + data.name : undefined, controls.length ? 'has-controls' : undefined]
+          .filter((item) => item)
+          .join(' ');
 
-      data[1].class = (data[1].class || '') + ' complex-item' + (controls.length ? ' has-controls' : '');
+      return [[tag, { class: data.class, code: data.code }]];
 
-      return [
-        [
-          tag,
-          data[1],
-          [
-            !controls.length
-              ? []
-              : [
-                  childTag,
-                  {
-                    class: 'item-controls',
-                    code: data[1].code,
-                    id: false,
-                  },
-                  [controls.indexOf('delete') == -1 ? [] : ['div', { class: 'h btn-delete' }]],
-                ],
+      // return [
+      // [
+      // tag,
+      // data,
+      // [
+      //   !controls.length
+      //     ? []
+      //     : [
+      //         itemTag,
+      //         {
+      //           class: 'item-controls',
+      //           code: data.code,
+      //           id: false,
+      //         },
+      //         [controls.indexOf('delete') == -1 ? [] : ['div', { class: 'h btn-delete' }]],
+      //       ],
 
-            // если добавлять не через concat, то потеряются все (криво вставленные) теги внутри complex-item, кроме первого
-          ].concat(data[2] || []),
-        ],
-      ];
+      //   // если добавлять не через concat, то потеряются все (криво вставленные) теги внутри complex-item, кроме первого
+      // ].concat(data[2] || []),
+      // ],
+      // ];
     },
     front: {
-      prepare: function (tpl, data, doAfterLoad, realParent, $parent) {
-        data[1].class += ' complex-item-' + realParent.attr('complex-name');
+      prepare: function ({ $el, data, parent: { $el: $parentEl, data: parentData } }) {
+        $el.setAttribute('markup-code', data.code);
+        if (parentData.on?.itemLoad) $el.setAttribute('markup-onload', parentData.on.itemLoad);
+        for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
+        $parentEl.dataset.itemcount = $parentEl.dataset.itemcount * 1 + 1;
+        $parentEl.dataset.o = ($parentEl.dataset.o || 0) * 1 + 1;
 
-        if (realParent.attr('itemcount')) {
-          // все добавленные item'ы
-          realParent.attr('itemcount', realParent.attr('itemcount') * 1 + 1);
-        }
-
-        // тут неправильный realParent, если item прикрепили в новое место
-        realParent.attr('o', (realParent.attr('o') || 0) * 1 + 1);
-
-        // без этого lastitem отображается после добавления нового item
-        const l = Math.abs(realParent.attr('l') || 0);
-        l && realParent.attr('o') * 1 >= l
-          ? realParent.find('> .btn-lastitem').removeClass('hidden')
-          : realParent.find('> .btn-lastitem').addClass('hidden');
+        // // без этого lastitem отображается после добавления нового item
+        // const l = Math.abs(realParent.attr('l') || 0);
+        // l && realParent.attr('o') * 1 >= l
+        //   ? realParent.find('> .btn-lastitem').removeClass('hidden')
+        //   : realParent.find('> .btn-lastitem').addClass('hidden');
       },
     },
     script: () => {

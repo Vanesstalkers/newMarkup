@@ -1,5 +1,6 @@
 ({
   tpl: () => [
+    DIV({}),
     A({
       class:
         'col-xs-8' +
@@ -26,8 +27,18 @@
     COMPLEX(
       {
         name: 'lvl1',
+        config: { tag: 'table' },
+        item: { add: true, config: { tag: 'tr' } },
         id: (cb) => {
-          cb([true]);
+          cb([true, true]);
+        },
+        on: {
+          load: (data) => {
+            // console.log('onLoad', this, { data });
+          },
+          itemLoad: (data) => {
+            // console.log('onItemLoad', this, { data });
+          },
         },
       },
       ({}) => [
@@ -35,12 +46,12 @@
         FIELD({
           name: 'num',
           label: 'Номер',
-          type: 'input-',
-          front: {
-            onSave: (a, b, c) => {
+          type: 'input',
+          on: {
+            save: (a, b, c) => {
               alert(1);
             },
-            onLoad: function (a, b, c) {
+            load: (a, b, c) => {
               alert(2);
             },
           },
@@ -49,7 +60,15 @@
           console.log(2);
         }),
         IF(true, () => [
-          COMPLEX({ name: 'lvl2' }, ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})]),
+          COMPLEX(
+            {
+              name: 'lvl2',
+              id: (cb) => {
+                cb([true]);
+              },
+            },
+            ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})],
+          ),
           COMPLEX({ name: 'lvl2-1' }, ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})]),
         ]),
         DIV({ class: 'row' }, SPAN({ class: 'col-xs-8' }), SPAN({ class: 'col-xs-8' }), IMG({})),
@@ -62,6 +81,12 @@
   style: `
     .body {
       display: 1px solid black;
+    }
+    .inline-error:before {
+      content: attr(error);
+      font-size: 10px;
+      color: red;
+      text-overflow: ellipsis;
     }
   `,
 });

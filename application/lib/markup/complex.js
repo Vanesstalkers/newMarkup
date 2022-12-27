@@ -1,12 +1,12 @@
 ({
-  get: ({ form, parent, errors, promises }, { name, col, link, filter, config }) => {
-    const complex = { items: {}, code: ++form.codeCount };
+  get: ({ form, parent, errors, promises }, { name, col, link, filter, config = {}, item = {}, id, on }) => {
+    const complex = { items: {}, code: ++form.codeCount, config, item, on };
     complex.name = name;
     complex.col = col || name;
     const linecode = `${parent.linecode}__${complex.name}`;
     complex.linecode = linecode;
     const idFunc =
-      form.markup[linecode].id ||
+      id ||
       function (cb) {
         cb(form.data[parent.code][`__${complex.name}`]?.l || []);
       };
@@ -15,10 +15,9 @@
     promises.db.push(
       new Promise(function (resolve, reject) {
         idFunc((ids) => {
-          console.log({ ids });
           for (const id of ids)
             if (id === true) {
-              const itemCode = form.codeCount++;
+              const itemCode = ++form.codeCount;
               form.data[itemCode] = {};
               complex.items[itemCode] = {};
             }
@@ -47,16 +46,21 @@
           });
           for (const code of Object.keys(complex.items)) {
             result = tplFuncWithProxifiedContext({ data: form.data[code] });
-            complex.items[code] = result;
+            complex.items[code] = { ...complex.item, code, elPath: 'core/default/el~complex|item', content: result };
           }
+          if (errors.length) throw errors[0];
         }
         resolve();
       }),
     );
 
-    return { type: 'complex', name: complex.name, items: complex.items };
+    return {
+      ...complex,
+      type: 'complex',
+      elPath: 'core/default/el~complex|block',
+    };
   },
-  prepare: ({ form, parent, errors, blockName }, { name, col, link, filter, config, id }, tplFunc) => {
+  prepare: ({ form, parent, errors, blockName }, { name, col, link, filter, config, id, on }, tplFunc) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
@@ -66,11 +70,11 @@
     if (form.markup[linecode]) throw new Error(`linecode dublicates (${linecode})`);
     form.markup[linecode] = {
       parent: parent.root ? null : JSON.stringify(parent.linecode),
-      id: typeof id === 'function' ? id.toString() : undefined,
       tpl: tplFunc.toString(),
       htmlList: [],
     };
     form.queryFields[linecode] = { _id: 1 }; // без этого не воспринимает slice и забирает весь объект
+    if (on) form.scriptList.push(...Object.values(on));
 
     complex.parentDataNotRequired = config?.parentDataNotRequired;
     if (!complex.parentDataNotRequired && form.queryFields[parent.linecode]) {

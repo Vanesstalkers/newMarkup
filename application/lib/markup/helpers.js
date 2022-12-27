@@ -8,9 +8,10 @@
           return ( ${stringifiedFunc})(...args) 
         }catch(err){
           if(!errors.length){
-            // console.log(err);
-            err.message += \` at TPL-script: ${stringifiedFunc.replace(/[`]/g, '\\`')}\`; 
+            console.log(err);
+            const stringifiedFunc = \`${stringifiedFunc.replace(/[`]/g, '\\`')}\`;
             // errors.push({message: err.message});
+            return [['div', {class: 'inline-error', error: err.message, "error_full": err.message + \` at TPL-script: \` + stringifiedFunc, onclick: "console.log(this.getAttribute('error_full'))"}]];
           }
         }
       }`,
@@ -35,14 +36,14 @@
                 if (typeof data != 'object') data = { name: data, keyvalue: data };
                 if (!data.type) data.type = 'input';
                 if (data.type.includes('*')) data.type = data.type.replace('*', 'json');
+                const elPath = `core/default/el~${data.type.replace(/[+-]/g, '')}|${data.type}`;
                 if (prepareCall) {
-                  const elPath = `core/default/el~${data.type.replace(/[+-]/g, '')}|${data.type}`;
                   form.elList.push(elPath);
                   form.queryFields[parent.linecode][data.name] = 1;
                   if (data.lst) form.lstList.push(data.lst);
-                  if (data.front) form.scriptList.push(...Object.values(data.front));
+                  if (data.on) form.scriptList.push(...Object.values(data.on));
                 } else {
-                  return { name: data.name, type: data.type };
+                  return { name: data.name, type: data.type, elPath };
                 }
               },
               IF: (check, result) => (prepareCall || check ? (typeof result == 'function' ? result() : result) : []),
@@ -50,9 +51,7 @@
                 if (prepareCall) form.funcList.push(f);
                 // f(); // внутри f могут быть объявлены переиспользуемые функции, которые будут вызваны внутри шаблона ???
               },
-              // SCRIPT: (f) => {
-              //   return [];
-              // },
+              console,
             },
             {
               get: function (target, name) {
@@ -82,40 +81,7 @@
           else stringifiedValue = value ? value.toString() : '';
       }
       if (stringifiedValue) entries.push([key, stringifiedValue]);
-
-      if (key == 'style' || key == 'script' || key == 'func' || key == 'stringFunc') {
-        //         if (key == 'stringFunc') funcFile += value.trim() + '\n\n';
-        //         if (key == 'style') style += value.toString().trim().substr(7).slice(0, -3).trim() + '\n\n';
-        //         if (key == 'script' || key == 'func') {
-        //           result += "exports.process['" + i + "']['" + key + "'] = {}\n";
-        //           if (typeof data[key] == 'function') data[key] = [data[key]];
-        //           data[key].forEach((f) => {
-        //             if (key == 'func') {
-        //               funcFile += f.toString().trim().substr(5).slice(0, -1).trim() + '\n\n';
-        //             } else {
-        //               let scriptText = f
-        //                 .toString()
-        //                 .trim()
-        //                 .match(/{([\s\S]*)}/gm)[0]
-        //                 .trim();
-        //               let scriptCode = md5(scriptText);
-        //               if ((f.config || {}).sfx) scriptCode += '_' + f.config.sfx;
-        //               scriptFile += `
-        // ((data) => ${scriptText}).call(null,
-        //   JSON.parse(document.querySelector('[script_code="${scriptCode}"]')?.dataset?.script || '{}'),
-        //   JSON.parse(document.querySelector('[script_code="${scriptCode}"]')?.dataset?.config || '{}')
-        // );\n\n
-        // `;
-        //             }
-        //           });
-        //         }
-      } else {
-      }
     }
-
-    // эксперимент с именованием внутренних путей внутри темы
-    //if(data.theme) style = style.replace(/\/BLOCK\//g, '/blocks/'+data.theme[0]+'/');
-
     return `{${entries.map(([key, str]) => `${key}: ${str}`)}}`;
   },
   prepareCss(str, styleList) {
@@ -126,10 +92,7 @@
       cssPosEnd = str.indexOf('`', cssPosStart);
       const cssCode = `_${node.crypto.createHash('md5').update(str.substring(cssPosStart, cssPosEnd)).digest('hex')}_`;
       const cssStr = str.substring(cssPosStart, cssPosEnd).replace(/\*css\*/g, cssCode);
-      // if (this.styleIndex[cssCode] == undefined) { // если потребуется, то это надо переделать на formStyleIndex
-      // this.styleIndex[cssCode] = cssStr;
       styleList.push(!cssStr.includes(cssCode) ? `.${cssCode} {${cssStr}}` : cssStr); // возможна упрощенная запись css
-      // }
       str = str.substring(0, cssPosStart - 4) + '" ' + cssCode + '"' + str.substring(cssPosEnd + 1);
       cssPosStart = str.indexOf('`css', cssPosStart + 1);
     }
@@ -147,6 +110,7 @@
         .map(([key, value]) => `${key}:${value.toString()}`)
         .join(',');
       funcList.push(`window.el['${elPath}'] = {${stringifiedEl}}`);
+      if (el.script) funcList.push(el.script);
 
       const regexp = /(window\.el\[[',"])(.*)([',"]\]\.)/g;
       // если элемент переиспользует часть функционала другого элемента, то его тоже нужно загрузить

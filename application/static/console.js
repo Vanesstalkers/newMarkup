@@ -146,30 +146,6 @@ const inputKeyboardEvents = {
   },
 };
 
-document.onkeydown = (event) => {
-  if (application.controlInput.inputActive) {
-    const keyName = KEY_NAME[event.keyCode];
-    const fn = inputKeyboardEvents[keyName];
-    if (fn) {
-      fn();
-      return false;
-    }
-  }
-  return true;
-};
-
-document.onkeypress = (event) => {
-  if (application.controlInput.inputActive) {
-    const fn = inputKeyboardEvents['KEY'];
-    const char = String.fromCharCode(event.keyCode);
-    if (CHARS.includes(char) && fn) {
-      fn(char);
-      return false;
-    }
-  }
-  return true;
-};
-
 const keyboardClick = (e) => {
   let char = e.target.inputChar;
   if (char === '_') char = ' ';
@@ -329,10 +305,10 @@ function commandLoop() {
 
 class Application {
   constructor() {
-    this.controlInput = document.getElementById('controlInput');
-    this.controlBrowse = document.getElementById('controlBrowse');
-    this.keyboard = new Keyboard(this);
-    this.scroller = new Scroller(this);
+    // this.controlInput = document.getElementById('controlInput');
+    // this.controlBrowse = document.getElementById('controlBrowse');
+    // this.keyboard = new Keyboard(this);
+    // this.scroller = new Scroller(this);
     const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
     this.metacom = Metacom.create(`${protocol}://${location.host}/api`);
   }
