@@ -8,7 +8,7 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
+    tpl: function (data, config) {
       const tag = data.config?.tag || 'div';
       const itemTag = data.item.config?.tag || 'div';
 
@@ -36,7 +36,7 @@
       return [
         [
           tag,
-          { class: data.class, code: data.code },
+          { class: data.class, code: data.code, type: data.type },
           [
             !add
               ? []
@@ -407,7 +407,7 @@
             top: inherit;
             bottom: 0px;
         }
-        .complex-block.has-controls > .complex-controls > .control-add {
+        .complex-block.has-controls > .complex-controls.control-add {
             position: absolute;
             left: 0px;
             top: -15px;
@@ -418,8 +418,8 @@
             white-space: nowrap;
             min-width: 100%;
         }
-        .complex-block.has-controls > .complex-controls > .control-add:before {
-            //content: 'Добавить';
+        .complex-block.has-controls > .complex-controls.control-add:before {
+            content: 'Добавить';
         }
         .complex-block.has-controls > .complex-controls > input[type=file], 
         .complex-block.has-controls > .complex-controls > .el > input[type=file] {
@@ -484,7 +484,7 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
+    tpl: function (data, config) {
       const tag = data.config?.tag || 'div';
       const controls = (data.controls || '').split(',').filter((item) => item);
       delete data.controls;
@@ -492,11 +492,21 @@
       data.class =
         (data.class || '') +
         ' ' +
-        ['complex-item', data.name ? 'complex-' + data.name : undefined, controls.length ? 'has-controls' : undefined]
+        [
+          'complex-item',
+          data.name ? 'complex-' + data.name : undefined,
+          true || controls.length ? 'has-controls' : undefined,
+        ]
           .filter((item) => item)
           .join(' ');
 
-      return [[tag, { class: data.class, code: data.code }]];
+      return [
+        [
+          tag,
+          { class: data.class, code: data.code },
+          [['div', { class: 'item-controls' }, [['div', { class: 'h btn-delete' }]]]],
+        ],
+      ];
 
       // return [
       // [
@@ -584,41 +594,41 @@
       });
     },
     style: `
-        .complex-item, .complex-item.has-controls {
-            position: relative;
-        }
-        .complex-item.has-controls > .item-controls {
-            position: absolute;
-            right: 6px;
-            top: 6px;
-            z-index: 1;
-            text-align: left;
-            height: 15px;
-            font-size: 10px;
-            display: none;
-        }
-        .complex-item.has-controls > .item-controls > div {
-            cursor: pointer;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        }
-        .complex-item.has-controls > .item-controls > div.btn-delete {
-            background-color: white;
-            background-image: url(/XAOC/images/delete.png);
-        }
+      .complex-item, .complex-item.has-controls {
+          position: relative;
+      }
+      .complex-item.has-controls > .item-controls {
+          position: absolute;
+          right: 6px;
+          top: 6px;
+          z-index: 1;
+          text-align: left;
+          height: 15px;
+          font-size: 10px;
+          display: none;
+      }
+      .complex-item.has-controls > .item-controls > div {
+          cursor: pointer;
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: cover;
+      }
+      .complex-item.has-controls > .item-controls > div.btn-delete {
+          background-color: white;
+          background-image: url(/delete.png);
+      }
 
-        body.editMode .complex-block.has-controls .complex-item.has-controls > .item-controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-        }
-        .complex-item.has-controls > .item-controls {
-            display: block;
-        }	
+      body.editMode .complex-block.has-controls .complex-item.has-controls > .item-controls {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+      }
+      .complex-item.has-controls > .item-controls {
+          display: block;
+      }	
     `,
   },
 

@@ -3,7 +3,7 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
+    tpl: function (data, config) {
       return [
         [
           'div',
@@ -20,24 +20,24 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_label'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['__tpl~el_label'].tpl.bind(this)(data, config)];
     },
   },
   'label-': {
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_label'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['__tpl~el_label'].tpl.bind(this)(data, config)];
     },
   },
   'label--': {
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['__tpl~el_label'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['__tpl~el_label'].tpl.bind(this)(data, config)];
     },
   },
 });

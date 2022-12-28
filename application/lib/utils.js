@@ -29,4 +29,8 @@
     if (!exp) return value;
     return value * 10 ** exp;
   },
+
+  isObjectID(value) {
+    return value && typeof value === 'object' && value._bsontype === 'ObjectID';
+  },
 });

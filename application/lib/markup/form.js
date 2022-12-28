@@ -1,5 +1,5 @@
 ({
-  get: async ({ form, name, _id = true }) => {
+  get: async ({ form, name, _id = true, user }) => {
     const cacheFilePath = `application/static/cache/${form}~${name}.js`;
     await node.fsp.access(cacheFilePath + 'null').catch(async () => {
       await lib.markup.form.prepare({ form, name });
@@ -22,17 +22,26 @@
       }
     }
 
-    // !!! form храним в пользователе
+    const processForm = {
+      ...formCache,
+      codeCount: 0,
+      data: { 0: { [`__${form}~${name}`]: { l: [true] } } },
+      fields: {},
+    };
     const result = lib.markup.complex.get(
       {
-        form: { ...formCache, codeCount: 0, data: { 0: { [`__${form}~${name}`]: { l: [true] } } } },
+        form: processForm,
         parent: { linecode: '.', code: 0 },
         errors: [],
         promises,
       },
-      { name: `${form}~${name}`, col: form },
+      { type: 'form', name: `${form}~${name}`, col: form },
     );
     await execPromises();
+
+    if (!user.forms) user.forms = {};
+    user.forms[`${form}~${name}`] = processForm;
+
     return result;
   },
 
@@ -45,7 +54,6 @@
         errors: [],
         form: {
           markup: {},
-          queryFields: {},
           funcList: [func],
           styleList: [style],
           lstList: [],
@@ -62,7 +70,6 @@
     const cacheList = [];
     // cacheList += 'exports.config = ' + JSON.stringify(SYS.get(__, "process['.'].config"));
     // cacheList += 'exports.lst = ' + JSON.stringify(__.lst);
-    cacheList.push(['fields', JSON.stringify(prepared.queryFields)]);
     const dataEntries = [];
     for (const [key, value] of Object.entries(prepared.markup)) {
       if (value.parent) {
@@ -88,7 +95,7 @@
     cacheList.push(['markup', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
     for (const elPath of prepared.elList.filter((value, index, self) => self.indexOf(value) === index)) {
-      lib.markup.helpers.prepareEl(elPath, { funcList: prepared.funcList, scriptList: prepared.scriptList });
+      lib.markup.helpers.prepareEl(elPath, { funcList: prepared.funcList, styleList: prepared.styleList });
     }
 
     let cacheFile = cacheList.map(([key, value]) => `${key}:${value}`).join(',');

@@ -305,98 +305,110 @@ $(function () {
     reloadComplex(this, { show: false });
   });
 
-  $(document).on('change', 'input, textarea, select', function (e) {
-    var $e = $(this);
-
-    var type = $e.attr('type');
-    var stype = $e.attr('stype');
-
-    if ($e.attr('fakeChange')) {
-      // нужно, например, для multiple-значений select2
-      $e.removeAttr('fakeChange');
-      return;
-    }
-
-    if (type != 'file') {
-      var val = $e.val(),
-        code = $e.attr('code');
-
-      var data = { code: code, value: val };
-
-      if (data.code && !stype) {
-        var onSave = $e.attr('onSave');
-        if (onSave == 'saveTheme' && $e.attr('themepath') && window.el[$e.attr('themepath')]) {
-          onSave = window.el[$e.attr('themepath')].save;
-        } else {
-          onSave = window[onSave];
-        }
-
-        if (typeof onSave == 'function') {
-          // если ищешь тут ошибку, то для начала проверь, что при объявлении onSave не перенес скобку начала стрелочной функции на новую строку ( тут -> "()=>{" )
-
-          onSave($e, data, function (valid, vdata) {
-            if ((valid && valid.err) || valid === false) {
-              const err = valid.err || 'Неизвестная ошибка, действие отменено';
-
-              if (err != 'with-out-notify') {
-                if (valid.errTarget) {
-                  $(valid.errTarget).notify(err, { className: valid.errType || 'error' });
-                } else {
-                  $.notify(err, { className: valid.errType || 'error' });
-                }
-              }
-
-              if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, valid);
-            } else {
-              if (vdata == undefined) vdata = data;
-              if ($e.attr('afterSave')) {
-                wsSendCallback(
-                  extend({ action: 'save' }, vdata),
-                  function (answer) {
-                    window[$e.attr('afterSave')]($e, answer);
-                  },
-                  function (answer) {
-                    if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
-                  },
-                );
-              } else {
-                wsSendCallback(
-                  extend({ action: 'save' }, vdata),
-                  function (answer) {},
-                  function (answer) {
-                    if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
-                  },
-                );
-              }
-            }
-          });
-        } else {
-          if ($e.attr('afterSave')) {
-            wsSendCallback(
-              extend({ action: 'save' }, data),
-              function (answer) {
-                window[$e.attr('afterSave')]($e, answer);
-              },
-              function (answer) {
-                if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
-              },
-            );
-          } else {
-            wsSendCallback(
-              extend({ action: 'save' }, data),
-              function (answer) {},
-              function (answer) {
-                if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
-              },
-            );
-          }
-        }
-      } else {
-        var onFilter = $e.attr('onFilter') || ($e.attr('type') == 'radio' ? $e.closest('.el').attr('onFilter') : false);
-        if (onFilter) window[onFilter]($e, data);
-      }
+  document.addEventListener('change', async (event) => {
+    const $el = event.target;
+    console.log({ $el });
+    if ($el.closest('input, textarea, select')) {
+      const form = $el.closest('[type="form"]').dataset.name;
+      const code = $el.closest('.el').dataset.code;
+      const value = $el.value;
+      const { result, msg, stack } = await api.markup.saveField({ form, code, value });
+      if (result === 'error') console.error({ msg, stack });
     }
   });
+
+  // $(document).on('change', 'input, textarea, select', function (e) {
+  //   var $e = $(this);
+
+  //   var type = $e.attr('type');
+  //   var stype = $e.attr('stype');
+
+  //   if ($e.attr('fakeChange')) {
+  //     // нужно, например, для multiple-значений select2
+  //     $e.removeAttr('fakeChange');
+  //     return;
+  //   }
+
+  //   if (type != 'file') {
+  //     var val = $e.val(),
+  //       code = $e.attr('code');
+
+  //     var data = { code: code, value: val };
+
+  //     if (data.code && !stype) {
+  //       var onSave = $e.attr('onSave');
+  //       if (onSave == 'saveTheme' && $e.attr('themepath') && window.el[$e.attr('themepath')]) {
+  //         onSave = window.el[$e.attr('themepath')].save;
+  //       } else {
+  //         onSave = window[onSave];
+  //       }
+
+  //       if (typeof onSave == 'function') {
+  //         // если ищешь тут ошибку, то для начала проверь, что при объявлении onSave не перенес скобку начала стрелочной функции на новую строку ( тут -> "()=>{" )
+
+  //         onSave($e, data, function (valid, vdata) {
+  //           if ((valid && valid.err) || valid === false) {
+  //             const err = valid.err || 'Неизвестная ошибка, действие отменено';
+
+  //             if (err != 'with-out-notify') {
+  //               if (valid.errTarget) {
+  //                 $(valid.errTarget).notify(err, { className: valid.errType || 'error' });
+  //               } else {
+  //                 $.notify(err, { className: valid.errType || 'error' });
+  //               }
+  //             }
+
+  //             if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, valid);
+  //           } else {
+  //             if (vdata == undefined) vdata = data;
+  //             if ($e.attr('afterSave')) {
+  //               wsSendCallback(
+  //                 extend({ action: 'save' }, vdata),
+  //                 function (answer) {
+  //                   window[$e.attr('afterSave')]($e, answer);
+  //                 },
+  //                 function (answer) {
+  //                   if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
+  //                 },
+  //               );
+  //             } else {
+  //               wsSendCallback(
+  //                 extend({ action: 'save' }, vdata),
+  //                 function (answer) {},
+  //                 function (answer) {
+  //                   if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
+  //                 },
+  //               );
+  //             }
+  //           }
+  //         });
+  //       } else {
+  //         if ($e.attr('afterSave')) {
+  //           wsSendCallback(
+  //             extend({ action: 'save' }, data),
+  //             function (answer) {
+  //               window[$e.attr('afterSave')]($e, answer);
+  //             },
+  //             function (answer) {
+  //               if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
+  //             },
+  //           );
+  //         } else {
+  //           wsSendCallback(
+  //             extend({ action: 'save' }, data),
+  //             function (answer) {},
+  //             function (answer) {
+  //               if ($e.attr('afterSaveError')) window[$e.attr('afterSaveError')]($e, answer);
+  //             },
+  //           );
+  //         }
+  //       }
+  //     } else {
+  //       var onFilter = $e.attr('onFilter') || ($e.attr('type') == 'radio' ? $e.closest('.el').attr('onFilter') : false);
+  //       if (onFilter) window[onFilter]($e, data);
+  //     }
+  //   }
+  // });
 
   $(document).on('click', '[query]', function (e) {
     //console.log('query', e, $(e.target));
@@ -619,17 +631,15 @@ nativeTplToHTML = function (deepEl, $parent) {
   for (const el of deepEl) {
     if (!el) continue;
     if (el.type) {
-      if (el.type === 'complex') {
+      if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
-        const elTpl = tpl(null, null, el, null);
-        nativeTplToHTML(elTpl, $parent);
+        nativeTplToHTML(tpl(el), $parent);
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
         if (prepare) prepare({ $el: $block, data: el });
         if (el.items) {
           for (const item of Object.values(el.items)) {
             const { tpl, prepare } = window.el[item.elPath] || {};
-            const itemTpl = tpl(null, null, { ...item, parent: el }, null);
-            nativeTplToHTML(itemTpl, $block);
+            nativeTplToHTML(tpl({ ...item, parent: el }), $block);
             const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
             if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
             nativeTplToHTML(item.content, $item);
@@ -638,9 +648,10 @@ nativeTplToHTML = function (deepEl, $parent) {
       } else {
         const { tpl, prepare } = window.el[el.elPath] || {};
         if (tpl) {
-          const elTpl = tpl(null, null, el, null);
-          if (prepare) prepare(elTpl[0], el);
-          nativeTplToHTML(elTpl, $parent);
+          el.class = `el el-${el.name.replace(/\./g, '_')} ${el.class}`;
+          nativeTplToHTML(tpl(el), $parent);
+          const $el = $parent.querySelector(`.el[code='${el.code}']`);
+          if (prepare) prepare({ $el, data: el });
         }
       }
     } else {
@@ -821,7 +832,6 @@ $(document).ready(function () {
     console.log({ mutationsList });
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
-
       } else if (mutation.type === 'attributes') {
         if (mutation.attributeName === 'markup-code') {
           // console.log('mutation', { code: mutation.target.getAttribute('markup-code'), mutation });

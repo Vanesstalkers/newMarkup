@@ -42,12 +42,21 @@
                 const elPath = `core/default/el~${data.type.replace(/[+-]/g, '')}|${data.type}`;
                 if (prepareCall) {
                   form.elList.push(elPath);
-                  form.queryFields[parent.linecode][data.name] = 1;
+                  form.markup[parent.linecode].queryFields[data.name] = 1;
                   if (data.lst) form.lstList.push(data.lst);
                   if (data.on) form.scriptList.push(...Object.values(data.on));
                 } else {
-                  const value = form.data[parent.code]?.[data.keyvalue];
-                  return { name: data.name, type: data.type, value, elPath };
+                  const field = {
+                    code: ++form.codeCount,
+                    parentCode: parent.code,
+                    name: data.name,
+                    type: data.type,
+                    keyvalue: data.keyvalue,
+                    elPath,
+                  };
+                  form.fields[field.code] = field;
+                  const value = form.data[parent.code]?.[field.keyvalue];
+                  return { ...field, value };
                 }
               },
               IF: (check, result) => (prepareCall || check ? (typeof result == 'function' ? result() : result) : []),
@@ -101,7 +110,7 @@
     }
     return str;
   },
-  prepareEl(elPath, { funcList }) {
+  prepareEl(elPath, { funcList, styleList }) {
     const [mainPath, elType] = elPath.split('|');
     const [corePath, themePath, filePath] = mainPath.split('/');
     const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
@@ -113,14 +122,15 @@
         .map(([key, value]) => `${key}:${value.toString()}`)
         .join(',');
       funcList.push(`window.el['${elPath}'] = {${stringifiedEl}}`);
-      if (el.script) funcList.push(el.script);
+      if (el.func) funcList.push(el.func);
+      if (el.style) styleList.push(el.style);
 
       const regexp = /(window\.el\[[',"])(.*)([',"]\]\.)/g;
       // если элемент переиспользует часть функционала другого элемента, то его тоже нужно загрузить
       for (const path of stringifiedEl.match(regexp) || []) {
         const outElPath = path.replace(regexp, '$2');
         // без следующей проверки может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
-        if (outElPath !== elPath) this.prepareEl(outElPath, { funcList });
+        if (outElPath !== elPath) this.prepareEl(outElPath, { funcList, styleList });
       }
     }
   },

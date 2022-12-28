@@ -3,20 +3,24 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
+    tpl: function (data, config) {
       return [
         [
           'div',
-          { class: data.class + ' ' },
+          { code: data.code, class: data.class + ' ' },
           [
             ['label', {}, [['span', { text: data.label }]]],
-            ['input', Object.assign({}, data, { class: 'el-value' })],
+            ['input', { type: 'input', class: 'el-value', value: data.value }],
           ],
         ],
       ];
     },
     front: {
-      prepare: function (tpl, data, doAfterLoad, realParent) {
+      prepare: function ({ $el, data }) {
+        $el.setAttribute('markup-code', data.code);
+        if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
+        for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
+
         if (data.config && data.config.mask)
           doAfterLoad.push(function () {
             realParent
@@ -31,8 +35,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['core/default/el~input|input'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['core/default/el~input|input'].tpl.bind(this)(data, config)];
     },
     front: {
       prepare: function (tpl, data, doAfterLoad, realParent) {
@@ -45,8 +49,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
     },
   },
 
@@ -54,8 +58,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (_, d, data, tpl) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(_, d, data, tpl)];
+    tpl: function (data, config) {
+      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
     },
   },
 });
