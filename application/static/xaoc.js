@@ -328,6 +328,14 @@ $(function () {
       if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
       nativeTplToHTML(item.content, $item);
     }
+    if ($el.closest('.btn-delete')) {
+      const form = $el.closest('[type="form"]').dataset.name;
+      const $item = $el.closest('.complex-item');
+      const code = $item.dataset.code;
+      const { result, msg, stack } = await api.markup.deleteComplex({ form, code });
+      if (result === 'error') console.error({ msg, stack });
+      else if (result === 'success') $item.remove();
+    }
   });
 
   // $(document).on('change', 'input, textarea, select', function (e) {

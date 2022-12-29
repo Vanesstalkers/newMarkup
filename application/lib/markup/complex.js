@@ -50,6 +50,7 @@
           const item = {
             ...complex.item,
             code,
+            blockCode: complex.code,
             name: complex.name,
             col: complex.col,
             linecode,
