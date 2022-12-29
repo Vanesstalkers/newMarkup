@@ -19,6 +19,7 @@
       COMPLEX(
         {
           name: 'lvl3',
+          item: {add: {label: '+ lvl3'}},
         },
         () => [FIELD({ name: 'test' })],
       ),

@@ -6,10 +6,7 @@
     });
 
     const { exports: formCache } = await npm.metavm.readScript(cacheFilePath, { type: npm.metavm.COMMON_CONTEXT });
-    const promises = {
-      db: [],
-      tpl: [],
-    };
+    const promises = { db: [], tpl: [] };
     async function execPromises() {
       if (promises.tpl.length) {
         const tplPromises = [...promises.tpl];

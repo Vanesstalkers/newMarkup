@@ -39,12 +39,7 @@ const KEY_CODE = {
   ACCENT: 192,
 };
 
-const KEYBOARD_LAYOUT = [
-  '1234567890',
-  'qwertyuiop',
-  'asdfghjkl<',
-  '^zxcvbnm_>',
-];
+const KEYBOARD_LAYOUT = ['1234567890', 'qwertyuiop', 'asdfghjkl<', '^zxcvbnm_>'];
 
 const KEY_NAME = {};
 for (const keyName in KEY_CODE) KEY_NAME[KEY_CODE[keyName]] = keyName;
@@ -443,13 +438,7 @@ class Application {
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
-  await application.metacom.load(
-    'auth',
-    'console',
-    'example',
-    'files',
-    'markup',
-  );
+  await application.metacom.load('auth', 'console', 'example', 'files', 'markup');
   const token = localStorage.getItem('metarhia.session.token');
   let logged = false;
   if (token) {
@@ -466,9 +455,18 @@ window.addEventListener('load', async () => {
     }
   }
   document.cookie = `token=${localStorage.getItem('metarhia.session.token')}`;
-  const { text } = await api.console.content({ name: 'home' });
-  application.print(text);
-  commandLoop();
+  // const { text } = await api.console.content({ name: 'home' });
+  // application.print(text);
+  // commandLoop();
+
+  await window.api.markup.getForm({ form: 'ce', name: 'main' });
+  (async () => {
+    const getForm = await window.api.markup.getForm({ form: 'ce', name: 'main' });
+    loadRes('cache/ce~main_func.js', false, () => {
+      nativeTplToHTML([getForm.data], document.body);
+      loadRes('cache/ce~main.css', false);
+    });
+  })();
 });
 
 if (navigator.serviceWorker) {

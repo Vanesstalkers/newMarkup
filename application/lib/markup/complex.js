@@ -1,13 +1,14 @@
 ({
   get: (
     { form, parent, errors, promises },
-    { type = 'complex', name, col, link, filter, config = {}, item = {}, id, on },
+    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on },
   ) => {
     const complex = { code: ++form.codeCount, type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
     complex.name = name;
     complex.col = col || name;
+    complex.links = links || { [parent.name]: `__${complex.name}` };
     const linecode = `${parent.linecode}__${complex.name}`;
     complex.linecode = linecode;
     const idFunc =
@@ -30,7 +31,11 @@
         }
       }
       if (findIds.length) {
-        const findData = await db.mongo.find(complex.col, {}, { projection: form.markup[linecode].queryFields });
+        const findData = await db.mongo.find(
+          complex.col,
+          { _id: { $in: findIds } },
+          { projection: form.markup[linecode].queryFields },
+        );
         for (const item of findData) {
           const itemCode = ++form.codeCount;
           form.data[itemCode] = item;
@@ -42,11 +47,19 @@
       let result = [];
       if (typeof tplFunc === 'function') {
         for (const code of Object.keys(complex.items)) {
-          const item = { ...complex.item, code, col: complex.col, linecode, elPath: 'core/default/el~complex|item' };
+          const item = {
+            ...complex.item,
+            code,
+            name: complex.name,
+            col: complex.col,
+            linecode,
+            elPath: 'core/default/el~complex|item',
+          };
           form.fields[code] = item;
           const proxyData = { form, parent: item, errors, promises };
           result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
           complex.items[code] = { ...item, content: result };
+          console.log({ itemAttr: Object.keys(complex.items[code]) });
         }
         if (errors.length) throw errors[0];
       }
@@ -54,10 +67,11 @@
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: ({ form, parent, errors, blockName }, { name, col, link, filter, config, id, on }, tplFunc) => {
+  prepare: ({ form, parent, errors, blockName }, { name, col, links, filter, config, id, on }, tplFunc) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
+    if (!links) links = { [parent.name]: `__${complex.name}` };
     const linecode = `${parent.linecode}__${complex.name}`;
     complex.linecode = linecode;
 
@@ -67,12 +81,13 @@
       tpl: tplFunc.toString(),
       htmlList: [],
       queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
+      links,
     };
     if (on) form.scriptList.push(...Object.values(on));
 
     complex.parentDataNotRequired = config?.parentDataNotRequired;
     if (!complex.parentDataNotRequired && form.markup[parent.linecode]) {
-      const childLink = link || `__${complex.name}`;
+      const childLink = links[parent.name];
       form.markup[parent.linecode].queryFields[childLink + '.l'] =
         filter?.l !== undefined ? { $slice: filter.l < 0 ? [filter.l, -1 * filter.l] : [0, filter.l] } : 1;
       // form.queryFields[parent.linecode][childLink + '.data'] = 1; ???

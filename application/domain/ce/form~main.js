@@ -63,15 +63,37 @@
           COMPLEX(
             {
               name: 'lvl2',
-              id: async () => {
-                return [true];
-              },
+              id: async () => [true],
+              item: { add: { label: '+++' } },
             },
             ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})],
           ),
-          COMPLEX({ name: 'lvl2-1' }, ({ data }) => [PPP({ _id: data._id }), SPAN({ class: 'col-xs-8' }), IMG({})]),
+          COMPLEX(
+            {
+              name: 'lvl2-1',
+              item: { add: { label: '+ lvl2-1' } },
+              links: { 'lvl2-1': { lvl1: '__lvl1' }, lvl1: '__lvl2-1' },
+            },
+            ({ data }) => [
+              PPP({ _id: data._id }),
+              SPAN({ class: 'col-xs-8' }),
+              IMG({}),
+              FIELD({
+                name: 'num',
+                label: 'Номер',
+                type: 'input',
+              }),
+            ],
+          ),
         ]),
-        DIV({ class: 'row' }, SPAN({ class: 'col-xs-8' }), SPAN({ class: 'col-xs-8' }), IMG({})),
+        DIV(
+          {
+            class: 'row',
+          },
+          SPAN({ class: 'col-xs-8' }),
+          SPAN({ class: 'col-xs-8' }),
+          IMG({}),
+        ),
       ],
     ),
   ],

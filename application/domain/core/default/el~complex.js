@@ -57,7 +57,6 @@
                     {
                       class: 'complex-controls control-add',
                       addField: add.field,
-                      code: data.code,
                       text: !add.type ? add.label || 'Добавить' : undefined,
                     },
                     [
@@ -384,13 +383,20 @@
 		});*/
     },
     style: `
+        .complex-block:before {
+          color: green;
+          content: attr(data-name);
+        }
         .complex-block {
             position: relative;
+            padding: 8px;
+            border: 1px solid green;
+            box-shadow: inset 0 0 4px 0px green;
         }
         .complex-block.has-controls > .complex-controls {
-            position: absolute;
-            top: 0px;
-            left: 0px;
+            // position: absolute;
+            // top: 0px;
+            // left: 0px;
             width: 100%;
             text-align: center;
             cursor: pointer;
@@ -408,18 +414,18 @@
             bottom: 0px;
         }
         .complex-block.has-controls > .complex-controls.control-add {
-            position: absolute;
-            left: 0px;
-            top: -15px;
-            width: auto;
-            height: 100%;
+            // position: absolute;
+            // left: 0px;
+            // top: -15px;
+            // width: auto;
+            // height: 100%;
             min-height: 15px;
             color: #1c84c6;
             white-space: nowrap;
             min-width: 100%;
         }
         .complex-block.has-controls > .complex-controls.control-add:before {
-            content: 'Добавить';
+            content: attr(text);
         }
         .complex-block.has-controls > .complex-controls > input[type=file], 
         .complex-block.has-controls > .complex-controls > .el > input[type=file] {
@@ -596,6 +602,9 @@
     style: `
       .complex-item, .complex-item.has-controls {
           position: relative;
+          padding: 8px;
+          border: 1px solid blue;
+          box-shadow: 0 0 0px 2px blue;
       }
       .complex-item.has-controls > .item-controls {
           position: absolute;

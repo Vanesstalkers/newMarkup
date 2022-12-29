@@ -307,13 +307,26 @@ $(function () {
 
   document.addEventListener('change', async (event) => {
     const $el = event.target;
-    console.log({ $el });
     if ($el.closest('input, textarea, select')) {
       const form = $el.closest('[type="form"]').dataset.name;
       const code = $el.closest('.el').dataset.code;
       const value = $el.value;
       const { result, msg, stack } = await api.markup.saveField({ form, code, value });
       if (result === 'error') console.error({ msg, stack });
+    }
+  });
+  document.addEventListener('click', async (event) => {
+    const $el = event.target;
+    if ($el.closest('.complex-controls.control-add')) {
+      const form = $el.closest('[type="form"]').dataset.name;
+      const $block = $el.closest('.complex-block');
+      const code = $block.dataset.code;
+      const { result, data: item, msg, stack } = await api.markup.addComplex({ form, code });
+      const { tpl, prepare } = window.el[item.elPath] || {};
+      nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
+      const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
+      if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
+      nativeTplToHTML(item.content, $item);
     }
   });
 

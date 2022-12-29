@@ -55,7 +55,7 @@
                     elPath,
                   };
                   form.fields[field.code] = field;
-                  const value = form.data[parent.code]?.[field.keyvalue];
+                  const value = form.data[parent.code]?.[field.keyvalue] || '';
                   return { ...field, value };
                 }
               },
