@@ -1,20 +1,23 @@
 ({
-  get: ({ form, data = {}, errors, parent, promises }, path) => {
+  get: ({ form, data = {}, parent, handlers }, path) => {
     const tplFunc = form.markup[path].tpl;
     const items = [];
-    promises.tpl.push(async () => {
+    handlers.tpl.push(async () => {
       let result = [];
       if (typeof tplFunc === 'function') {
-        const proxyData = { form, data, errors, parent, promises };
-        result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data });
-        if (errors.length) throw errors[0];
+        const proxyData = { form, data, parent, handlers };
+        try {
+          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data });
+        } catch (err) {
+          result = [['div', { class: 'inline-error', error: err.message }]];
+        }
       }
       items.push(...result);
     });
     return items;
   },
 
-  prepare: ({ form, parent, errors, blockName }, path) => {
+  prepare: ({ form, parent, blockName }, path) => {
     const [block, name] = path.split('~');
     const { tpl: tplFunc, func, style } = domain[block][`html~${name}`];
     form.markup[path] = { tpl: tplFunc.toString() };
@@ -23,10 +26,12 @@
     if (func) form.funcList.push(func);
 
     if (typeof tplFunc === 'function') {
-      const proxyData = { prepareCall: true, form, errors, parent, blockName };
-      const tplFuncWithProxifiedContext = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData);
-      tplFuncWithProxifiedContext({ parent, data: {} });
-      if (errors.length) throw errors[0];
+      try {
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, { prepareCall: true, form, parent, blockName })({
+          parent,
+          data: {},
+        });
+      } catch (err) {}
     }
   },
 });

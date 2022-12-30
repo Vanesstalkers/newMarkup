@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, errors, parent, blockName, promises }) {
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, parent, blockName, handlers }) {
     const appContext = { console, process, api, lib, db, bus, domain };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
@@ -8,12 +8,7 @@
         try{ 
           return ( ${stringifiedFunc})(...args) 
         }catch(err){
-          if(!errors.length){
-            console.log(err);
-            const stringifiedFunc = \`${stringifiedFunc.replace(/[`]/g, '\\`')}\`;
-            // errors.push({message: err.message});
-            return [['div', {class: 'inline-error', error: err.message, "error_full": err.message + \` at TPL-script: \` + stringifiedFunc, onclick: "console.log(this.getAttribute('error_full'))"}]];
-          }
+          proxifiedError = err;
         }
       }`,
       {
@@ -22,16 +17,15 @@
             {
               ...appContext,
               parent,
-              errors,
               COMPLEX: (...args) =>
                 prepareCall
-                  ? lib.markup.complex.prepare({ form, errors, parent, blockName }, ...args)
-                  : lib.markup.complex.get({ form, parent, errors, promises }, ...args),
+                  ? lib.markup.complex.prepare({ form, parent, blockName }, ...args)
+                  : lib.markup.complex.get({ form, parent, handlers }, ...args),
               HTML: (...args) => {
                 if (prepareCall) {
-                  lib.markup.html.prepare({ form, errors, parent, blockName }, ...args);
+                  lib.markup.html.prepare({ form, parent, blockName }, ...args);
                 } else {
-                  return lib.markup.html.get({ form, errors, parent, promises }, ...args);
+                  return lib.markup.html.get({ form, parent, handlers }, ...args);
                 }
               },
               FIELD: (data) => {
@@ -71,6 +65,13 @@
                 return function (...args) {
                   return [name, args[0] || {}, Object.values(args).slice(1)];
                 };
+              },
+              set: function (target, name, value) {
+                if (name === 'proxifiedError') {
+                  console.log(value, `\nat TPL-script: ${stringifiedFunc}`);
+                  throw value;
+                }
+                if (target[name]) return Reflect.set(target, name, value);
               },
             },
           ),

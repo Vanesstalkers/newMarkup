@@ -322,11 +322,15 @@ $(function () {
       const $block = $el.closest('.complex-block');
       const code = $block.dataset.code;
       const { result, data: item, msg, stack } = await api.markup.addComplex({ form, code });
-      const { tpl, prepare } = window.el[item.elPath] || {};
-      nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
-      const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
-      if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
-      nativeTplToHTML(item.content, $item);
+      if (result === 'error') {
+        console.error({ msg, stack });
+      } else {
+        const { tpl, prepare } = window.el[item.elPath] || {};
+        nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
+        const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
+        if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
+        nativeTplToHTML(item.content, $item);
+      }
     }
     if ($el.closest('.btn-delete')) {
       const form = $el.closest('[type="form"]').dataset.name;
@@ -335,6 +339,24 @@ $(function () {
       const { result, msg, stack } = await api.markup.deleteComplex({ form, code });
       if (result === 'error') console.error({ msg, stack });
       else if (result === 'success') $item.remove();
+    }
+    if ($el.closest('.btn-reload')) {
+      const form = $el.closest('[type="form"]').dataset.name;
+      const $block = $el.closest('.complex-block');
+      const $item = $el.closest('.complex-item');
+      const code = $item.dataset.code;
+      const { result, data: item, msg, stack } = await api.markup.showComplex({ form, code });
+      if (result === 'error') console.error({ msg, stack });
+      else if (result === 'success') {
+        item.class = (item.class || '') + ' reloaded';
+        const { tpl, prepare } = window.el[item.elPath] || {};
+        nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
+        const $newItem = $block.querySelector(`.reloaded.complex-item[code='${item.code}']`);
+        if (prepare) prepare({ $el: $newItem, data: item, parent: { data: $block.dataset, $el: $block } });
+        nativeTplToHTML(item.content, $newItem);
+        $newItem.classList.remove('reloaded');
+        $item.replaceWith($newItem);
+      }
     }
   });
 
@@ -660,10 +682,12 @@ nativeTplToHTML = function (deepEl, $parent) {
         if (el.items) {
           for (const item of Object.values(el.items)) {
             const { tpl, prepare } = window.el[item.elPath] || {};
-            nativeTplToHTML(tpl({ ...item, parent: el }), $block);
-            const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
-            if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
-            nativeTplToHTML(item.content, $item);
+            if (typeof tpl === 'function') {
+              nativeTplToHTML(tpl({ ...item, parent: el }), $block);
+              const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
+              if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
+              nativeTplToHTML(item.content, $item);
+            }
           }
         }
       } else {

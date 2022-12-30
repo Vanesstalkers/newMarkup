@@ -510,7 +510,7 @@
         [
           tag,
           { class: data.class, code: data.code },
-          [['div', { class: 'item-controls' }, [['div', { class: 'h btn-delete' }]]]],
+          [['div', { class: 'item-controls' }, [['div', { class: 'h btn-reload' }], ['div', { class: 'h btn-delete' }]]]],
         ],
       ];
 
@@ -629,6 +629,10 @@
           background-color: white;
           background-image: url(/delete.png);
       }
+      .complex-item.has-controls > .item-controls > div.btn-reload {
+        background-color: orange;
+        background-image: url(/delete.png);
+    }
 
       body.editMode .complex-block.has-controls .complex-item.has-controls > .item-controls {
           display: flex;

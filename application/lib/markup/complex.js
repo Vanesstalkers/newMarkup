@@ -1,8 +1,5 @@
 ({
-  get: (
-    { form, parent, errors, promises },
-    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on },
-  ) => {
+  get: ({ form, parent, handlers }, { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on }) => {
     const complex = { code: ++form.codeCount, type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
@@ -18,7 +15,7 @@
       };
     const tplFunc = form.markup[linecode].tpl;
 
-    promises.ids.push(async () => {
+    handlers.ids.push(async () => {
       const ids = await idFunc();
       const findIds = [];
       for (const id of ids) {
@@ -36,12 +33,12 @@
           form.data[`${linecode}-${id}`] = itemCode;
           complex.items[itemCode] = {};
         }
-        if (!promises.db[complex.col]) promises.db[complex.col] = {};
-        if (!promises.db[complex.col][linecode]) promises.db[complex.col][linecode] = [];
-        promises.db[complex.col][linecode].push(...findIds);
+        if (!handlers.db[complex.col]) handlers.db[complex.col] = {};
+        if (!handlers.db[complex.col][linecode]) handlers.db[complex.col][linecode] = [];
+        handlers.db[complex.col][linecode].push(...findIds);
       }
     });
-    promises.tpl.push(async () => {
+    handlers.tpl.push(async () => {
       let result = [];
       if (typeof tplFunc === 'function') {
         for (const code of Object.keys(complex.items)) {
@@ -55,17 +52,20 @@
             elPath: 'core/default/el~complex|item',
           };
           form.fields[code] = item;
-          const proxyData = { form, parent: item, errors, promises };
-          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
+          const proxyData = { form, parent: item, handlers };
+          try {
+            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
+          } catch (err) {
+            result = [['div', { class: 'inline-error', error: err.message }]];
+          }
           complex.items[code] = { ...item, content: result };
         }
-        if (errors.length) throw errors[0];
       }
     });
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: ({ form, parent, errors, blockName }, { name, col, links, filter, config, id, on }, tplFunc) => {
+  prepare: ({ form, parent, blockName }, { name, col, links, filter, config, id, on }, tplFunc) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
@@ -92,9 +92,10 @@
     }
 
     if (typeof tplFunc === 'function') {
-      const proxyData = { prepareCall: true, form, errors, parent: complex, blockName };
-      lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
-      if (errors.length) throw errors[0];
+      const proxyData = { prepareCall: true, form, parent: complex, blockName };
+      try {
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
+      } catch (err) {}
       return form;
     }
   },
