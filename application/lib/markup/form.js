@@ -6,25 +6,13 @@
     });
 
     const { exports: formCache } = await npm.metavm.readScript(cacheFilePath, { type: npm.metavm.COMMON_CONTEXT });
-    const promises = { db: [], tpl: [] };
-    async function execPromises() {
-      if (promises.tpl.length) {
-        const tplPromises = [...promises.tpl];
-        const dbPromises = [...promises.db];
-        promises.tpl.splice(0, promises.tpl.length);
-        promises.db.splice(0, promises.db.length);
-        for (const dbFunc of dbPromises) await dbFunc();
-        for (const tplFunc of tplPromises) await tplFunc();
-        await execPromises();
-      }
-    }
-
     const processForm = {
       ...formCache,
       codeCount: 0,
       data: { 0: { [`__${form}~${name}`]: { l: [true] } } },
       fields: {},
     };
+    const promises = { ids: [], db: {}, tpl: [] };
     const result = lib.markup.complex.get(
       {
         form: processForm,
@@ -34,6 +22,35 @@
       },
       { type: 'form', name: `${form}~${name}`, col: form },
     );
+
+    async function execPromises() {
+      if (promises.tpl.length) {
+        const idsPromises = [...promises.ids];
+        const tplPromises = [...promises.tpl];
+        promises.ids.splice(0, promises.ids.length);
+        promises.tpl.splice(0, promises.tpl.length);
+        for (const idsFunc of idsPromises) await idsFunc();
+
+        for (const [col, map] of Object.entries(promises.db)) {
+          for (const [linecode, ids] of Object.entries(map)) {
+            const findData = await db.mongo.find(
+              col,
+              { _id: { $in: ids } },
+              { projection: processForm.markup[linecode].queryFields },
+            );
+            for (const item of findData) {
+              const itemCode = processForm.data[`${linecode}-${item._id}`];
+              processForm.data[itemCode] = item;
+              delete processForm.data[`${linecode}-${item._id}`];
+            }
+          }
+        }
+
+        for (const tplFunc of tplPromises) await tplFunc();
+        promises.db = {};
+        await execPromises();
+      }
+    }
     await execPromises();
 
     if (!user.forms) user.forms = {};
@@ -55,7 +72,6 @@
           styleList: [style],
           lstList: [],
           elList: ['core/default/el~complex|block', 'core/default/el~complex|item'],
-          htmlList: [],
           scriptList: [],
         },
         parent: { linecode: '.', root: true },
@@ -74,18 +90,14 @@
         prepared.markup[parent].tpl = prepared.markup[parent].tpl
           .replace(new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'), '')
           .replace(/,[\s]*,/g, ',');
-        for (const html of prepared.markup[parent].htmlList) {
-          prepared.htmlList[html].tpl = prepared.htmlList[html].tpl
+        for (const html of prepared.markup[parent].usedHtml) {
+          prepared.markup[html].tpl = prepared.markup[html].tpl
             .replace(new RegExp(value.tpl.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'), '')
             .replace(/,[\s]*,/g, ',');
         }
       }
     }
     for (const [key, value] of Object.entries(prepared.markup)) {
-      const stringifiedData = lib.markup.helpers.prepareData(value, { styleList: prepared.styleList });
-      dataEntries.push([key, stringifiedData]);
-    }
-    for (const [key, value] of Object.entries(prepared.htmlList)) {
       const stringifiedData = lib.markup.helpers.prepareData(value, { styleList: prepared.styleList });
       dataEntries.push([key, stringifiedData]);
     }

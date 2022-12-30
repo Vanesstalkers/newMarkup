@@ -16,9 +16,9 @@
 
   prepare: ({ form, parent, errors, blockName }, path) => {
     const [block, name] = path.split('~');
-    const { tpl: tplFunc, func, script, style } = domain[block][`html~${name}`];
-    form.htmlList[path] = { tpl: tplFunc.toString() };
-    form.markup[parent.linecode].htmlList.push(path);
+    const { tpl: tplFunc, func, style } = domain[block][`html~${name}`];
+    form.markup[path] = { tpl: tplFunc.toString() };
+    form.markup[parent.linecode].usedHtml.push(path);
     if (style) form.styleList.push(style);
     if (func) form.funcList.push(func);
 

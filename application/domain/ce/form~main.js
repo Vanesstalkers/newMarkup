@@ -30,7 +30,7 @@
         config: { tag: 'table' },
         item: { add: true, config: { tag: 'tr' } },
         id: async () => {
-          return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f')];
+          return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f'), db.mongo.ObjectID('63aee515b11faaaba5c00306')];
         },
         on: {
           load: (data) => {

@@ -18,7 +18,7 @@
       };
     const tplFunc = form.markup[linecode].tpl;
 
-    promises.db.push(async () => {
+    promises.ids.push(async () => {
       const ids = await idFunc();
       const findIds = [];
       for (const id of ids) {
@@ -31,16 +31,14 @@
         }
       }
       if (findIds.length) {
-        const findData = await db.mongo.find(
-          complex.col,
-          { _id: { $in: findIds } },
-          { projection: form.markup[linecode].queryFields },
-        );
-        for (const item of findData) {
+        for (const id of findIds) {
           const itemCode = ++form.codeCount;
-          form.data[itemCode] = item;
+          form.data[`${linecode}-${id}`] = itemCode;
           complex.items[itemCode] = {};
         }
+        if (!promises.db[complex.col]) promises.db[complex.col] = {};
+        if (!promises.db[complex.col][linecode]) promises.db[complex.col][linecode] = [];
+        promises.db[complex.col][linecode].push(...findIds);
       }
     });
     promises.tpl.push(async () => {
@@ -60,7 +58,6 @@
           const proxyData = { form, parent: item, errors, promises };
           result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
           complex.items[code] = { ...item, content: result };
-          console.log({ itemAttr: Object.keys(complex.items[code]) });
         }
         if (errors.length) throw errors[0];
       }
@@ -80,7 +77,7 @@
     form.markup[linecode] = {
       parent: parent.root ? null : JSON.stringify(parent.linecode),
       tpl: tplFunc.toString(),
-      htmlList: [],
+      usedHtml: [],
       queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
       links,
     };
