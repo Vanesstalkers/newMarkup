@@ -49,12 +49,18 @@
           type: 'input',
           on: {
             save: (a, b, c) => {
-              alert(1);
+              // alert(1);
             },
             load: (a, b, c) => {
-              alert(2);
+              // alert(2);
             },
           },
+        }),
+        FIELD({
+          name: 'list',
+          label: 'Список',
+          type: 'select',
+          lst: 'ce~tutorial',
         }),
         FUNC(() => {
           console.log(2);
@@ -78,11 +84,11 @@
               PPP({ _id: data._id }),
               SPAN({ class: 'col-xs-8' }),
               IMG({}),
-              FIELD({
-                name: 'num',
-                label: 'Номер',
-                type: 'input',
-              }),
+              // FIELD({
+              //   name: 'num',
+              //   label: 'Номер',
+              //   type: 'input',
+              // }),
             ],
           ),
         ]),
@@ -109,6 +115,9 @@
       font-size: 10px;
       color: red;
       text-overflow: ellipsis;
+    }
+    .el > label:before {
+      content: attr(text);
     }
   `,
 });

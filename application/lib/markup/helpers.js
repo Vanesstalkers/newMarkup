@@ -41,11 +41,9 @@
                   if (data.on) form.scriptList.push(...Object.values(data.on));
                 } else {
                   const field = {
+                    ...data,
                     code: ++form.codeCount,
                     parentCode: parent.code,
-                    name: data.name,
-                    type: data.type,
-                    keyvalue: data.keyvalue,
                     elPath,
                   };
                   form.fields[field.code] = field;

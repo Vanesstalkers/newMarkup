@@ -115,4 +115,9 @@
 
     return { handlers, execHandlers };
   },
+  getLst: ({lst})=>{
+    // const [block, name] = lst.split('~');
+    // const { tpl: tplFunc, func, style } = 
+    return domain['ce'][`tutorial`];
+  }
 });

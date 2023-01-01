@@ -693,9 +693,14 @@ nativeTplToHTML = function (deepEl, $parent) {
       } else {
         const { tpl, prepare } = window.el[el.elPath] || {};
         if (tpl) {
-          el.class = `el el-${el.name.replace(/\./g, '_')} ${el.class}`;
+          el.class = ['el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
           nativeTplToHTML(tpl(el), $parent);
           const $el = $parent.querySelector(`.el[code='${el.code}']`);
+
+          $el.setAttribute('markup-code', el.code);
+          if (el.on?.load) $el.setAttribute('markup-onload', el.on.load);
+          for (const [key, value] of Object.entries(el)) $el.dataset[key] = value;
+
           if (prepare) prepare({ $el, data: el });
         }
       }

@@ -49,7 +49,7 @@
     const cacheList = [];
     // cacheList += 'exports.config = ' + JSON.stringify(SYS.get(__, "process['.'].config"));
     // cacheList += 'exports.lst = ' + JSON.stringify(__.lst);
-    const dataEntries = [];
+    const tplEntries = [];
     for (const [key, value] of Object.entries(prepared.markup)) {
       if (value.parent) {
         const parent = JSON.parse(value.parent);
@@ -65,13 +65,43 @@
     }
     for (const [key, value] of Object.entries(prepared.markup)) {
       const stringifiedData = lib.markup.helpers.prepareData(value, { styleList: prepared.styleList });
-      dataEntries.push([key, stringifiedData]);
+      tplEntries.push([key, stringifiedData]);
     }
-    cacheList.push(['markup', `{${dataEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+    cacheList.push(['markup', `{${tplEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
     for (const elPath of prepared.elList.filter((value, index, self) => self.indexOf(value) === index)) {
       lib.markup.helpers.prepareEl(elPath, { funcList: prepared.funcList, styleList: prepared.styleList });
     }
+    const lstEntries = [];
+    prepared.funcList.push('window.LST = {}');
+    for (const lstCode of prepared.lstList.filter((value, index, self) => self.indexOf(value) === index)) {
+      const [path, name] = lstCode.split('~');
+      const lst = lib.utils.getDeep(domain, path.replace(/\//g, '.') + '.' + name);
+      lstEntries.push([
+        lstCode,
+        JSON.stringify(lst, (key, value) => {
+          return typeof value === 'function' ? '***function*** ' + value.toString() : value;
+        }),
+      ]);
+
+      const lstFunc = {};
+      let sLst = `window.LST["${lstCode}"] = ${JSON.stringify(lst, (key, value) => {
+        if (typeof value === 'function') {
+          const str = value.toString();
+          const code = node.crypto.createHash('md5').update(str).digest('hex');
+          lstFunc[code] = str;
+          return code;
+        }
+        return value;
+      })}`;
+      try {
+        for (const [code, str] of Object.entries(lstFunc)) sLst = sLst.replace(new RegExp(`"${code}"`, 'g'), str);
+      } catch (err) {
+        console.log(err);
+      }
+      prepared.funcList.push(sLst);
+    }
+    cacheList.push(['lst', `{${lstEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
     let cacheFile = cacheList.map(([key, value]) => `${key}:${value}`).join(',');
     for (const script of prepared.scriptList) {
