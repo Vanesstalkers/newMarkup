@@ -166,7 +166,6 @@ class MetacomWritable extends EventEmitter {
   }
 
   write(data) {
-    console.log("write", this.streamId);
     const chunk = MetacomChunk.encode(this.streamId, data);
     this.transport.send(chunk);
   }

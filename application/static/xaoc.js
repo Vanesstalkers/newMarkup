@@ -665,14 +665,14 @@ nativeTplToHTML = function (deepEl, $parent) {
     if (el.type) {
       if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
-        nativeTplToHTML(tpl(el), $parent);
+        nativeTplToHTML([tpl(el)], $parent);
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
         if (prepare) prepare({ $el: $block, data: el });
         if (el.items) {
           for (const item of Object.values(el.items)) {
             const { tpl, prepare } = window.el[item.elPath] || {};
             if (typeof tpl === 'function') {
-              nativeTplToHTML(tpl({ ...item, parent: el }), $block);
+              nativeTplToHTML([tpl({ ...item, parent: el })], $block);
               const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
               if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
               nativeTplToHTML(item.content, $item);
@@ -683,14 +683,16 @@ nativeTplToHTML = function (deepEl, $parent) {
         const { tpl, prepare } = window.el[el.elPath] || {};
         if (tpl) {
           el.class = ['el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
-          nativeTplToHTML(tpl(el), $parent);
+          nativeTplToHTML([tpl(el)], $parent);
           const $el = $parent.querySelector(`.el[code='${el.code}']`);
 
-          $el.setAttribute('markup-code', el.code);
-          if (el.on?.load) $el.setAttribute('markup-onload', el.on.load);
-          for (const [key, value] of Object.entries(el)) $el.dataset[key] = value;
+          if ($el) {
+            $el.setAttribute('markup-code', el.code);
+            if (el.on?.load) $el.setAttribute('markup-onload', el.on.load);
+            for (const [key, value] of Object.entries(el)) $el.dataset[key] = value;
 
-          if (prepare) prepare({ $el, data: el });
+            if (prepare) prepare({ $el, data: el });
+          }
         }
       }
     } else {

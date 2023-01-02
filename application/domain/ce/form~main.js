@@ -1,6 +1,5 @@
 ({
   tpl: () => [
-    DIV({}),
     A({
       class:
         'col-xs-8' +

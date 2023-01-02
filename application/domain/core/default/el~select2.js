@@ -14,13 +14,6 @@
         const $select = $el.querySelector('select');
         const form = $select.closest('[type="form"]').dataset.name;
         const code = $select.closest('.el').dataset.code;
-        console.log(
-          Array.from($select.options).map((opt) => ({
-            text: opt.label,
-            value: opt.value,
-            selected: opt.selected,
-          })),
-        );
         new SlimSelect({
           select: $select,
           settings: {
@@ -85,7 +78,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~select2|select2'].tpl(data)];
+      return window.el['core/default/el~select2|select2'].tpl(data);
     },
     front: {
       prepare: function ({ $el, data }) {
@@ -99,7 +92,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+      return window.el['core/default/el~label|label'].tpl(data);
     },
   },
 
@@ -108,7 +101,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+      return window.el['core/default/el~label|label'].tpl(data);
     },
   },
 });

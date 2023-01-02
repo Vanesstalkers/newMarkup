@@ -109,20 +109,14 @@
     }
     return str;
   },
-  prepareEl(elPath, { funcList, styleList }) {
+  prepareEl(elPath, { funcList, styleList, dependencyMap, elList }) {
     const [mainPath, elType] = elPath.split('|');
     const [corePath, themePath, filePath] = mainPath.split('/');
     const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
     const el = elType ? elFile?.[elType] : elFile;
 
     if (el) {
-      for (const dependence of el.config?.dependencies || []) {
-        const dependenceLib = domain[corePath][themePath]['static'][dependence];
-        if (dependenceLib.func) funcList.unshift(dependenceLib.func);
-        if (dependenceLib.style) styleList.unshift(dependenceLib.style);
-      }
-
-      const stringifiedEl = [['tpl', el.tpl]]
+      const stringifiedEl = [['tpl', this.prepareCss(el.tpl ? el.tpl.toString() : '', styleList)]]
         .concat(Object.entries(el.front || {}))
         .map(([key, value]) => `${key}:${value.toString()}`)
         .join(',');
@@ -130,12 +124,21 @@
       if (el.func) funcList.push(el.func);
       if (el.style) styleList.push(el.style);
 
+      if (el.config?.dependencies?.length) {
+        for (const name of el.config.dependencies) {
+          dependencyMap[[corePath, themePath, 'static', name].join('/')] = domain[corePath][themePath]['static'][name];
+        }
+      }
+
+      // !!! переделать на  dependencyList
       const regexp = /(window\.el\[[',"])(.*)([',"]\]\.)/g;
       // если элемент переиспользует часть функционала другого элемента, то его тоже нужно загрузить
       for (const path of stringifiedEl.match(regexp) || []) {
         const outElPath = path.replace(regexp, '$2');
-        // без следующей проверки может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
-        if (outElPath !== elPath) this.prepareEl(outElPath, { funcList, styleList });
+        if (!elList.includes(outElPath)) {
+          // без следующей проверки может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
+          if (outElPath !== elPath) this.prepareEl(outElPath, { funcList, styleList, dependencyMap });
+        }
       }
     }
   },

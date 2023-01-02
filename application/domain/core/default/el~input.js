@@ -5,13 +5,11 @@
     },
     tpl: function (data) {
       return [
+        'div',
+        { code: data.code, class: data.class },
         [
-          'div',
-          { code: data.code, class: data.class + ' ' },
-          [
-            ['label', { text: data.label || '' }],
-            ['input', { type: 'input', class: 'el-value', value: data.value }],
-          ],
+          ['label', { text: data.label || '' }],
+          ['input', { type: 'input', class: 'el-value', value: data.value }],
         ],
       ];
     },
@@ -19,10 +17,9 @@
       prepare: function ({ $el, data }) {
         const $input = $el.querySelector('input');
         $input.addEventListener('change', async (event) => {
-          const $el = event.target;
-          const form = $el.closest('[type="form"]').dataset.name;
-          const code = $el.closest('.el').dataset.code;
-          const value = $el.value;
+          const form = $input.closest('[type="form"]').dataset.name;
+          const code = $input.closest('.el').dataset.code;
+          const value = $input.value;
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
           if (result === 'error') console.error({ msg, stack });
         });
@@ -42,7 +39,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~input|input'].tpl(data)];
+      return window.el['core/default/el~input|input'].tpl(data);
     },
     front: {
       prepare: function ({ $el, data }) {
@@ -56,7 +53,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+      return window.el['core/default/el~label|label'].tpl(data);
     },
   },
 
@@ -65,7 +62,7 @@
       customType: 'html',
     },
     tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+      return window.el['core/default/el~label|label'].tpl(data);
     },
   },
 });

@@ -6,26 +6,24 @@
     tpl: function (data) {
       if (!data.config) data.config = {};
       return [
+        'div',
+        { code: data.code, class: data.class },
         [
-          'div',
-          { code: data.code, class: data.class + ' ' },
+          ['label', { text: data.label || '' }],
           [
-            ['label', { text: data.label || '' }],
+            'select',
+            {
+              value: data.value || '',
+              class: 'el-value',
+              ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
+            },
             [
-              'select',
-              {
-                value: data.value || '',
-                class: 'el-value',
-                ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
-              },
-              [
-                (data.config.element = function (e) {
-                  const selected = (data.value || []).filter(({ value }) => value === e.v).length
-                    ? { selected: 'selected' }
-                    : {};
-                  return [['option', { label: e.l, value: e.v, ...selected }]];
-                }),
-              ],
+              (data.config.element = function (e) {
+                const selected = (data.value || []).filter(({ value }) => value === e.v).length
+                  ? { selected: 'selected' }
+                  : {};
+                return [['option', { label: e.l, value: e.v, ...selected }]];
+              }),
             ],
           ],
         ],

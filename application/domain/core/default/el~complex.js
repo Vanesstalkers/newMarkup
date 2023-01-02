@@ -34,58 +34,56 @@
           .filter((item) => item)
           .join(' ');
       return [
+        tag,
+        { class: data.class, code: data.code, type: data.type },
         [
-          tag,
-          { class: data.class, code: data.code, type: data.type },
-          [
-            !add
-              ? []
-              : [
-                  // itemTag,
-                  // Object.assign(
-                  //   {
-                  //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
-                  //     addField: add.field,
-                  //     code: data.code,
-                  //     id: false, // без id: false элемент подменит собой комплексный блок
-                  //   },
-                  //   data.front || {},
-                  // ),
-                  // [
+          !add
+            ? []
+            : [
+                // itemTag,
+                // Object.assign(
+                //   {
+                //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
+                //     addField: add.field,
+                //     code: data.code,
+                //     id: false, // без id: false элемент подменит собой комплексный блок
+                //   },
+                //   data.front || {},
+                // ),
+                // [
+                [
+                  itemTag,
+                  {
+                    class: 'complex-controls control-add',
+                    addField: add.field,
+                    text: !add.type ? add.label || 'Добавить' : undefined,
+                  },
                   [
-                    itemTag,
-                    {
-                      class: 'complex-controls control-add',
-                      addField: add.field,
-                      text: !add.type ? add.label || 'Добавить' : undefined,
-                    },
-                    [
-                      add.type != 'file'
-                        ? []
-                        : [
-                            window.el['core/default/el~file|file'].tpl.bind(this)(
-                              _,
-                              d,
-                              { class: 'el control-el', addLabel: add.label, delete: false },
-                              tpl,
-                            ),
-                          ],
+                    add.type != 'file'
+                      ? []
+                      : [
+                          window.el['core/default/el~file|file'].tpl.bind(this)(
+                            _,
+                            d,
+                            { class: 'el control-el', addLabel: add.label, delete: false },
+                            tpl,
+                          ),
+                        ],
 
-                      add.type != 'search'
-                        ? []
-                        : [
-                            window.el['core/default/el~select2|select2'].tpl.bind(this)(
-                              _,
-                              d,
-                              { class: 'el', label: add.label, onSave: 'addWithSearch', code: data.code, id: false },
-                              tpl,
-                            ),
-                          ],
-                    ],
+                    add.type != 'search'
+                      ? []
+                      : [
+                          window.el['core/default/el~select2|select2'].tpl.bind(this)(
+                            _,
+                            d,
+                            { class: 'el', label: add.label, onSave: 'addWithSearch', code: data.code, id: false },
+                            tpl,
+                          ),
+                        ],
                   ],
-                  // ],
                 ],
-          ],
+                // ],
+              ],
         ],
 
         // !controls.show
@@ -507,10 +505,17 @@
           .join(' ');
 
       return [
+        tag,
+        { class: data.class, code: data.code },
         [
-          tag,
-          { class: data.class, code: data.code },
-          [['div', { class: 'item-controls' }, [['div', { class: 'h btn-reload' }], ['div', { class: 'h btn-delete' }]]]],
+          [
+            'div',
+            { class: 'item-controls' },
+            [
+              ['div', { class: 'h btn-reload' }],
+              ['div', { class: 'h btn-delete' }],
+            ],
+          ],
         ],
       ];
 
