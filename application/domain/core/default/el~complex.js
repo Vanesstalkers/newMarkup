@@ -63,7 +63,7 @@
                       add.type != 'file'
                         ? []
                         : [
-                            window.el['core/default/el~file'].tpl.bind(this)(
+                            window.el['core/default/el~file|file'].tpl.bind(this)(
                               _,
                               d,
                               { class: 'el control-el', addLabel: add.label, delete: false },
@@ -74,7 +74,7 @@
                       add.type != 'search'
                         ? []
                         : [
-                            window.el['core/default/el~select2'].tpl.bind(this)(
+                            window.el['core/default/el~select2|select2'].tpl.bind(this)(
                               _,
                               d,
                               { class: 'el', label: add.label, onSave: 'addWithSearch', code: data.code, id: false },
@@ -125,11 +125,11 @@
 
         //   switch (data[1].add.type) {
         //     case 'file':
-        //       if (window.el['core/default/el~file'].prepare)
-        //         window.el['core/default/el~file'].prepare.bind(this)(tpl, {}, doAfterLoad, realParent);
+        //       if (window.el['core/default/el~file|file'].prepare)
+        //         window.el['core/default/el~file|file'].prepare.bind(this)(tpl, {}, doAfterLoad, realParent);
         //       break;
         //     case 'search':
-        //       window.el['core/default/el~select2'].prepare.bind(this)(
+        //       window.el['core/default/el~select2|select2'].prepare.bind(this)(
         //         tpl,
         //         {
         //           lst: data[1].add.lst || 'addobj',

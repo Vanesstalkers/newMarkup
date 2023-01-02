@@ -37,7 +37,7 @@
                 if (prepareCall) {
                   form.elList.push(elPath);
                   form.markup[parent.linecode].queryFields[data.name] = 1;
-                  if (data.lst) form.lstList.push(data.lst);
+                  if (typeof data.lst === 'string') form.lstList.push(data.lst);
                   if (data.on) form.scriptList.push(...Object.values(data.on));
                 } else {
                   const field = {
@@ -116,6 +116,12 @@
     const el = elType ? elFile?.[elType] : elFile;
 
     if (el) {
+      for (const dependence of el.config?.dependencies || []) {
+        const dependenceLib = domain[corePath][themePath]['static'][dependence];
+        if (dependenceLib.func) funcList.unshift(dependenceLib.func);
+        if (dependenceLib.style) styleList.unshift(dependenceLib.style);
+      }
+
       const stringifiedEl = [['tpl', el.tpl]]
         .concat(Object.entries(el.front || {}))
         .map(([key, value]) => `${key}:${value.toString()}`)

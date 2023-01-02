@@ -304,17 +304,6 @@ $(function () {
   $(document).on('click', '.show-complex', function () {
     reloadComplex(this, { show: false });
   });
-
-  document.addEventListener('change', async (event) => {
-    const $el = event.target;
-    if ($el.closest('input, textarea, select')) {
-      const form = $el.closest('[type="form"]').dataset.name;
-      const code = $el.closest('.el').dataset.code;
-      const value = $el.value;
-      const { result, msg, stack } = await api.markup.saveField({ form, code, value });
-      if (result === 'error') console.error({ msg, stack });
-    }
-  });
   document.addEventListener('click', async (event) => {
     const $el = event.target;
     if ($el.closest('.complex-controls.control-add')) {

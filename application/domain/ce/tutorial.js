@@ -1,7 +1,13 @@
 [
   {
+    v: 'fake1',
+    l: 'fake111',
+  },{
+    v: 'fake2',
+    l: 'fake222',
+  },{
     v: 'fake',
-    l: 'fake',
+    l: 'fake333',
     action: function (callback) {
       waitForLoadElementByCode[$('#formContent').attr('code')] = function () {
         callback();

@@ -56,12 +56,8 @@
             },
           },
         }),
-        FIELD({
-          name: 'list',
-          label: 'Список',
-          type: 'select',
-          lst: 'ce~tutorial',
-        }),
+        FIELD({ name: 'list', label: 'Список', type: 'select2', lst: { action: 'ce~search' }, multiple: true }),
+        FIELD({ name: 'list2', label: 'Список', type: 'select2', lst: 'ce~tutorial' }),
         FUNC(() => {
           console.log(2);
         }),

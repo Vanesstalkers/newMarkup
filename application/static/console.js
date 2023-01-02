@@ -462,6 +462,7 @@ window.addEventListener('load', async () => {
   await window.api.markup.getForm({ form: 'ce', name: 'main' });
   (async () => {
     const getForm = await window.api.markup.getForm({ form: 'ce', name: 'main' });
+    if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
     loadRes('cache/ce~main_func.js', false, () => {
       nativeTplToHTML([getForm.data], document.body);
       loadRes('cache/ce~main.css', false);

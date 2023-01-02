@@ -13,12 +13,17 @@
             ['label', { text: data.label || '' }],
             [
               'select',
-              { value: data.value || '', class: 'el-value' },
+              {
+                value: data.value || '',
+                class: 'el-value',
+                ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
+              },
               [
                 (data.config.element = function (e) {
-                  return [
-                    ['option', { label: e.l, value: e.v, ...(e.v == data.value ? { selected: 'selected' } : {}) }],
-                  ];
+                  const selected = (data.value || []).filter(({ value }) => value === e.v).length
+                    ? { selected: 'selected' }
+                    : {};
+                  return [['option', { label: e.l, value: e.v, ...selected }]];
                 }),
               ],
             ],
@@ -27,27 +32,17 @@
       ];
     },
     front: {
-      prepare: function ({ $el, data }) {
+      prepare: function ({ $el, data, addListener = true }) {
         if (!data.lst) return;
 
-        if (!window.LST[data.lst]) {
-          window.LST[data.lst] = [{ v: '', l: '' }];
-          window.oLST[data.lst] = {};
+        if (typeof data.lst === 'object' || !window.LST[data.lst]) {
+          window.LST[data.lst] = [];
+          // window.oLST[data.lst] = {};
+          if ((data.value || []).length)
+            window.LST[data.lst].push(...data.value.map(({ value, label }) => ({ v: value, l: label })));
+          if (window.LST[data.lst].filter(({ v }) => v === '').length === 0)
+            window.LST[data.lst].unshift({ v: '', l: 'н/д' });
         }
-
-        // if (typeof data.value == 'object') {
-        //   if (!window.oLST[data.lst][data.value.v]) {
-        //     if (data.multiple) {
-        //       // пока нет живых кейсов с кастомными multiple-значениями, не совсем понятно что тут делать...
-        //     } else {
-        //       window.oLST[data.lst][data.value.v] = data.value;
-        //       window.LST[data.lst].push(data.value);
-        //     }
-        //   }
-
-        //   data.value = data.value.v;
-        //   $e.attr('value', data.value);
-        // }
 
         const $select = $el.querySelector('select');
         if (typeof data.config.element === 'function') {
@@ -55,6 +50,17 @@
             if (!l.hide) nativeTplToHTML(data.config.element(l), $select);
           });
         }
+
+        if (addListener)
+          $select.addEventListener('change', async (event) => {
+            const form = $select.closest('[type="form"]').dataset.name;
+            const code = $select.closest('.el').dataset.code;
+            const value = Array.from($select.options)
+              .filter((opt) => opt.selected)
+              .map((opt) => ({ label: opt.label, value: opt.value }));
+            const { result, msg, stack } = await api.markup.saveField({ form, code, value });
+            if (result === 'error') console.error({ msg, stack });
+          });
       },
     },
   },
@@ -63,12 +69,12 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~select|select'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~select|select'].tpl(data)];
     },
     front: {
-      prepare: function (tpl, data, doAfterLoad, realParent) {
-        window.el['core/default/el~select|select'].prepare.bind(this)(tpl, data, doAfterLoad, realParent);
+      prepare: function ({ $el, data }) {
+        window.el['core/default/el~select|select'].prepare({ $el, data });
       },
     },
   },
@@ -77,8 +83,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~label|label'].tpl(data)];
     },
   },
 
@@ -86,8 +92,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~label|label'].tpl(data)];
     },
   },
 });

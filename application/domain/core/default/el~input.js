@@ -3,7 +3,7 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
+    tpl: function (data) {
       return [
         [
           'div',
@@ -17,12 +17,22 @@
     },
     front: {
       prepare: function ({ $el, data }) {
-        if (data.config && data.config.mask)
-          doAfterLoad.push(function () {
-            realParent
-              .find('input[code=' + data.code + ']')
-              .mask(data.config.mask.m || data.config.mask, data.config.mask.c);
-          });
+        const $input = $el.querySelector('input');
+        $input.addEventListener('change', async (event) => {
+          const $el = event.target;
+          const form = $el.closest('[type="form"]').dataset.name;
+          const code = $el.closest('.el').dataset.code;
+          const value = $el.value;
+          const { result, msg, stack } = await api.markup.saveField({ form, code, value });
+          if (result === 'error') console.error({ msg, stack });
+        });
+
+        // if (data.config && data.config.mask)
+        //   doAfterLoad.push(function () {
+        //     realParent
+        //       .find('input[code=' + data.code + ']')
+        //       .mask(data.config.mask.m || data.config.mask, data.config.mask.c);
+        //   });
       },
     },
   },
@@ -31,12 +41,12 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~input|input'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~input|input'].tpl(data)];
     },
     front: {
-      prepare: function (tpl, data, doAfterLoad, realParent) {
-        window.el['core/default/el~input|input'].prepare.bind(this)(tpl, data, doAfterLoad, realParent);
+      prepare: function ({ $el, data }) {
+        window.el['core/default/el~input|input'].prepare({ $el, data });
       },
     },
   },
@@ -45,8 +55,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~label|label'].tpl(data)];
     },
   },
 
@@ -54,8 +64,8 @@
     config: {
       customType: 'html',
     },
-    tpl: function (data, config) {
-      return [window.el['core/default/el~label|label'].tpl.bind(this)(data, config)];
+    tpl: function (data) {
+      return [window.el['core/default/el~label|label'].tpl(data)];
     },
   },
 });
