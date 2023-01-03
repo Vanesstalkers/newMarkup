@@ -1,0 +1,3 @@
+({
+  baseForm: 'core/default~main',
+});

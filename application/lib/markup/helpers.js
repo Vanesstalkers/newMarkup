@@ -1,6 +1,6 @@
 ({
   addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, parent, blockName, handlers }) {
-    const appContext = { console, process, api, lib, db, bus, domain };
+    const appContext = { console, JSON, process, api, lib, db, bus, domain };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -17,6 +17,9 @@
             {
               ...appContext,
               parent,
+              FORM: (data) => {
+                return { ...data, type: 'subform', code: lib.markup.helpers.nextCode(form) };
+              },
               COMPLEX: (...args) =>
                 prepareCall
                   ? lib.markup.complex.prepare({ form, parent, blockName }, ...args)
@@ -42,7 +45,7 @@
                 } else {
                   const field = {
                     ...data,
-                    code: ++form.codeCount,
+                    code: lib.markup.helpers.nextCode(form),
                     parentCode: parent.code,
                     elPath,
                   };
@@ -78,6 +81,9 @@
     );
     return f;
   },
+  nextCode(form) {
+    return [++form.codeCount, form.codeSfx].filter((item) => item).join('_');
+  },
   prepareData(data, { styleList }) {
     const entries = [];
 
@@ -109,7 +115,7 @@
     }
     return str;
   },
-  prepareEl(elPath, { funcList, styleList, dependencyMap, elList }) {
+  prepareEl(elPath, { funcList, styleList, dependencyMap, elList = [] }) {
     const [mainPath, elType] = elPath.split('|');
     const [corePath, themePath, filePath] = mainPath.split('/');
     const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];

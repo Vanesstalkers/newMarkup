@@ -315,7 +315,7 @@ $(function () {
         console.error({ msg, stack });
       } else {
         const { tpl, prepare } = window.el[item.elPath] || {};
-        nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
+        nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
         const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
         if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
         nativeTplToHTML(item.content, $item);
@@ -663,7 +663,17 @@ nativeTplToHTML = function (deepEl, $parent) {
   for (const el of deepEl) {
     if (!el) continue;
     if (el.type) {
-      if (el.type === 'complex' || el.type === 'form') {
+      if (el.type === 'subform') {
+        (async () => {
+          const form = el.name;
+          const getForm = await window.api.markup.getForm({ form, codeSfx: el.code });
+          if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
+          loadRes(`cache/${form}.func.js`, false, () => {
+            nativeTplToHTML([getForm.data], $parent);
+            loadRes(`cache/${form}.css`, false);
+          });
+        })();
+      } else if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
         nativeTplToHTML([tpl(el)], $parent);
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
@@ -689,6 +699,7 @@ nativeTplToHTML = function (deepEl, $parent) {
           if ($el) {
             $el.setAttribute('markup-code', el.code);
             if (el.on?.load) $el.setAttribute('markup-onload', el.on.load);
+            $el.dataset.el = JSON.stringify(el);
             for (const [key, value] of Object.entries(el)) $el.dataset[key] = value;
 
             if (prepare) prepare({ $el, data: el });
@@ -701,8 +712,11 @@ nativeTplToHTML = function (deepEl, $parent) {
         case 'string':
           const [tag, options, items] = el;
           const $el = document.createElement(tag);
-          for (const [key, value] of Object.entries(options)) $el.setAttribute(key, value);
+          // console.log({ el, options });
+          for (const [key, value] of Object.entries(options))
+            $el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
           $parent.appendChild($el);
+          if (options.text) $el.appendChild(document.createTextNode(options.text));
           if (items?.length) nativeTplToHTML(items, $el);
           break;
         case 'object':
@@ -879,7 +893,7 @@ $(document).ready(function () {
         }
         if (mutation.attributeName === 'markup-onload') {
           const funcName = mutation.target.getAttribute('markup-onload');
-          if (window[funcName]) window[funcName].call(mutation.target);
+          if (window[funcName]) window[funcName](mutation.target);
         }
       }
     }

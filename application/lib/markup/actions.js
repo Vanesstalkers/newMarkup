@@ -12,17 +12,9 @@
     const block = processForm.fields[code];
     const { _id: parentId } = processForm.data[block.parent.code];
 
-    const parentLink = block.links[block.name]?.[block.parent.name];
-    const insertData = parentLink ? { [parentLink]: { l: [parentId], c: 1 } } : {};
-    const newItem = await db.mongo.insertOne(block.col, insertData);
-    const itemLink = block.links[block.parent.name];
-    if (itemLink) {
-      const updateData = { $push: { [`${itemLink}.l`]: newItem._id }, $inc: { [`${itemLink}.c`]: 1 } };
-      await db.mongo.updateOne(block.parent.col, parentId, updateData);
-    }
-
-    const itemCode = ++processForm.codeCount;
-    processForm.data[itemCode] = insertData;
+    const newItem = await db.addComplex({ ...block, parent: { ...block.parent, _id: parentId } });
+    const itemCode = lib.markup.helpers.nextCode(processForm);
+    processForm.data[itemCode] = newItem;
     return await lib.markup.actions.showComplexItem({ itemCode, blockCode: code, form: processForm });
   },
   deleteComplex: async ({ form, code, user }) => {

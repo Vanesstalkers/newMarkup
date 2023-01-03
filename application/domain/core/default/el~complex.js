@@ -422,9 +422,6 @@
             white-space: nowrap;
             min-width: 100%;
         }
-        .complex-block.has-controls > .complex-controls.control-add:before {
-            content: attr(text);
-        }
         .complex-block.has-controls > .complex-controls > input[type=file], 
         .complex-block.has-controls > .complex-controls > .el > input[type=file] {
             opacity: 0;

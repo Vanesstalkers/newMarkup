@@ -14,9 +14,6 @@
               .*css* {
                 position: relative;
               }
-              .*css* > a:before {
-                content: attr(text);
-              }
               .*css* > input {
                 display: none;
               }
@@ -88,7 +85,7 @@
             i++;
             if (i < files.length) return uploadNext();
 
-            const el = Object.fromEntries(Object.entries($el.dataset));
+            const el = JSON.parse($el.dataset.el);
             el.value = value;
             const $parent = $el.closest('.complex-item');
             const { tpl, prepare } = window.el[el.elPath] || {};
@@ -97,9 +94,9 @@
             nativeTplToHTML([tpl(el)], $parent);
             const $newEl = $parent.querySelector(`.reloaded.el[code='${el.code}']`);
 
-            console.log({ $parent, $el, $newEl });
             $newEl.setAttribute('markup-code', el.code);
             if (el.on?.load) $newEl.setAttribute('markup-onload', el.on.load);
+            $newEl.dataset.el = JSON.stringify(el);
             for (const [key, value] of Object.entries(el)) $newEl.dataset[key] = value;
             if (prepare) prepare({ $el: $newEl, data: el });
             $newEl.classList.remove('reloaded');
@@ -116,10 +113,13 @@
       window.uploadFile = async (file, formData = {}) => {
         const uploader = application.metacom.createBlobUploader(file);
         const {
-          data: { uploadPath },
+          data: { uploadPath } = {},
+          result,
+          msg,
         } = await api.markup.upload({ ...formData, streamId: uploader.streamId, name: file.name });
+        if (result === 'error') throw new Error(msg);
         await uploader.upload();
-        return { uploadedFile: file, uploadPath };
+        return { uploadedFile: file, uploadPath, result, msg };
       };
     },
   },
@@ -151,12 +151,7 @@
             class:
               data.class +
               `css
-                .*css* {
                   position: relative;
-                }
-                .*css* > a:before {
-                  content: attr(text);
-                }
               `,
           },
           [

@@ -9,11 +9,11 @@ async ({ streamId, name, form, code }) => {
     const parentData = processForm.data[field.parentCode];
     const fileDir = `upload/${parent.col}/${parentData._id.toString()}/`;
     const fileName = `${Date.now()}_${name}`;
-    const uploadPath = `./application/static/${fileDir}`;
-    await node.fsp.mkdir(uploadPath, { recursive: true });
+    const pathPrefix = './application/static/';
+    await node.fsp.mkdir(pathPrefix + fileDir, { recursive: true });
 
     const readable = context.client.getStream(streamId);
-    const writable = node.fs.createWriteStream(uploadPath + fileName);
+    const writable = node.fs.createWriteStream(pathPrefix + fileDir + fileName);
     readable.pipe(writable);
     return { result: 'success', data: { uploadPath: fileDir + fileName } };
   } catch (err) {

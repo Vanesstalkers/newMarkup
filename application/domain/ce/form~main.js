@@ -1,6 +1,8 @@
 ({
   tpl: () => [
     A({
+      text: 'about',
+      href: '#' + JSON.stringify({ text: 'about', a: { b: { c: 3 } } }),
       class:
         'col-xs-8' +
         `css
@@ -8,6 +10,8 @@
         `,
     }),
     A({
+      text: 'contact',
+      href: '#' + JSON.stringify({ text: 'contact', a: { b: { c: 3, d: 4 } } }),
       class: `css
         .*css* {
           border-color: black;
@@ -50,8 +54,21 @@
             save: (a, b, c) => {
               // alert(1);
             },
-            load: (a, b, c) => {
-              // alert(2);
+            load: ($el) => {
+              //console.log('onLoad', $el);
+            },
+          },
+        }),
+        FIELD({
+          name: 'file',
+          label: 'Файл',
+          type: 'file',
+          on: {
+            save: (a, b, c) => {
+              // alert(1);
+            },
+            load: ($el) => {
+              console.log('onLoad', $el);
             },
           },
         }),
@@ -110,9 +127,6 @@
       font-size: 10px;
       color: red;
       text-overflow: ellipsis;
-    }
-    .el > label:before {
-      content: attr(text);
     }
   `,
 });

@@ -1,6 +1,6 @@
 ({
   get: ({ form, parent, handlers }, { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on }) => {
-    const complex = { code: ++form.codeCount, type, parent, items: {}, config, item, on };
+    const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
     complex.name = name;
@@ -20,7 +20,7 @@
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
-          const itemCode = ++form.codeCount;
+          const itemCode = lib.markup.helpers.nextCode(form);
           form.data[itemCode] = {};
           complex.items[itemCode] = {};
         } else {
@@ -29,7 +29,7 @@
       }
       if (findIds.length) {
         for (const id of findIds) {
-          const itemCode = ++form.codeCount;
+          const itemCode = lib.markup.helpers.nextCode(form);
           form.data[`${linecode}-${id}`] = itemCode;
           complex.items[itemCode] = {};
         }
