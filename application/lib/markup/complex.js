@@ -95,7 +95,9 @@
       const proxyData = { prepareCall: true, form, parent: complex, blockName };
       try {
         lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
       return form;
     }
   },

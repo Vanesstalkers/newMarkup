@@ -66,6 +66,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "htmlparser": "^1.7.7",
     "impress": "^3.0.0-alpha.4",
     "metasql": "^2.0.4",
     "metavm": "1.2.2",

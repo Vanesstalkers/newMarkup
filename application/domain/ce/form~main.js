@@ -1,4 +1,10 @@
 ({
+  config: {
+    menu: {
+      label: 'Компании',
+      icon: 'mdi mdi-office-building',
+    }
+  },
   tpl: () => [
     A({
       text: 'about',
@@ -24,14 +30,11 @@
         }
     `,
     }),
-    FUNC(function () {
-      console.log(1);
-    }),
     COMPLEX(
       {
         name: 'lvl1',
         config: { tag: 'table' },
-        item: { add: true, config: { tag: 'tr' } },
+        item: { add: true || {type: 'file'}, config: { tag: 'tr' } },
         id: async () => {
           return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f'), db.mongo.ObjectID('63aee515b11faaaba5c00306')];
         },
@@ -68,14 +71,14 @@
               // alert(1);
             },
             load: ($el) => {
-              console.log('onLoad', $el);
+              // console.log('onLoad', $el);
             },
           },
         }),
         FIELD({ name: 'list', label: 'Список', type: 'select2', lst: { action: 'ce~search' }, multiple: true }),
         FIELD({ name: 'list2', label: 'Список', type: 'select2', lst: 'ce~tutorial' }),
         FUNC(() => {
-          console.log(2);
+          // console.log(2);
         }),
         IF(true, () => [
           COMPLEX(
@@ -116,7 +119,7 @@
     ),
   ],
   func: () => {
-    console.log('from export');
+    // console.log('from export');
   },
   style: `
     .body {

@@ -1,5 +1,5 @@
 ({
-  get: ({ form, data = {}, parent, handlers }, path) => {
+  get: ({ form, data = {}, parent, handlers }, path, config) => {
     const tplFunc = form.markup[path].tpl;
     const items = [];
     handlers.tpl.push(async () => {
@@ -7,7 +7,7 @@
       if (typeof tplFunc === 'function') {
         const proxyData = { form, data, parent, handlers };
         try {
-          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data });
+          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)(config);
         } catch (err) {
           result = [['div', { class: 'inline-error', error: err.message }]];
         }
@@ -17,9 +17,9 @@
     return items;
   },
 
-  prepare: ({ form, parent, blockName }, path) => {
+  prepare: ({ form, parent, blockName }, path, config) => {
     const [block, name] = path.split('~');
-    const { tpl: tplFunc, func, style } = domain[block][`html~${name}`];
+    const { tpl: tplFunc, func, style } = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `html~${name}`);
     form.markup[path] = { tpl: tplFunc.toString() };
     form.markup[parent.linecode].usedHtml.push(path);
     if (style) form.styleList.push(style);
@@ -27,10 +27,9 @@
 
     if (typeof tplFunc === 'function') {
       try {
-        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, { prepareCall: true, form, parent, blockName })({
-          parent,
-          data: {},
-        });
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, { prepareCall: true, form, parent, blockName, data: {test: 1} })(
+          config,
+        );
       } catch (err) {}
     }
   },

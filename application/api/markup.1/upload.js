@@ -8,7 +8,7 @@ async ({ streamId, name, form, code }) => {
     const parent = processForm.fields[field.parentCode];
     const parentData = processForm.data[field.parentCode];
     const fileDir = `upload/${parent.col}/${parentData._id.toString()}/`;
-    const fileName = `${Date.now()}_${name}`;
+    const fileName = Date.now() + Math.random() + '.' + name.split('.').pop();
     const pathPrefix = './application/static/';
     await node.fsp.mkdir(pathPrefix + fileDir, { recursive: true });
 

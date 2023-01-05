@@ -339,7 +339,7 @@ $(function () {
       else if (result === 'success') {
         item.class = (item.class || '') + ' reloaded';
         const { tpl, prepare } = window.el[item.elPath] || {};
-        nativeTplToHTML(tpl({ ...item, parent: $block.dataset }), $block);
+        nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
         const $newItem = $block.querySelector(`.reloaded.complex-item[code='${item.code}']`);
         if (prepare) prepare({ $el: $newItem, data: item, parent: { data: $block.dataset, $el: $block } });
         nativeTplToHTML(item.content, $newItem);
@@ -666,12 +666,14 @@ nativeTplToHTML = function (deepEl, $parent) {
       if (el.type === 'subform') {
         (async () => {
           const form = el.name;
-          const getForm = await window.api.markup.getForm({ form, codeSfx: el.code });
-          if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
-          loadRes(`cache/${form}.func.js`, false, () => {
-            nativeTplToHTML([getForm.data], $parent);
-            loadRes(`cache/${form}.css`, false);
-          });
+          if (form) {
+            const getForm = await window.api.markup.getForm({ form, codeSfx: el.code });
+            if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
+            loadRes(`cache/${form}.func.js`, false, () => {
+              nativeTplToHTML([getForm.data], $parent);
+              loadRes(`cache/${form}.css`, false);
+            });
+          }
         })();
       } else if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
@@ -710,11 +712,17 @@ nativeTplToHTML = function (deepEl, $parent) {
       const el0 = el[0];
       switch (typeof el0) {
         case 'string':
-          const [tag, options, items] = el;
+          const [tag, options = {}, items] = el;
           const $el = document.createElement(tag);
-          // console.log({ el, options });
           for (const [key, value] of Object.entries(options))
             $el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
+          if (options.src) {
+            $el.onload = () => {
+              while (window.waitForLoadRes?.[options.src]?.length) {
+                window.waitForLoadRes[options.src].shift()();
+              }
+            };
+          }
           $parent.appendChild($el);
           if (options.text) $el.appendChild(document.createTextNode(options.text));
           if (items?.length) nativeTplToHTML(items, $el);

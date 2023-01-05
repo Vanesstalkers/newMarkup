@@ -62,23 +62,23 @@
                     add.type != 'file'
                       ? []
                       : [
-                          window.el['core/default/el~file|file'].tpl.bind(this)(
-                            _,
-                            d,
-                            { class: 'el control-el', addLabel: add.label, delete: false },
-                            tpl,
-                          ),
+                          window.el['core/default/el~file|file'].tpl({
+                            class: 'el control-el',
+                            addLabel: add.label,
+                            delete: false,
+                          }),
                         ],
 
                     add.type != 'search'
                       ? []
                       : [
-                          window.el['core/default/el~select2|select2'].tpl.bind(this)(
-                            _,
-                            d,
-                            { class: 'el', label: add.label, onSave: 'addWithSearch', code: data.code, id: false },
-                            tpl,
-                          ),
+                          window.el['core/default/el~select2|select2'].tpl({
+                            class: 'el',
+                            label: add.label,
+                            onSave: 'addWithSearch',
+                            code: data.code,
+                            id: false,
+                          }),
                         ],
                   ],
                 ],
@@ -381,16 +381,16 @@
 		});*/
     },
     style: `
-        .complex-block:before {
-          color: green;
-          content: attr(data-name);
-        }
-        .complex-block {
-            position: relative;
-            padding: 8px;
-            border: 1px solid green;
-            box-shadow: inset 0 0 4px 0px green;
-        }
+        // .complex-block:before {
+        //   color: green;
+        //   content: attr(data-name);
+        // }
+        // .complex-block {
+        //     position: relative;
+        //     padding: 8px;
+        //     border: 1px solid green;
+        //     box-shadow: inset 0 0 4px 0px green;
+        // }
         .complex-block.has-controls > .complex-controls {
             // position: absolute;
             // top: 0px;
@@ -602,12 +602,12 @@
       });
     },
     style: `
-      .complex-item, .complex-item.has-controls {
-          position: relative;
-          padding: 8px;
-          border: 1px solid blue;
-          box-shadow: 0 0 0px 2px blue;
-      }
+      // .complex-item, .complex-item.has-controls {
+      //     position: relative;
+      //     padding: 8px;
+      //     border: 1px solid blue;
+      //     box-shadow: 0 0 0px 2px blue;
+      // }
       .complex-item.has-controls > .item-controls {
           position: absolute;
           right: 6px;
@@ -626,14 +626,13 @@
           background-repeat: no-repeat;
           background-position: center;
           background-size: cover;
+          background-color: transparent;
       }
       .complex-item.has-controls > .item-controls > div.btn-delete {
-          background-color: white;
           background-image: url(/delete.png);
       }
       .complex-item.has-controls > .item-controls > div.btn-reload {
-        background-color: orange;
-        background-image: url(/delete.png);
+        background-image: url(/reload.png);
     }
 
       body.editMode .complex-block.has-controls .complex-item.has-controls > .item-controls {

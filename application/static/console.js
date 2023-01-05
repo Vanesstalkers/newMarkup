@@ -66,6 +66,16 @@ const upload = () => {
   };
 };
 
+const showForm = async ({ form, container, _id }) => {
+  const $container = container ? document.getElementById(container) : document.body;
+  const getForm = await window.api.markup.getForm({ form, _id });
+  if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
+  loadRes(`cache/${form}.func.js`, false, () => {
+    nativeTplToHTML([getForm.data], $container);
+    loadRes(`cache/${form}.css`, false);
+  });
+};
+
 class Application {
   constructor() {
     const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
@@ -99,15 +109,10 @@ window.addEventListener('load', async () => {
   document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
 
   await window.api.markup.getForm({ form });
-  const getForm = await window.api.markup.getForm({ form });
-  if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
-  loadRes(`cache/${form}.func.js`, false, () => {
-    nativeTplToHTML([getForm.data], document.body);
-    loadRes(`cache/${form}.css`, false);
-  });
+  await showForm({ form });
 });
 
 window.addEventListener('hashchange', async (event) => {
   const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
-  console.log({ routeQuery });
+  await showForm(routeQuery);
 });

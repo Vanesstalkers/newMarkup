@@ -4,6 +4,7 @@
       customType: 'html',
     },
     tpl: function (data) {
+      if (!data.value) data.value = {};
       return [
         'div',
         {
@@ -11,11 +12,11 @@
           class:
             data.class +
             `css
+              .*css* > input {
+                display: none!important;
+              }
               .*css* {
                 position: relative;
-              }
-              .*css* > input {
-                display: none;
               }
               .*css* > label {
                 display: flex;
@@ -33,7 +34,7 @@
                 height: 15px;
                 min-width: 15px;
                 padding: 0px;
-                background-color: white;
+                background-color: transparent;
                 background-repeat: no-repeat;
                 background-position: center;
                 background-size: cover;

@@ -1,6 +1,6 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, parent, blockName, handlers }) {
-    const appContext = { console, JSON, process, api, lib, db, bus, domain };
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, data, form, parent, blockName, handlers }) {
+    const appContext = { console, Object, JSON, process, api, lib, db, bus, domain, config };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
       '',
@@ -16,13 +16,25 @@
           new Proxy(
             {
               ...appContext,
+              data,
               parent,
               FORM: (data) => {
                 return { ...data, type: 'subform', code: lib.markup.helpers.nextCode(form) };
               },
               COMPLEX: (...args) =>
                 prepareCall
-                  ? lib.markup.complex.prepare({ form, parent, blockName }, ...args)
+                  ? (() => {
+                      const elPath = `core/default/el~complex|block`;
+                      form.elList.push(elPath);
+                      const [mainPath, elType] = elPath.split('|');
+                      const [corePath, themePath, filePath] = mainPath.split('/');
+                      const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
+                      const el = elType ? elFile?.[elType] : elFile;
+                      if (typeof el.tpl === 'function')
+                        lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { form })(...args);
+
+                      lib.markup.complex.prepare({ form, parent, blockName }, ...args);
+                    })()
                   : lib.markup.complex.get({ form, parent, handlers }, ...args),
               HTML: (...args) => {
                 if (prepareCall) {
@@ -31,7 +43,7 @@
                   return lib.markup.html.get({ form, parent, handlers }, ...args);
                 }
               },
-              FIELD: (data) => {
+              FIELD: function (data) {
                 if (typeof data != 'object') data = { name: data };
                 if (!data.keyvalue) data.keyvalue = data.name;
                 if (!data.type) data.type = 'input';
@@ -42,6 +54,14 @@
                   form.markup[parent.linecode].queryFields[data.name] = 1;
                   if (typeof data.lst === 'string') form.lstList.push(data.lst);
                   if (data.on) form.scriptList.push(...Object.values(data.on));
+
+                  const [mainPath, elType] = elPath.split('|');
+                  const [corePath, themePath, filePath] = mainPath.split('/');
+                  const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
+                  const el = elType ? elFile?.[elType] : elFile;
+
+                  if (typeof el.tpl === 'function')
+                    lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { form })(data);
                 } else {
                   const field = {
                     ...data,
@@ -73,6 +93,63 @@
                   throw value;
                 }
                 if (target[name]) return Reflect.set(target, name, value);
+              },
+            },
+          ),
+        ),
+      },
+    );
+    return f;
+  },
+  addProxifiedContextToElTplFunc(tplFunc, { form }) {
+    const appContext = { console, JSON, process, api, lib, db, bus, domain };
+    const stringifiedFunc = tplFunc.toString();
+
+    const { exports: f } = new npm.metavm.MetaScript(
+      '',
+      `(...args)=>{
+        try{ 
+          return ( ${stringifiedFunc})(...args) 
+        }catch(err){
+          proxifiedError = err;
+        }
+      }`,
+      {
+        context: npm.metavm.createContext(
+          new Proxy(
+            {
+              ...appContext,
+              window: {
+                el: new Proxy(
+                  {},
+                  {
+                    get: function (target, name) {
+                      // !!! если совсем правильно, то тут нужно делать рекурсивный вызов addProxifiedContextToElTplFunc
+                      form.elList.push(name);
+                      return { tpl: () => [] };
+                    },
+                  },
+                ),
+              },
+            },
+            {
+              set: function (target, name, value) {
+                if (name === 'proxifiedError') {
+                  console.log(value, `\nat TPL-script: ${stringifiedFunc}`);
+                  throw value;
+                }
+                if (target[name]) return Reflect.set(target, name, value);
+              },
+              get: function (target, name) {
+                if (target[name]) return Reflect.get(target, name);
+                form.funcList.push(`
+                  window["${name}"] = function (...args) {
+                    return ["${name}", args[0] || {} , Object.values(args).slice(1)]
+                  }
+                `);
+                return function (...args) {
+                  return [name, args[0] || {}, Object.values(args).slice(1)];
+                };
               },
             },
           ),
@@ -115,7 +192,7 @@
     }
     return str;
   },
-  prepareEl(elPath, { funcList, styleList, dependencyMap, elList = [] }) {
+  prepareEl(elPath, { funcList, styleList }) {
     const [mainPath, elType] = elPath.split('|');
     const [corePath, themePath, filePath] = mainPath.split('/');
     const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
@@ -129,23 +206,6 @@
       funcList.push(`window.el['${elPath}'] = {${stringifiedEl}}`);
       if (el.func) funcList.push(el.func);
       if (el.style) styleList.push(el.style);
-
-      if (el.config?.dependencies?.length) {
-        for (const name of el.config.dependencies) {
-          dependencyMap[[corePath, themePath, 'static', name].join('/')] = domain[corePath][themePath]['static'][name];
-        }
-      }
-
-      // !!! переделать на  dependencyList
-      const regexp = /(window\.el\[[',"])(.*)([',"]\]\.)/g;
-      // если элемент переиспользует часть функционала другого элемента, то его тоже нужно загрузить
-      for (const path of stringifiedEl.match(regexp) || []) {
-        const outElPath = path.replace(regexp, '$2');
-        if (!elList.includes(outElPath)) {
-          // без следующей проверки может возникнуть рекурсия (см. prepareCustom в el~token для core_game)
-          if (outElPath !== elPath) this.prepareEl(outElPath, { funcList, styleList, dependencyMap });
-        }
-      }
     }
   },
 });

@@ -5,7 +5,6 @@ async () => {
         expr: '2+3*sqrt(4)',
         precision: 3,
       });
-      console.log({ math: res });
     }, 1000);
   }
 };

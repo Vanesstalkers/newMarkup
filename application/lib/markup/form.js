@@ -1,5 +1,6 @@
 ({
   get: async ({ form, _id = true, codeSfx, user }) => {
+    if (_id !== true) _id = db.mongo.ObjectID(_id);
     const cacheFilePath = `application/static/cache/${form}.js`;
     // await node.fsp.access(cacheFilePath).catch(async () => {
     //   try {
@@ -12,7 +13,7 @@
     const { exports: formCache } = await npm.metavm.readScript(cacheFilePath, { type: npm.metavm.COMMON_CONTEXT });
     const processForm = {
       ...formCache,
-      ...{ data: { 0: { [`__${form}`]: { l: [true] } } }, codeCount: 0, codeSfx, fields: {} },
+      ...{ data: { 0: { [`__${form}`]: { l: [_id] } } }, codeCount: 0, codeSfx, fields: {} },
     };
 
     if (!user.forms) user.forms = {};
@@ -30,7 +31,6 @@
 
   prepare: async ({ form }) => {
     const [block, name] = form.split('~');
-    // const { tpl, id, func, style } = domain[block][`form~${name}`];
     const { tpl, id, func, style } = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `form~${name}`);
     const prepared = await lib.markup.complex.prepare(
       {
@@ -43,7 +43,6 @@
           lstList: [],
           elList: ['core/default/el~complex|block', 'core/default/el~complex|item'],
           scriptList: [],
-          dependencyMap: {},
         },
         parent: { linecode: '.', root: true },
       },
@@ -79,7 +78,6 @@
       lib.markup.helpers.prepareEl(elPath, {
         funcList: prepared.funcList,
         styleList: prepared.styleList,
-        dependencyMap: prepared.dependencyMap,
         elList: prepared.elList,
       });
     }
@@ -133,11 +131,6 @@
       }
 
       prepared.funcList.push(`window.f_${scriptCode} = ${stringifiedScript}`);
-    }
-
-    for (const { func, style } of Object.values(prepared.dependencyMap)) {
-      if (func) prepared.funcList.unshift(func);
-      if (style) prepared.styleList.unshift(style);
     }
 
     const formCachePath = `application/static/cache/${form}`;
