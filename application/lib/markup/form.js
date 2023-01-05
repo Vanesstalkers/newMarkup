@@ -73,6 +73,7 @@
     }
     cacheList.push(['markup', `{${tplEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
+    prepared.funcList.push('window.el = {}');
     prepared.elList = prepared.elList.filter((value, index, self) => self.indexOf(value) === index);
     for (const elPath of prepared.elList) {
       lib.markup.helpers.prepareEl(elPath, {
