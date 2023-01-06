@@ -11,10 +11,9 @@
       const fullName = 'demouser';
       const hash = await metarhia.metautil.hashPassword(password);
       const user = await api.auth.provider.registerUser({ login, hash, fullName, demo: true });
-      user.accountId = user._id;
 
       const token = api.auth.provider.generateToken();
-      const data = { ...user };
+      const data = { user };
       context.client.startSession(token, data);
       const { ip } = context.client;
       api.auth.provider.startSession(token, data, { ip });

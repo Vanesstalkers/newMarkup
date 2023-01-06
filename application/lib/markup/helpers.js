@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, data, form, parent, blockName, handlers }) {
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, data, parent, blockName, handlers }) {
     const appContext = { console, Object, JSON, process, api, lib, db, bus, domain, config };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(

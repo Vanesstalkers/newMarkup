@@ -1,5 +1,5 @@
 ({
-  get: ({ form, parent, handlers }, { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on }) => {
+  get: ({ form, parent, handlers }, { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {}) => {
     const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
@@ -17,6 +17,7 @@
 
     handlers.ids.push(async () => {
       const ids = await idFunc();
+      console.log({ids});
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
@@ -52,9 +53,9 @@
             elPath: 'core/default/el~complex|item',
           };
           form.fields[code] = item;
-          const proxyData = { form, parent: item, handlers };
+          const proxyData = { form, data: form.data[code], parent: item, handlers };
           try {
-            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
+            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
           } catch (err) {
             result = [['div', { class: 'inline-error', error: err.message }]];
           }
@@ -65,7 +66,7 @@
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: ({ form, parent, blockName }, { name, col, links, filter, config, id, on }, tplFunc) => {
+  prepare: ({ form, parent, blockName }, { name, col, links, filter, config, id, on } = {}, tplFunc) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
@@ -92,9 +93,9 @@
     }
 
     if (typeof tplFunc === 'function') {
-      const proxyData = { prepareCall: true, form, parent: complex, blockName };
+      const proxyData = { prepareCall: true, form, data: {}, parent: complex, blockName };
       try {
-        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
       } catch (err) {
         console.log(err);
       }

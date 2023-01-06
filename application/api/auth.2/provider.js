@@ -29,9 +29,9 @@
     db.mongo.deleteOne('session', record);
   },
 
-  async registerUser(login, password) {
+  async registerUser(data) {
     // return db.pg.insert('Account', { login, password });
-    const user = await db.mongo.insertOne('user', { login, password });
+    const user = await db.mongo.insertOne('user', data);
 
     await db.addComplex({
       name: 'user_role',

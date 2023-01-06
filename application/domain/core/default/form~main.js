@@ -1,4 +1,5 @@
 ({
+  id: async () => [],
   tpl: () => [
     // var userLST = SYS.get(LST, 'user~roles.list.obj.'+_.__.user.role) || {};
 
@@ -211,7 +212,7 @@
           { class: 'container-fluid' },
           DIV(
             { id: 'formContent' /* , class: 'role-'+_.__.user.role+' wrapper wrapper-content animated fadeIn' */ },
-            FORM({ /* name: 'ce~main' */ /* , SYS.get(_.__, 'user.query.subform.form') || _.__.global.baseForm */ }),
+            FORM({ name: 'ce~main' /* , SYS.get(_.__, 'user.query.subform.form') || _.__.global.baseForm */ }),
           ),
           DIV(
             { class: 'row page-titles mx-0' },
@@ -829,7 +830,6 @@
     let waitForLib = '/theme/global.min.js';
     if (!window.waitForLoadRes[waitForLib]) window.waitForLoadRes[waitForLib] = [];
     window.waitForLoadRes[waitForLib].push(() => {
-
       new quixSettings({
         typography: 'roboto',
         version: 'light',

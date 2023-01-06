@@ -1,6 +1,5 @@
 ({
   get: async ({ form, _id = true, codeSfx, user }) => {
-    if (_id !== true) _id = db.mongo.ObjectID(_id);
     const cacheFilePath = `application/static/cache/${form}.js`;
     // await node.fsp.access(cacheFilePath).catch(async () => {
     //   try {
@@ -11,18 +10,21 @@
     // });
 
     const { exports: formCache } = await npm.metavm.readScript(cacheFilePath, { type: npm.metavm.COMMON_CONTEXT });
-    const processForm = {
-      ...formCache,
-      ...{ data: { 0: { [`__${form}`]: { l: [_id] } } }, codeCount: 0, codeSfx, fields: {} },
-    };
-
+    const processForm = { ...formCache, ...{ data: {}, codeCount: 0, codeSfx, fields: {} } };
     if (!user.forms) user.forms = {};
     user.forms[form] = processForm;
 
+    const [block, name] = form.split('~');
+    let [formCol] = (block||'').split('/');
+    if (formCol === 'core') {
+      formCol = 'user';
+      _id = user._id;
+    }
+    if (_id !== true) _id = db.mongo.ObjectID(_id);
     const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
       { form: processForm, parent: { linecode: '.', code: 0 }, handlers },
-      { type: 'form', name: form, col: form },
+      { type: 'form', name: form, col: formCol, id: () => [_id] },
     );
     await execHandlers();
 

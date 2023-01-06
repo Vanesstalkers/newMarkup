@@ -27,9 +27,13 @@
 
     if (typeof tplFunc === 'function') {
       try {
-        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, { prepareCall: true, form, parent, blockName, data: {test: 1} })(
-          config,
-        );
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, {
+          prepareCall: true,
+          form,
+          data: {},
+          parent,
+          blockName,
+        })(config);
       } catch (err) {}
     }
   },

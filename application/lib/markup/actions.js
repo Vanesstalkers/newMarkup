@@ -54,12 +54,9 @@
         elPath: 'core/default/el~complex|item',
       };
       form.fields[item.code] = item;
-      const proxyData = { form, parent: item, handlers };
+      const proxyData = { form, data: form.data[itemCode], parent: item, handlers };
       try {
-        result = lib.markup.helpers.addProxifiedContextToTplFunc(
-          form.markup[block.linecode].tpl,
-          proxyData,
-        )({ data: form.data[itemCode] });
+        result = lib.markup.helpers.addProxifiedContextToTplFunc(form.markup[block.linecode].tpl, proxyData)();
       } catch (err) {
         result = [['div', { class: 'inline-error', error: err.message }]];
       }

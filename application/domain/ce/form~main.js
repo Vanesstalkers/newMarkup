@@ -5,6 +5,7 @@
       icon: 'mdi mdi-office-building',
     }
   },
+  id: async () => [],
   tpl: () => [
     A({
       text: 'about',
@@ -47,7 +48,7 @@
           },
         },
       },
-      ({}) => [
+      () => [
         HTML('ce~test'),
         FIELD({
           name: 'num',
@@ -87,7 +88,7 @@
               id: async () => [true],
               item: { add: { label: '+++' } },
             },
-            ({}) => [SPAN({ class: 'col-xs-8' }), IMG({})],
+            () => [SPAN({ class: 'col-xs-8' }), IMG({})],
           ),
           COMPLEX(
             {
@@ -95,7 +96,7 @@
               item: { add: { label: '+ lvl2-1' } },
               links: { 'lvl2-1': { lvl1: '__lvl1' }, lvl1: '__lvl2-1' },
             },
-            ({ data }) => [
+            () => [
               PPP({ _id: data._id }),
               SPAN({ class: 'col-xs-8' }),
               IMG({}),

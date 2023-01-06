@@ -67,41 +67,36 @@ const upload = () => {
 };
 
 window.waitForLoadRes = {};
-const loadRes = function (src, onetime, callback, config = {}) {
-  var type = 'js';
-  if (src.substr(-4) == '.css') type = 'css';
-  var res;
-  if (type == 'js') {
-    res = document.createElement('script');
-    res.setAttribute('src', src);
-    if (config.importance) res.setAttribute('importance', config.importance);
-  } else if (type == 'css') {
-    res = document.createElement('link');
-    res.rel = 'stylesheet';
-    res.type = 'text/css';
-    res.href = src;
-    res.media = 'all';
-    if (config.id) res.id = config.id;
-  }
-
-  res.onload = function (e) {
-    if (typeof callback == 'function') callback();
-  };
-  res.onerror = function (e) {
-    if (typeof callback == 'function') callback();
-  };
-
-  document.head.appendChild(res);
+const loadRes = function (src, config = {}) {
+  return new Promise((resolve, reject) => {
+    let type = 'js';
+    if (src.substr(-4) == '.css') type = 'css';
+    let res;
+    if (type == 'js') {
+      res = document.createElement('script');
+      res.setAttribute('src', src);
+      if (config.importance) res.setAttribute('importance', config.importance);
+    } else if (type == 'css') {
+      res = document.createElement('link');
+      res.rel = 'stylesheet';
+      res.type = 'text/css';
+      res.href = src;
+      res.media = 'all';
+      if (config.id) res.id = config.id;
+    }
+    res.onload = resolve;
+    res.onerror = reject;
+    document.head.appendChild(res);
+  });
 };
 
 const showForm = async ({ form, container, _id }) => {
   const $container = container ? document.getElementById(container) : document.body;
   const getForm = await window.api.markup.getForm({ form, _id });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
-  loadRes(`cache/${form}.func.js`, false, () => {
-    nativeTplToHTML([getForm.data], $container);
-    loadRes(`cache/${form}.css`, false);
-  });
+  await loadRes(`cache/${form}.func.js`);
+  nativeTplToHTML([getForm.data], $container);
+  await loadRes(`cache/${form}.css`);
 };
 
 window.nativeTplToHTML = function (deepEl, $parent) {
@@ -115,10 +110,9 @@ window.nativeTplToHTML = function (deepEl, $parent) {
           if (form) {
             const getForm = await window.api.markup.getForm({ form, codeSfx: el.code });
             if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
-            loadRes(`cache/${form}.func.js`, false, () => {
-              nativeTplToHTML([getForm.data], $parent);
-              loadRes(`cache/${form}.css`, false);
-            });
+            await loadRes(`cache/${form}.func.js`);
+            nativeTplToHTML([getForm.data], $parent);
+            await loadRes(`cache/${form}.css`);
           }
         })();
       } else if (el.type === 'complex' || el.type === 'form') {
@@ -188,19 +182,22 @@ class Application {
   }
 }
 
+window.addEventListener('hashchange', async (event) => {
+  const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
+  await showForm(routeQuery);
+});
+
 window.addEventListener('load', async () => {
   window.application = new Application();
   window.api = window.application.metacom.api;
   await application.metacom.load('auth', 'console', 'example', 'files', 'markup');
   const token = localStorage.getItem('xaoc.session.token');
-  let { form } = JSON.parse(decodeURI(location.hash.substring(1)) || '{}');
 
   let logged = false;
   // if (token) {
   const res = await api.auth.restore({ token });
   logged = res.status === 'logged';
   if (res.token) localStorage.setItem('xaoc.session.token', res.token);
-  if (!form) form = res.baseForm;
   // }
 
   // if (!logged) {
@@ -213,9 +210,12 @@ window.addEventListener('load', async () => {
   // }
   document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
 
-  console.log({ form });
+  const form = BASE_FORM;
   await window.api.markup.getForm({ form });
   await showForm({ form });
+  if (location.hash) {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  }
 
   new MutationObserver(function (mutationsList, observer) {
     console.log({ mutationsList });
@@ -238,11 +238,6 @@ window.addEventListener('load', async () => {
     subtree: true,
     attributeOldValue: true,
   });
-});
-
-window.addEventListener('hashchange', async (event) => {
-  const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
-  await showForm(routeQuery);
 });
 
 document.addEventListener('click', async (event) => {
