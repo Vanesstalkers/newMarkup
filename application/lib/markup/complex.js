@@ -1,5 +1,9 @@
 ({
-  get: ({ form, parent, handlers }, { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {}) => {
+  get: (
+    { user, form, parent, handlers },
+    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {},
+  ) => {
+
     const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
@@ -16,8 +20,7 @@
     const tplFunc = form.markup[linecode].tpl;
 
     handlers.ids.push(async () => {
-      const ids = await idFunc();
-      console.log({ids});
+      const ids = await idFunc({ user });
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
@@ -53,7 +56,7 @@
             elPath: 'core/default/el~complex|item',
           };
           form.fields[code] = item;
-          const proxyData = { form, data: form.data[code], parent: item, handlers };
+          const proxyData = { user, form, data: form.data[code], parent: item, handlers };
           try {
             result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
           } catch (err) {
@@ -66,7 +69,7 @@
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: ({ form, parent, blockName }, { name, col, links, filter, config, id, on } = {}, tplFunc) => {
+  prepare: ({ user, form, parent, blockName }, { name, col, links, filter, config, id, on = {} } = {}, tplFunc) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
@@ -77,9 +80,12 @@
     if (form.markup[linecode]) throw new Error(`linecode dublicates (${linecode})`);
     form.markup[linecode] = {
       parent: parent.root ? null : JSON.stringify(parent.linecode),
-      tpl: tplFunc.toString(),
       usedHtml: [],
       queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
+      tpl: tplFunc.toString(),
+      col: JSON.stringify(col),
+      id: id?.toString(),
+      on: Object.fromEntries(Object.entries(on).map(([key, func]) => [key, func.toString()])),
       links,
     };
     if (on) form.scriptList.push(...Object.values(on));
@@ -93,7 +99,7 @@
     }
 
     if (typeof tplFunc === 'function') {
-      const proxyData = { prepareCall: true, form, data: {}, parent: complex, blockName };
+      const proxyData = { prepareCall: true, user, form, data: {}, parent: complex, blockName };
       try {
         lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
       } catch (err) {

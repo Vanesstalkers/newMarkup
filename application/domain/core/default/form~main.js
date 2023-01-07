@@ -1,5 +1,6 @@
 ({
-  id: async () => [],
+  col: 'user',
+  id: ({ user }) => [user._id],
   tpl: () => [
     // var userLST = SYS.get(LST, 'user~roles.list.obj.'+_.__.user.role) || {};
 
@@ -8,7 +9,7 @@
     LINK({ href: '/theme/style.css', rel: 'stylesheet', type: 'text/css', media: 'all' }),
     SCRIPT({ src: '/theme/global.min.js' }),
     LINK({ href: '/vendor/select2/css/select2.min.css', rel: 'stylesheet', type: 'text/css', media: 'all' }),
-    SCRIPT({ src: '/vendor/select2/js/select2.full.min.js' }),
+    SCRIPT({ src: '/vendor/select2/js/select2.full.min.js', waitForResLoaded: '/theme/global.min.js' }),
 
     DIV(
       { id: 'main-wrapper', class: 'show' },
@@ -798,559 +799,533 @@
       ),
     ),
 
-    /*     DIV(
-      { id: 'wrapper' },
-      HTML('core/default~sidebar'),
-
-      DIV(
-        { id: 'page-wrapper', class: 'gray-bg' },
-        DIV({ class: 'row border-bottom' }, [
-          // _.html('__tpl~navbar', _, {}),
-        ]),
-
-        DIV(
-          { class: 'row wrapper border-bottom white-bg page-heading' },
-          DIV({ class: 'col-lg-10' }, H2({ text: '' }), OL({ class: 'breadcrumb' })),
-        ),
-
-        DIV(
-          { id: 'formContent' , class: 'role-'+_.__.user.role+' wrapper wrapper-content animated fadeIn' },
-          FORM({ name: 'ce~main' SYS.get(_.__, 'user.query.subform.form') || _.__.global.baseForm }),
-        ),
-
-        // _.html('__tpl~footer', _, {}),
-      ),
-    ), */
-
     // _.if(userLST.tutorial !== false, ()=>['div', {id: 'subFormTutorial'}, [
     //   _.form({name: 'tutorial~main', history: false }),
     // ]]),
   ],
-  func: () => {
-    let waitForLib = '/theme/global.min.js';
-    if (!window.waitForLoadRes[waitForLib]) window.waitForLoadRes[waitForLib] = [];
-    window.waitForLoadRes[waitForLib].push(() => {
-      new quixSettings({
-        typography: 'roboto',
-        version: 'light',
-        layout: 'vertical',
-        headerBg: 'color_1',
-        navheaderBg: 'color_1',
-        sidebarBg: 'color_1',
-        sidebarStyle: 'full',
-        sidebarPosition: 'fixed',
-        headerPosition: 'fixed',
-        containerLayout: 'wide',
-        direction: 'ltr',
-      });
+  on: {
+    itemLoad: () => {
+      window.runAfterResLoaded('/theme/global.min.js', () => {
+        new quixSettings({
+          typography: 'roboto',
+          version: 'light',
+          layout: 'vertical',
+          headerBg: 'color_1',
+          navheaderBg: 'color_1',
+          sidebarBg: 'color_1',
+          sidebarStyle: 'full',
+          sidebarPosition: 'fixed',
+          headerPosition: 'fixed',
+          containerLayout: 'wide',
+          direction: 'ltr',
+        });
 
-      $('#preloader').fadeOut(500);
-      $('#main-wrapper').addClass('show');
+        $('#preloader').fadeOut(500);
+        $('#main-wrapper').addClass('show');
 
-      // if($('body').attr('data-sidebar-position') === "fixed") {
-      //     $('.quixnav-scroll').slimscroll({
-      //         position: "right",
-      //         size: "5px",
-      //         height: "100%",
-      //         color: "transparent"
-      //     });
-      // }
+        // if($('body').attr('data-sidebar-position') === "fixed") {
+        //     $('.quixnav-scroll').slimscroll({
+        //         position: "right",
+        //         size: "5px",
+        //         height: "100%",
+        //         color: "transparent"
+        //     });
+        // }
 
-      $('#menu').metisMenu();
+        $('#menu').metisMenu();
 
-      // $(function() {
-      //     AOS.init({
-      //         duration: 1500,
-      //         easing: 'ease-in-out',
-      //     });
-      // });
+        // $(function() {
+        //     AOS.init({
+        //         duration: 1500,
+        //         easing: 'ease-in-out',
+        //     });
+        // });
 
-      $('#checkAll').change(function () {
-        $('td input:checkbox').prop('checked', $(this).prop('checked'));
-      });
+        $('#checkAll').change(function () {
+          $('td input:checkbox').prop('checked', $(this).prop('checked'));
+        });
 
-      // $('.sidebar-right-inner').slimscroll({
-      //     // position: "left",
-      //     size: "5px",
-      //     height: "100%",
-      //     color: "#c6c8c9"
-      // });
+        // $('.sidebar-right-inner').slimscroll({
+        //     // position: "left",
+        //     size: "5px",
+        //     height: "100%",
+        //     color: "#c6c8c9"
+        // });
 
-      $('.nav-control').on('click', function () {
-        $('#main-wrapper').toggleClass('menu-toggle');
+        $('.nav-control').on('click', function () {
+          $('#main-wrapper').toggleClass('menu-toggle');
 
-        $('.hamburger').toggleClass('is-active');
-      });
+          $('.hamburger').toggleClass('is-active');
+        });
 
-      //to keep the current page active
-      $(function () {
-        for (
-          var nk = window.location,
-            o = $('ul#menu a')
-              .filter(function () {
-                return this.href == nk;
-              })
-              .addClass('mm-active')
-              .parent()
-              .addClass('mm-active');
-          ;
+        //to keep the current page active
+        $(function () {
+          for (
+            var nk = window.location,
+              o = $('ul#menu a')
+                .filter(function () {
+                  return this.href == nk;
+                })
+                .addClass('mm-active')
+                .parent()
+                .addClass('mm-active');
+            ;
 
-        ) {
-          // console.log(o)
-          if (!o.is('li')) break;
-          o = o.parent().addClass('mm-show').parent().addClass('mm-active');
-        }
+          ) {
+            // console.log(o)
+            if (!o.is('li')) break;
+            o = o.parent().addClass('mm-show').parent().addClass('mm-active');
+          }
 
-        $('ul#menu>li').on('click', function () {
-          const sidebarStyle = $('body').attr('data-sidebar-style');
-          if (sidebarStyle === 'mini') {
-            console.log($(this).find('ul'));
-            $(this).find('ul').stop();
+          $('ul#menu>li').on('click', function () {
+            const sidebarStyle = $('body').attr('data-sidebar-style');
+            if (sidebarStyle === 'mini') {
+              console.log($(this).find('ul'));
+              $(this).find('ul').stop();
+            }
+          });
+        });
+
+        $(function () {
+          // var win_w = window.outerWidth;
+          var win_h = window.outerHeight;
+          var win_h = window.outerHeight;
+          if (win_h > 0 ? win_h : screen.height) {
+            $('.content-body').css('min-height', win_h + 60 + 'px');
+          }
+        });
+
+        $('a[data-action="collapse"]').on('click', function (i) {
+          i.preventDefault(),
+            $(this).closest('.card').find('[data-action="collapse"] i').toggleClass('mdi-arrow-down mdi-arrow-up'),
+            $(this).closest('.card').children('.card-body').collapse('toggle');
+        });
+
+        $('a[data-action="expand"]').on('click', function (i) {
+          i.preventDefault(),
+            $(this)
+              .closest('.card')
+              .find('[data-action="expand"] i')
+              .toggleClass('icon-size-actual icon-size-fullscreen'),
+            $(this).closest('.card').toggleClass('card-fullscreen');
+        });
+
+        $('[data-action="close"]').on('click', function () {
+          $(this).closest('.card').removeClass().slideUp('fast');
+        });
+
+        $('[data-action="reload"]').on('click', function () {
+          var e = $(this);
+          e.parents('.card').addClass('card-load'),
+            e.parents('.card').append('<div class="card-loader"><i class=" ti-reload rotate-refresh"></div>'),
+            setTimeout(function () {
+              e.parents('.card').children('.card-loader').remove(), e.parents('.card').removeClass('card-load');
+            }, 2000);
+        });
+
+        const headerHight = $('.header').innerHeight();
+
+        $(window).scroll(function () {
+          if (
+            $('body').attr('data-layout') === 'horizontal' &&
+            $('body').attr('data-header-position') === 'static' &&
+            $('body').attr('data-sidebar-position') === 'fixed'
+          )
+            $(this.window).scrollTop() >= headerHight
+              ? $('.quixnav').addClass('fixed')
+              : $('.quixnav').removeClass('fixed');
+        });
+
+        // $('.sidebar-right-trigger').on('click', function() {
+        //     $('.sidebar-right').toggleClass('show');
+        // });
+
+        const qs = new PerfectScrollbar('.quixnav-scroll');
+        // const sr = new PerfectScrollbar('.sidebar-right-inner');
+
+        //plugin bootstrap minus and plus
+        $('.btn-number').on('click', function (e) {
+          e.preventDefault();
+
+          fieldName = $(this).attr('data-field');
+          type = $(this).attr('data-type');
+          var input = $("input[name='" + fieldName + "']");
+          var currentVal = parseInt(input.val());
+          if (!isNaN(currentVal)) {
+            if (type == 'minus') input.val(currentVal - 1);
+            else if (type == 'plus') input.val(currentVal + 1);
+          } else {
+            input.val(0);
           }
         });
       });
+      window.runAfterResLoaded('/vendor/select2/js/select2.full.min.js', () => {
+        // single select box
+        $('#single-select').select2();
 
-      $(function () {
-        // var win_w = window.outerWidth;
-        var win_h = window.outerHeight;
-        var win_h = window.outerHeight;
-        if (win_h > 0 ? win_h : screen.height) {
-          $('.content-body').css('min-height', win_h + 60 + 'px');
-        }
-      });
+        // multi select box
+        $('.multi-select').select2();
 
-      $('a[data-action="collapse"]').on('click', function (i) {
-        i.preventDefault(),
-          $(this).closest('.card').find('[data-action="collapse"] i').toggleClass('mdi-arrow-down mdi-arrow-up'),
-          $(this).closest('.card').children('.card-body').collapse('toggle');
-      });
+        // dropdown option groups
+        $('.dropdown-groups').select2();
 
-      $('a[data-action="expand"]').on('click', function (i) {
-        i.preventDefault(),
-          $(this)
-            .closest('.card')
-            .find('[data-action="expand"] i')
-            .toggleClass('icon-size-actual icon-size-fullscreen'),
-          $(this).closest('.card').toggleClass('card-fullscreen');
-      });
+        //disabling options
+        $('.disabling-options').select2();
 
-      $('[data-action="close"]').on('click', function () {
-        $(this).closest('.card').removeClass().slideUp('fast');
-      });
+        //disabling a select2 control
+        $('.js-example-disabled').select2();
+        $('.js-example-disabled-multi').select2();
+        $('#js-programmatic-enable').on('click', function () {
+          $('.js-example-disabled').prop('disabled', false);
+          $('.js-example-disabled-multi').prop('disabled', false);
+        });
+        $('#js-programmatic-disable').on('click', function () {
+          $('.js-example-disabled').prop('disabled', true);
+          $('.js-example-disabled-multi').prop('disabled', true);
+        });
 
-      $('[data-action="reload"]').on('click', function () {
-        var e = $(this);
-        e.parents('.card').addClass('card-load'),
-          e.parents('.card').append('<div class="card-loader"><i class=" ti-reload rotate-refresh"></div>'),
-          setTimeout(function () {
-            e.parents('.card').children('.card-loader').remove(), e.parents('.card').removeClass('card-load');
-          }, 2000);
-      });
+        // select2 with labels
+        $('.select2-with-label-single').select2();
+        $('.select2-with-label-multiple').select2();
 
-      const headerHight = $('.header').innerHeight();
+        //select2 container width
+        $('.select2-width-50').select2();
+        $('.select2-width-75').select2();
 
-      $(window).scroll(function () {
-        if (
-          $('body').attr('data-layout') === 'horizontal' &&
-          $('body').attr('data-header-position') === 'static' &&
-          $('body').attr('data-sidebar-position') === 'fixed'
-        )
-          $(this.window).scrollTop() >= headerHight
-            ? $('.quixnav').addClass('fixed')
-            : $('.quixnav').removeClass('fixed');
-      });
+        //select2 themes
+        $('.js-example-theme-single').select2({
+          theme: 'classic',
+        });
+        $('.js-example-theme-multiple').select2({
+          theme: 'classic',
+        });
 
-      // $('.sidebar-right-trigger').on('click', function() {
-      //     $('.sidebar-right').toggleClass('show');
-      // });
+        //ajax remote data
+        $('.js-data-example-ajax').select2({
+          width: '100%',
+          ajax: {
+            url: 'https://api.github.com/search/repositories',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+              return {
+                q: params.term, // search term
+                page: params.page,
+              };
+            },
+            processResults: function (data, params) {
+              // parse the results into the format expected by Select2
+              // since we are using custom formatting functions we do not need to
+              // alter the remote JSON data, except to indicate that infinite
+              // scrolling can be used
+              params.page = params.page || 1;
 
-      const qs = new PerfectScrollbar('.quixnav-scroll');
-      // const sr = new PerfectScrollbar('.sidebar-right-inner');
-
-      //plugin bootstrap minus and plus
-      $('.btn-number').on('click', function (e) {
-        e.preventDefault();
-
-        fieldName = $(this).attr('data-field');
-        type = $(this).attr('data-type');
-        var input = $("input[name='" + fieldName + "']");
-        var currentVal = parseInt(input.val());
-        if (!isNaN(currentVal)) {
-          if (type == 'minus') input.val(currentVal - 1);
-          else if (type == 'plus') input.val(currentVal + 1);
-        } else {
-          input.val(0);
-        }
-      });
-    });
-
-    waitForLib = '/vendor/select2/js/select2.full.min.js';
-    if (!window.waitForLoadRes[waitForLib]) window.waitForLoadRes[waitForLib] = [];
-    window.waitForLoadRes[waitForLib].push(() => {
-      // single select box
-      $('#single-select').select2();
-
-      // multi select box
-      $('.multi-select').select2();
-
-      // dropdown option groups
-      $('.dropdown-groups').select2();
-
-      //disabling options
-      $('.disabling-options').select2();
-
-      //disabling a select2 control
-      $('.js-example-disabled').select2();
-      $('.js-example-disabled-multi').select2();
-      $('#js-programmatic-enable').on('click', function () {
-        $('.js-example-disabled').prop('disabled', false);
-        $('.js-example-disabled-multi').prop('disabled', false);
-      });
-      $('#js-programmatic-disable').on('click', function () {
-        $('.js-example-disabled').prop('disabled', true);
-        $('.js-example-disabled-multi').prop('disabled', true);
-      });
-
-      // select2 with labels
-      $('.select2-with-label-single').select2();
-      $('.select2-with-label-multiple').select2();
-
-      //select2 container width
-      $('.select2-width-50').select2();
-      $('.select2-width-75').select2();
-
-      //select2 themes
-      $('.js-example-theme-single').select2({
-        theme: 'classic',
-      });
-      $('.js-example-theme-multiple').select2({
-        theme: 'classic',
-      });
-
-      //ajax remote data
-      $('.js-data-example-ajax').select2({
-        width: '100%',
-        ajax: {
-          url: 'https://api.github.com/search/repositories',
-          dataType: 'json',
-          delay: 250,
-          data: function (params) {
-            return {
-              q: params.term, // search term
-              page: params.page,
-            };
+              return {
+                results: data.items,
+                pagination: {
+                  more: params.page * 30 < data.total_count,
+                },
+              };
+            },
+            cache: true,
           },
-          processResults: function (data, params) {
-            // parse the results into the format expected by Select2
-            // since we are using custom formatting functions we do not need to
-            // alter the remote JSON data, except to indicate that infinite
-            // scrolling can be used
-            params.page = params.page || 1;
+          placeholder: 'Search for a repository',
+          escapeMarkup: function (markup) {
+            return markup;
+          }, // let our custom formatter work
+          minimumInputLength: 1,
+          templateResult: formatRepo,
+          templateSelection: formatRepoSelection,
+        });
 
-            return {
-              results: data.items,
-              pagination: {
-                more: params.page * 30 < data.total_count,
-              },
-            };
-          },
-          cache: true,
-        },
-        placeholder: 'Search for a repository',
-        escapeMarkup: function (markup) {
+        function formatRepo(repo) {
+          if (repo.loading) {
+            return repo.text;
+          }
+
+          var markup =
+            "<div class='select2-result-repository clearfix'>" +
+            "<div class='select2-result-repository__avatar'><img src='" +
+            repo.owner.avatar_url +
+            "' /></div>" +
+            "<div class='select2-result-repository__meta'>" +
+            "<div class='select2-result-repository__title'>" +
+            repo.full_name +
+            '</div>';
+
+          if (repo.description) {
+            markup += "<div class='select2-result-repository__description'>" + repo.description + '</div>';
+          }
+
+          markup +=
+            "<div class='select2-result-repository__statistics'>" +
+            "<div class='select2-result-repository__forks'><i class='fa fa-flash'></i> " +
+            repo.forks_count +
+            ' Forks</div>' +
+            "<div class='select2-result-repository__stargazers'><i class='fa fa-star'></i> " +
+            repo.stargazers_count +
+            ' Stars</div>' +
+            "<div class='select2-result-repository__watchers'><i class='fa fa-eye'></i> " +
+            repo.watchers_count +
+            ' Watchers</div>' +
+            '</div>' +
+            '</div></div>';
+
           return markup;
-        }, // let our custom formatter work
-        minimumInputLength: 1,
-        templateResult: formatRepo,
-        templateSelection: formatRepoSelection,
-      });
-
-      function formatRepo(repo) {
-        if (repo.loading) {
-          return repo.text;
         }
 
-        var markup =
-          "<div class='select2-result-repository clearfix'>" +
-          "<div class='select2-result-repository__avatar'><img src='" +
-          repo.owner.avatar_url +
-          "' /></div>" +
-          "<div class='select2-result-repository__meta'>" +
-          "<div class='select2-result-repository__title'>" +
-          repo.full_name +
-          '</div>';
-
-        if (repo.description) {
-          markup += "<div class='select2-result-repository__description'>" + repo.description + '</div>';
+        function formatRepoSelection(repo) {
+          return repo.full_name || repo.text;
         }
 
-        markup +=
-          "<div class='select2-result-repository__statistics'>" +
-          "<div class='select2-result-repository__forks'><i class='fa fa-flash'></i> " +
-          repo.forks_count +
-          ' Forks</div>' +
-          "<div class='select2-result-repository__stargazers'><i class='fa fa-star'></i> " +
-          repo.stargazers_count +
-          ' Stars</div>' +
-          "<div class='select2-result-repository__watchers'><i class='fa fa-eye'></i> " +
-          repo.watchers_count +
-          ' Watchers</div>' +
-          '</div>' +
-          '</div></div>';
+        // loading array data
+        var data = [
+          {
+            id: 0,
+            text: 'enhancement',
+          },
+          {
+            id: 1,
+            text: 'bug',
+          },
+          {
+            id: 2,
+            text: 'duplicate',
+          },
+          {
+            id: 3,
+            text: 'invalid',
+          },
+          {
+            id: 4,
+            text: 'wontfix',
+          },
+        ];
+        $('.js-example-data-array').select2({
+          data: data,
+        });
 
-        return markup;
-      }
+        //automatic selection
+        $('#automatic-selection').select2({
+          selectOnClose: true,
+        });
 
-      function formatRepoSelection(repo) {
-        return repo.full_name || repo.text;
-      }
+        //remain open after selection
+        $('#remain-open').select2({
+          closeOnSelect: false,
+        });
 
-      // loading array data
-      var data = [
-        {
-          id: 0,
-          text: 'enhancement',
-        },
-        {
-          id: 1,
-          text: 'bug',
-        },
-        {
-          id: 2,
-          text: 'duplicate',
-        },
-        {
-          id: 3,
-          text: 'invalid',
-        },
-        {
-          id: 4,
-          text: 'wontfix',
-        },
-      ];
-      $('.js-example-data-array').select2({
-        data: data,
-      });
+        //dropdown-placement
+        $('#dropdown-placement').select2({
+          dropdownParent: $('#select2-modal'),
+        });
 
-      //automatic selection
-      $('#automatic-selection').select2({
-        selectOnClose: true,
-      });
+        // limit the number of selection
+        $('#limit-selection').select2({
+          maximumSelectionLength: 2,
+        });
 
-      //remain open after selection
-      $('#remain-open').select2({
-        closeOnSelect: false,
-      });
+        // dynamic option
+        $('#dynamic-option-creation').select2({
+          tags: true,
+        });
 
-      //dropdown-placement
-      $('#dropdown-placement').select2({
-        dropdownParent: $('#select2-modal'),
-      });
+        // tagging with multi value select box
+        $('#multi-value-select').select2({
+          tags: true,
+        });
 
-      // limit the number of selection
-      $('#limit-selection').select2({
-        maximumSelectionLength: 2,
-      });
+        // single-select-placeholder
+        $('.single-select-placeholder').select2({
+          placeholder: 'Select a state',
+          allowClear: true,
+        });
 
-      // dynamic option
-      $('#dynamic-option-creation').select2({
-        tags: true,
-      });
+        // multi select placeholder
+        $('.multi-select-placeholder').select2({
+          placeholder: 'Select a state',
+        });
 
-      // tagging with multi value select box
-      $('#multi-value-select').select2({
-        tags: true,
-      });
+        //default selection placeholder
+        $('.default-placeholder').select2({
+          placeholder: {
+            id: '-1', // the value of the option
+            text: 'Select an option',
+          },
+        });
 
-      // single-select-placeholder
-      $('.single-select-placeholder').select2({
-        placeholder: 'Select a state',
-        allowClear: true,
-      });
-
-      // multi select placeholder
-      $('.multi-select-placeholder').select2({
-        placeholder: 'Select a state',
-      });
-
-      //default selection placeholder
-      $('.default-placeholder').select2({
-        placeholder: {
-          id: '-1', // the value of the option
-          text: 'Select an option',
-        },
-      });
-
-      // customizing how results are matched
-      function matchCustom(params, data) {
-        // If there are no search terms, return all of the data
-        if ($.trim(params.term) === '') {
-          return data;
-        }
-
-        // Do not display the item if there is no 'text' property
-        if (typeof data.text === 'undefined') {
-          return null;
-        }
-
-        // `params.term` should be the term that is used for searching
-        // `data.text` is the text that is displayed for the data object
-        if (data.text.indexOf(params.term) > -1) {
-          var modifiedData = $.extend({}, data, true);
-          modifiedData.text += ' (matched)';
-
-          // You can return modified objects from here
-          // This includes matching the `children` how you want in nested data sets
-          return modifiedData;
-        }
-
-        // Return `null` if the term should not be displayed
-        return null;
-      }
-      $('.customize-result').select2({
-        matcher: matchCustom,
-      });
-
-      // matching grouped options
-
-      function matchStart(params, data) {
-        // If there are no search terms, return all of the data
-        if ($.trim(params.term) === '') {
-          return data;
-        }
-
-        // Skip if there is no 'children' property
-        if (typeof data.children === 'undefined') {
-          return null;
-        }
-
-        // `data.children` contains the actual options that we are matching against
-        var filteredChildren = [];
-        $.each(data.children, function (idx, child) {
-          if (child.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
-            filteredChildren.push(child);
+        // customizing how results are matched
+        function matchCustom(params, data) {
+          // If there are no search terms, return all of the data
+          if ($.trim(params.term) === '') {
+            return data;
           }
+
+          // Do not display the item if there is no 'text' property
+          if (typeof data.text === 'undefined') {
+            return null;
+          }
+
+          // `params.term` should be the term that is used for searching
+          // `data.text` is the text that is displayed for the data object
+          if (data.text.indexOf(params.term) > -1) {
+            var modifiedData = $.extend({}, data, true);
+            modifiedData.text += ' (matched)';
+
+            // You can return modified objects from here
+            // This includes matching the `children` how you want in nested data sets
+            return modifiedData;
+          }
+
+          // Return `null` if the term should not be displayed
+          return null;
+        }
+        $('.customize-result').select2({
+          matcher: matchCustom,
         });
 
-        // If we matched any of the timezone group's children, then set the matched children on the group
-        // and return the group object
-        if (filteredChildren.length) {
-          var modifiedData = $.extend({}, data, true);
-          modifiedData.children = filteredChildren;
+        // matching grouped options
 
-          // You can return modified objects from here
-          // This includes matching the `children` how you want in nested data sets
-          return modifiedData;
+        function matchStart(params, data) {
+          // If there are no search terms, return all of the data
+          if ($.trim(params.term) === '') {
+            return data;
+          }
+
+          // Skip if there is no 'children' property
+          if (typeof data.children === 'undefined') {
+            return null;
+          }
+
+          // `data.children` contains the actual options that we are matching against
+          var filteredChildren = [];
+          $.each(data.children, function (idx, child) {
+            if (child.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) {
+              filteredChildren.push(child);
+            }
+          });
+
+          // If we matched any of the timezone group's children, then set the matched children on the group
+          // and return the group object
+          if (filteredChildren.length) {
+            var modifiedData = $.extend({}, data, true);
+            modifiedData.children = filteredChildren;
+
+            // You can return modified objects from here
+            // This includes matching the `children` how you want in nested data sets
+            return modifiedData;
+          }
+
+          // Return `null` if the term should not be displayed
+          return null;
+        }
+        $('.match-grouped-options').select2({
+          matcher: matchStart,
+        });
+
+        //minimum search term length
+        $('.minimum-search-length').select2({
+          minimumInputLength: 3, // only start searching when the user has input 3 or more characters
+        });
+
+        //maximum search term length
+        $('.maximum-search-length').select2({
+          maximumInputLength: 20, // only allow terms up to 20 characters long
+        });
+
+        // programmatically add new option
+        var data = {
+          id: 1,
+          text: 'New Item',
+        };
+        var newOption = new Option(data.text, data.id, false, false);
+        $('.add-new-options').append(newOption).trigger('change').select2();
+
+        // create if not exists
+
+        // Set the value, creating a new option if necessary
+        if ($('.create-if-not-exists').find("option[value='" + data.id + "']").length) {
+          $('.create-if-not-exists').val(data.id).trigger('change');
+        } else {
+          // Create a DOM Option and pre-select by default
+          var newOption = new Option(data.text, data.id, true, true);
+          // Append it to the select
+          $('.create-if-not-exists').append(newOption).trigger('change').select2();
         }
 
-        // Return `null` if the term should not be displayed
-        return null;
-      }
-      $('.match-grouped-options').select2({
-        matcher: matchStart,
-      });
+        // using jquery selector
 
-      //minimum search term length
-      $('.minimum-search-length').select2({
-        minimumInputLength: 3, // only start searching when the user has input 3 or more characters
-      });
+        $('.jquery-selector').select2();
+        $('.jquery-selector').on('change', function () {
+          var selectData = $(this).find(':selected');
+          var value = selectData.val();
+          alert('you select ' + value);
+        });
 
-      //maximum search term length
-      $('.maximum-search-length').select2({
-        maximumInputLength: 20, // only allow terms up to 20 characters long
-      });
+        // select2 rtl support
+        $('.rtl-select2').select2({
+          dir: 'rtl',
+        });
 
-      // programmatically add new option
-      var data = {
-        id: 1,
-        text: 'New Item',
-      };
-      var newOption = new Option(data.text, data.id, false, false);
-      $('.add-new-options').append(newOption).trigger('change').select2();
+        // destroy selector
+        $('.destroy-selector').select2();
 
-      // create if not exists
+        $('#destroy-selector-trigger').click(function () {
+          $('.destroy-selector').select2('destroy');
+        });
 
-      // Set the value, creating a new option if necessary
-      if ($('.create-if-not-exists').find("option[value='" + data.id + "']").length) {
-        $('.create-if-not-exists').val(data.id).trigger('change');
-      } else {
-        // Create a DOM Option and pre-select by default
-        var newOption = new Option(data.text, data.id, true, true);
-        // Append it to the select
-        $('.create-if-not-exists').append(newOption).trigger('change').select2();
-      }
+        // opening options
+        $('.opening-dropdown').select2();
+        $('#dropdown-trigger-open').click(function () {
+          $('.opening-dropdown').select2('open');
+        });
 
-      // using jquery selector
+        // open or close dropdown
+        $('.open-close-dropdown').select2();
+        $('#opening-dropdown-trigger').click(function () {
+          $('.open-close-dropdown').select2('open');
+        });
+        $('#closing-dropdown-trigger').click(function () {
+          $('.open-close-dropdown').select2('close');
+        });
 
-      $('.jquery-selector').select2();
-      $('.jquery-selector').on('change', function () {
-        var selectData = $(this).find(':selected');
-        var value = selectData.val();
-        alert('you select ' + value);
-      });
+        // select2 methods
+        var $singleUnbind = $('.single-event-unbind').select2();
 
-      // select2 rtl support
-      $('.rtl-select2').select2({
-        dir: 'rtl',
-      });
+        $('.js-programmatic-set-val').on('click', function () {
+          $singleUnbind.val('CA').trigger('change');
+        });
 
-      // destroy selector
-      $('.destroy-selector').select2();
+        $('.js-programmatic-open').on('click', function () {
+          $singleUnbind.select2('open');
+        });
 
-      $('#destroy-selector-trigger').click(function () {
-        $('.destroy-selector').select2('destroy');
-      });
+        $('.js-programmatic-close').on('click', function () {
+          $singleUnbind.select2('close');
+        });
 
-      // opening options
-      $('.opening-dropdown').select2();
-      $('#dropdown-trigger-open').click(function () {
-        $('.opening-dropdown').select2('open');
-      });
+        $('.js-programmatic-init').on('click', function () {
+          $singleUnbind.select2({
+            width: '400px',
+          });
+        });
 
-      // open or close dropdown
-      $('.open-close-dropdown').select2();
-      $('#opening-dropdown-trigger').click(function () {
-        $('.open-close-dropdown').select2('open');
-      });
-      $('#closing-dropdown-trigger').click(function () {
-        $('.open-close-dropdown').select2('close');
-      });
+        $('.js-programmatic-destroy').on('click', function () {
+          $singleUnbind.select2('destroy');
+        });
 
-      // select2 methods
-      var $singleUnbind = $('.single-event-unbind').select2();
+        var $unbindMulti = $('.js-example-programmatic-multi').select2();
+        $('.js-programmatic-multi-set-val').on('click', function () {
+          $unbindMulti.val(['CA', 'HA']).trigger('change');
+        });
 
-      $('.js-programmatic-set-val').on('click', function () {
-        $singleUnbind.val('CA').trigger('change');
-      });
-
-      $('.js-programmatic-open').on('click', function () {
-        $singleUnbind.select2('open');
-      });
-
-      $('.js-programmatic-close').on('click', function () {
-        $singleUnbind.select2('close');
-      });
-
-      $('.js-programmatic-init').on('click', function () {
-        $singleUnbind.select2({
-          width: '400px',
+        $('.js-programmatic-multi-clear').on('click', function () {
+          $unbindMulti.val(null).trigger('change');
         });
       });
-
-      $('.js-programmatic-destroy').on('click', function () {
-        $singleUnbind.select2('destroy');
-      });
-
-      var $unbindMulti = $('.js-example-programmatic-multi').select2();
-      $('.js-programmatic-multi-set-val').on('click', function () {
-        $unbindMulti.val(['CA', 'HA']).trigger('change');
-      });
-
-      $('.js-programmatic-multi-clear').on('click', function () {
-        $unbindMulti.val(null).trigger('change');
-      });
-    });
+    },
   },
+  func: () => {},
   style: `
   `,
 });

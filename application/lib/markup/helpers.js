@@ -1,5 +1,5 @@
 ({
-  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, form, data, parent, blockName, handlers }) {
+  addProxifiedContextToTplFunc(tplFunc, { prepareCall = false, user, form, data, parent, blockName, handlers }) {
     const appContext = { console, Object, JSON, process, api, lib, db, bus, domain, config };
     const stringifiedFunc = tplFunc.toString();
     const { exports: f } = new npm.metavm.MetaScript(
@@ -16,6 +16,7 @@
           new Proxy(
             {
               ...appContext,
+              user,
               data,
               parent,
               FORM: (data) => {
@@ -31,16 +32,16 @@
                       const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
                       const el = elType ? elFile?.[elType] : elFile;
                       if (typeof el.tpl === 'function')
-                        lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { form })(...args);
+                        lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { user, form })(...args);
 
-                      lib.markup.complex.prepare({ form, parent, blockName }, ...args);
+                      lib.markup.complex.prepare({ user, form, parent, blockName }, ...args);
                     })()
-                  : lib.markup.complex.get({ form, parent, handlers }, ...args),
+                  : lib.markup.complex.get({ user, form, parent, handlers }, ...args),
               HTML: (...args) => {
                 if (prepareCall) {
-                  lib.markup.html.prepare({ form, parent, blockName }, ...args);
+                  lib.markup.html.prepare({ user, form, parent, blockName }, ...args);
                 } else {
-                  return lib.markup.html.get({ form, parent, handlers }, ...args);
+                  return lib.markup.html.get({ user, form, parent, handlers }, ...args);
                 }
               },
               FIELD: function (data) {
@@ -169,6 +170,9 @@
       switch (key) {
         case 'tpl':
           stringifiedValue = this.prepareCss(value ? value.toString() : '', styleList);
+          break;
+        case 'on':
+          stringifiedValue = `{${Object.entries(value).map(([key, str]) => `${key}: ${str}`)}}`
           break;
         default:
           if (typeof value == 'object') stringifiedValue = JSON.stringify(value);

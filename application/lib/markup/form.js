@@ -3,7 +3,7 @@
     const cacheFilePath = `application/static/cache/${form}.js`;
     // await node.fsp.access(cacheFilePath).catch(async () => {
     //   try {
-    await lib.markup.form.prepare({ form });
+    await lib.markup.form.prepare({ form, user });
     //   } catch (err) {
     //     console.log(err);
     //   }
@@ -14,28 +14,28 @@
     if (!user.forms) user.forms = {};
     user.forms[form] = processForm;
 
-    const [block, name] = form.split('~');
-    let [formCol] = (block||'').split('/');
-    if (formCol === 'core') {
-      formCol = 'user';
-      _id = user._id;
-    }
     if (_id !== true) _id = db.mongo.ObjectID(_id);
+    let { col, id, on = {} } = processForm.markup[`.__${form}`];
+    if (!id) id = () => [_id];
     const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
-      { form: processForm, parent: { linecode: '.', code: 0 }, handlers },
-      { type: 'form', name: form, col: formCol, id: () => [_id] },
+      { user, form: processForm, parent: { linecode: '.', code: 0 }, handlers },
+      { type: 'form', name: form, col, id, on },
     );
     await execHandlers();
 
     return result;
   },
 
-  prepare: async ({ form }) => {
+  prepare: async ({ form, user }) => {
     const [block, name] = form.split('~');
-    const { tpl, id, func, style } = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `form~${name}`);
+    const { tpl, col, id, on, func, style } = lib.utils.getDeep(
+      domain,
+      block.replace(/\//g, '.') + '.' + `form~${name}`,
+    );
     const prepared = await lib.markup.complex.prepare(
       {
+        user,
         blockName: block,
         tplType: 'form',
         form: {
@@ -48,7 +48,7 @@
         },
         parent: { linecode: '.', root: true },
       },
-      { name: form, col: block, id },
+      { name: form, col, id, on },
       tpl,
     );
 

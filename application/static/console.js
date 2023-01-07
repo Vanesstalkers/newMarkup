@@ -67,7 +67,22 @@ const upload = () => {
 };
 
 window.waitForLoadRes = {};
-const loadRes = function (src, config = {}) {
+
+window.resOnLoad = function () {
+  const src = new URL(this.src).pathname;
+  while (window.waitForLoadRes?.[src]?.length) {
+    window.waitForLoadRes[src].shift()();
+  }
+  window.waitForLoadRes[src] = true;
+};
+
+window.runAfterResLoaded = (waitForRes, func) => {
+  if (window.waitForLoadRes[waitForRes] === true) return func();
+  if (!window.waitForLoadRes[waitForRes]) window.waitForLoadRes[waitForRes] = [];
+  window.waitForLoadRes[waitForRes].push(func);
+};
+
+window.loadRes = function (src, config = {}) {
   return new Promise((resolve, reject) => {
     let type = 'js';
     if (src.substr(-4) == '.css') type = 'css';
@@ -92,42 +107,38 @@ const loadRes = function (src, config = {}) {
 
 const showForm = async ({ form, container, _id }) => {
   const $container = container ? document.getElementById(container) : document.body;
-  const getForm = await window.api.markup.getForm({ form, _id });
+  const $parentForm = $container.closest(`[type="form"]`);
+  const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
+  $container.innerHTML = '';
   await loadRes(`cache/${form}.func.js`);
-  nativeTplToHTML([getForm.data], $container);
+  await nativeTplToHTML([getForm.data], $container);
   await loadRes(`cache/${form}.css`);
 };
 
-window.nativeTplToHTML = function (deepEl, $parent) {
+window.nativeTplToHTML = async function (deepEl, $parent) {
   if (!deepEl || !$parent) return;
   for (const el of deepEl) {
     if (!el) continue;
     if (el.type) {
       if (el.type === 'subform') {
-        (async () => {
-          const form = el.name;
-          if (form) {
-            const getForm = await window.api.markup.getForm({ form, codeSfx: el.code });
-            if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
-            await loadRes(`cache/${form}.func.js`);
-            nativeTplToHTML([getForm.data], $parent);
-            await loadRes(`cache/${form}.css`);
-          }
-        })();
+        if (el.name) {
+          // !!! если сделать async, то ломается инициация select2 в текущей форме
+          showForm({ form: el.name, container: $parent.id });
+        }
       } else if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
-        nativeTplToHTML([tpl(el)], $parent);
+        await nativeTplToHTML([tpl(el)], $parent);
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
         if (prepare) prepare({ $el: $block, data: el });
         if (el.items) {
           for (const item of Object.values(el.items)) {
             const { tpl, prepare } = window.el[item.elPath] || {};
             if (typeof tpl === 'function') {
-              nativeTplToHTML([tpl({ ...item, parent: el })], $block);
+              await nativeTplToHTML([tpl({ ...item, parent: el })], $block);
               const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
               if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
-              nativeTplToHTML(item.content, $item);
+              await nativeTplToHTML(item.content, $item);
             }
           }
         }
@@ -135,7 +146,7 @@ window.nativeTplToHTML = function (deepEl, $parent) {
         const { tpl, prepare } = window.el[el.elPath] || {};
         if (tpl) {
           el.class = ['el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
-          nativeTplToHTML([tpl(el)], $parent);
+          await nativeTplToHTML([tpl(el)], $parent);
           const $el = $parent.querySelector(`.el[code='${el.code}']`);
 
           if ($el) {
@@ -156,19 +167,17 @@ window.nativeTplToHTML = function (deepEl, $parent) {
           const $el = document.createElement(tag);
           for (const [key, value] of Object.entries(options))
             $el.setAttribute(key, typeof value === 'object' ? JSON.stringify(value) : value);
-          if (options.src) {
-            $el.onload = () => {
-              while (window.waitForLoadRes?.[options.src]?.length) {
-                window.waitForLoadRes[options.src].shift()();
-              }
-            };
+          if (options.src) $el.onload = window.resOnLoad;
+          async function init() {
+            $parent.appendChild($el);
+            if (options.text) $el.appendChild(document.createTextNode(options.text));
+            if (items?.length) await nativeTplToHTML(items, $el);
           }
-          $parent.appendChild($el);
-          if (options.text) $el.appendChild(document.createTextNode(options.text));
-          if (items?.length) nativeTplToHTML(items, $el);
+          if (options.waitForResLoaded) window.runAfterResLoaded(options.waitForResLoaded, init);
+          else await init();
           break;
         case 'object':
-          nativeTplToHTML(el, $parent);
+          await nativeTplToHTML(el, $parent);
           break;
       }
     }
@@ -210,13 +219,6 @@ window.addEventListener('load', async () => {
   // }
   document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
 
-  const form = BASE_FORM;
-  await window.api.markup.getForm({ form });
-  await showForm({ form });
-  if (location.hash) {
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  }
-
   new MutationObserver(function (mutationsList, observer) {
     console.log({ mutationsList });
     for (const mutation of mutationsList) {
@@ -238,6 +240,13 @@ window.addEventListener('load', async () => {
     subtree: true,
     attributeOldValue: true,
   });
+
+  const form = BASE_FORM;
+  await window.api.markup.getForm({ form });
+  await showForm({ form });
+  if (location.hash) {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  }
 });
 
 document.addEventListener('click', async (event) => {
@@ -251,10 +260,10 @@ document.addEventListener('click', async (event) => {
       console.error({ msg, stack });
     } else {
       const { tpl, prepare } = window.el[item.elPath] || {};
-      nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
+      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
       const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
       if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
-      nativeTplToHTML(item.content, $item);
+      await nativeTplToHTML(item.content, $item);
     }
   }
   if ($el.closest('.btn-delete')) {
@@ -275,10 +284,10 @@ document.addEventListener('click', async (event) => {
     else if (result === 'success') {
       item.class = (item.class || '') + ' reloaded';
       const { tpl, prepare } = window.el[item.elPath] || {};
-      nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
+      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
       const $newItem = $block.querySelector(`.reloaded.complex-item[code='${item.code}']`);
       if (prepare) prepare({ $el: $newItem, data: item, parent: { data: $block.dataset, $el: $block } });
-      nativeTplToHTML(item.content, $newItem);
+      await nativeTplToHTML(item.content, $newItem);
       $newItem.classList.remove('reloaded');
       $item.replaceWith($newItem);
     }

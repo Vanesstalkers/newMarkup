@@ -15,7 +15,7 @@
     const newItem = await db.addComplex({ ...block, parent: { ...block.parent, _id: parentId } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
     processForm.data[itemCode] = newItem;
-    return await lib.markup.actions.showComplexItem({ itemCode, blockCode: code, form: processForm });
+    return await lib.markup.actions.showComplexItem({ itemCode, blockCode: code, user, form: processForm });
   },
   deleteComplex: async ({ form, code, user }) => {
     const processForm = user.forms[form];
@@ -36,9 +36,9 @@
 
     const itemData = await db.mongo.findOne(item.col, itemId);
     processForm.data[code] = itemData;
-    return await lib.markup.actions.showComplexItem({ itemCode: code, blockCode: item.blockCode, form: processForm });
+    return await lib.markup.actions.showComplexItem({ itemCode: code, blockCode: item.blockCode, user, form: processForm });
   },
-  showComplexItem: async ({ itemCode, blockCode, form }) => {
+  showComplexItem: async ({ itemCode, blockCode, user, form }) => {
     const block = form.fields[blockCode];
 
     const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form });
@@ -54,7 +54,7 @@
         elPath: 'core/default/el~complex|item',
       };
       form.fields[item.code] = item;
-      const proxyData = { form, data: form.data[itemCode], parent: item, handlers };
+      const proxyData = { user, form, data: form.data[itemCode], parent: item, handlers };
       try {
         result = lib.markup.helpers.addProxifiedContextToTplFunc(form.markup[block.linecode].tpl, proxyData)();
       } catch (err) {

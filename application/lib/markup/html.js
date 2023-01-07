@@ -1,11 +1,11 @@
 ({
-  get: ({ form, data = {}, parent, handlers }, path, config) => {
+  get: ({ user, form, data = {}, parent, handlers }, path, config) => {
     const tplFunc = form.markup[path].tpl;
     const items = [];
     handlers.tpl.push(async () => {
       let result = [];
       if (typeof tplFunc === 'function') {
-        const proxyData = { form, data, parent, handlers };
+        const proxyData = { user, form, data, parent, handlers };
         try {
           result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)(config);
         } catch (err) {
@@ -17,7 +17,7 @@
     return items;
   },
 
-  prepare: ({ form, parent, blockName }, path, config) => {
+  prepare: ({ user, form, parent, blockName }, path, config) => {
     const [block, name] = path.split('~');
     const { tpl: tplFunc, func, style } = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `html~${name}`);
     form.markup[path] = { tpl: tplFunc.toString() };
@@ -29,6 +29,7 @@
       try {
         lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, {
           prepareCall: true,
+          user,
           form,
           data: {},
           parent,

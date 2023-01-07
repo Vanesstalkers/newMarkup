@@ -31,7 +31,10 @@
                       {},
                       A(
                         {
-                          href: `#{"form":"${name.replace('form~', `${block}~`)}", "container":"formContent"}`,
+                          href: `#${JSON.stringify({
+                            form: name.replace('form~', `${block}~`),
+                            container: 'formContent',
+                          })}`,
                           'aria-expanded': 'false',
                         },
                         I({ class: icon }),
