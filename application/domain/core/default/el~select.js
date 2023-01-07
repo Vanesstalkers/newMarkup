@@ -7,14 +7,14 @@
       if (!data.config) data.config = {};
       return [
         'div',
-        { code: data.code, class: data.class },
+        { code: data.code, class: 'form-group ' + data.class },
         [
           ['label', { text: data.label || '' }],
           [
             'select',
             {
               value: data.value || '',
-              class: 'el-value',
+              class: 'form-control el-value',
               ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
             },
             [
@@ -22,7 +22,7 @@
                 const selected = (data.value || []).filter(({ value }) => value === e.v).length
                   ? { selected: 'selected' }
                   : {};
-                return [['option', { label: e.l, value: e.v, ...selected }]];
+                return [['option', { text: e.l, value: e.v, ...selected }]];
               }),
             ],
           ],
@@ -35,7 +35,6 @@
 
         if (typeof data.lst === 'object' || !window.LST[data.lst]) {
           window.LST[data.lst] = [];
-          // window.oLST[data.lst] = {};
           if ((data.value || []).length)
             window.LST[data.lst].push(...data.value.map(({ value, label }) => ({ v: value, l: label })));
           if (window.LST[data.lst].filter(({ v }) => v === '').length === 0)

@@ -99,7 +99,13 @@ window.loadRes = function (src, config = {}) {
       res.media = 'all';
       if (config.id) res.id = config.id;
     }
-    res.onload = resolve;
+    res.onload = () => {
+      while (window.waitForLoadRes?.[src]?.length) {
+        window.waitForLoadRes[src].shift()();
+      }
+      window.waitForLoadRes[src] = true;
+      resolve();
+    };
     res.onerror = reject;
     document.head.appendChild(res);
   });

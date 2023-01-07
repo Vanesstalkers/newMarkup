@@ -172,7 +172,7 @@
           stringifiedValue = this.prepareCss(value ? value.toString() : '', styleList);
           break;
         case 'on':
-          stringifiedValue = `{${Object.entries(value).map(([key, str]) => `${key}: ${str}`)}}`
+          stringifiedValue = `{${Object.entries(value).map(([key, str]) => `${key}: ${str}`)}}`;
           break;
         default:
           if (typeof value == 'object') stringifiedValue = JSON.stringify(value);

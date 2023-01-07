@@ -146,15 +146,15 @@
     await node.fsp.writeFile(
       `${formCachePath}.func.js`,
       prepared.funcList.map(
-        (value) =>
+        (item) =>
           `${
-            typeof value === 'function'
-              ? value
+            typeof item === 'function'
+              ? item
                   .toString()
                   .trim()
                   .match(/{([\s\S]*)}/gm)[0]
                   ?.slice(1, -1)
-              : value.toString()
+              : (item || '').toString()
           }\n\n`,
       ),
     );
