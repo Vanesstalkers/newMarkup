@@ -7,65 +7,95 @@
       if (!data.value) data.value = {};
       return [
         'div',
-        {
-          code: data.code,
-          class:
-            data.class +
-            `css
-              .*css* > input {
-                display: none!important;
-              }
-              .*css* {
-                position: relative;
-              }
-              .*css* > label {
-                display: flex;
-              }
-              .*css* > label > span {
-                width: 100%;
-              }
-              .*css* > label > .edit-btn {
-                top: 0px;
-                padding: 0px;
-                right: 0px;
-                font-size: 90%;
-              }
-              .*css* > label > .btn-link {
-                height: 15px;
-                min-width: 15px;
-                padding: 0px;
-                background-color: transparent;
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: cover;
-                cursor: pointer;
-              }
-              .*css* > label > .btn-link.edit-btn  {
-                background-image: url(/edit.png);
-              }
-              .*css* > label > .btn-link.delete-btn {
-                background-image: url(/delete.png);
-              }
-            `,
-        },
+        { code: data.code, class: 'form-group ' + data.class },
         [
+          ['label', { text: data.label || '' }],
           [
-            'label',
-            { text: data.label || '' },
+            'div',
+            { class: 'input-group' },
             [
-              ['div', { class: 'btn btn-link edit-btn' }],
-              data.delete === false ? [] : ['div', { class: 'btn btn-link delete-btn' }],
+              data.value.l
+                ? [
+                    'div',
+                    { class: 'input-group-prepend' },
+                    [
+                      [
+                        'button',
+                        { class: 'btn btn-light', type: 'button' },
+                        [['a', { target: '_blank', href: data.value.l }, [['i', { class: 'mdi mdi-download' }]]]],
+                      ],
+                    ],
+                  ]
+                : [],
+              [
+                'div',
+                {
+                  class:
+                    'custom-file' +
+                    `css
+                    .*css* > label.custom-file-label {
+                      cursor: pointer;
+                    }
+                    .*css* > .custom-file-label:after {
+                      content: none;
+                    }
+                  `,
+                },
+                [
+                  ['input', { type: 'file', multiple: true }],
+                  data.value.l
+                    ? ['div', { class: 'custom-file-label', target: '_blank', href: data.value.l, text: data.value.n }]
+                    : ['label', { text: 'Загрузить файл', class: 'custom-file-label' }],
+                ],
+              ],
+              data.value.l
+                ? [
+                    'div',
+                    { class: 'input-group-append' },
+                    [
+                      [
+                        'button',
+                        { class: 'btn btn-light edit-btn', type: 'button' },
+                        [['i', { class: 'mdi mdi-pencil' }]],
+                      ],
+                      [
+                        'button',
+                        { class: 'btn btn-light delete-btn', type: 'button' },
+                        [['i', { class: 'mdi mdi-delete' }]],
+                      ],
+                    ],
+                  ]
+                : [],
             ],
           ],
-          ['a', { target: '_blank', href: data.value.l, text: data.value.n }],
-          ['input', { type: 'file', multiple: true }],
         ],
       ];
     },
     front: {
       prepare: function ({ $el, data }) {
+        const reloadEl = async function (value) {
+          const el = JSON.parse($el.dataset.el);
+          el.value = value;
+          const $parent = $el.closest('.complex-item');
+          const { tpl, prepare } = window.el[el.elPath] || {};
+
+          el.class = ['reloaded', 'el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
+          await nativeTplToHTML([tpl(el)], $parent);
+          const $newEl = $parent.querySelector(`.reloaded.el[code='${el.code}']`);
+
+          $newEl.setAttribute('markup-code', el.code);
+          if (el.on?.load) $newEl.setAttribute('markup-onload', el.on.load);
+          $newEl.dataset.el = JSON.stringify(el);
+          for (const [key, value] of Object.entries(el)) $newEl.dataset[key] = value;
+          if (prepare) prepare({ $el: $newEl, data: el });
+          $newEl.classList.remove('reloaded');
+          $el.replaceWith($newEl);
+        };
+
         const $input = $el.querySelector('input');
+        const $label = $el.querySelector('label.custom-file-label');
         const $editBtn = $el.querySelector('.edit-btn');
+        const $deleteBtn = $el.querySelector('.delete-btn');
         $input.onchange = () => {
           const { name: form } = $input.closest('[type="form"]').dataset;
           const { code } = $input.closest('.el').dataset;
@@ -85,29 +115,21 @@
             if (result === 'error') console.error({ msg, stack });
             i++;
             if (i < files.length) return uploadNext();
-
-            const el = JSON.parse($el.dataset.el);
-            el.value = value;
-            const $parent = $el.closest('.complex-item');
-            const { tpl, prepare } = window.el[el.elPath] || {};
-
-            el.class = ['reloaded', 'el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
-            nativeTplToHTML([tpl(el)], $parent);
-            const $newEl = $parent.querySelector(`.reloaded.el[code='${el.code}']`);
-
-            $newEl.setAttribute('markup-code', el.code);
-            if (el.on?.load) $newEl.setAttribute('markup-onload', el.on.load);
-            $newEl.dataset.el = JSON.stringify(el);
-            for (const [key, value] of Object.entries(el)) $newEl.dataset[key] = value;
-            if (prepare) prepare({ $el: $newEl, data: el });
-            $newEl.classList.remove('reloaded');
-            $el.replaceWith($newEl);
-
+            await reloadEl(value);
             return null;
           };
           uploadNext();
         };
-        $editBtn.onclick = () => $input.click();
+        if ($deleteBtn)
+          $deleteBtn.onclick = async () => {
+            const { name: form } = $input.closest('[type="form"]').dataset;
+            const { code } = $input.closest('.el').dataset;
+            const { result, msg, stack } = await api.markup.saveField({ form, code, value: null });
+            if (result === 'error') console.error({ msg, stack });
+            await reloadEl(null);
+          };
+        if ($label) $label.onclick = () => $input.click();
+        if ($editBtn) $editBtn.onclick = () => $input.click();
       },
     },
     func: () => {

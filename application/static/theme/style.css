@@ -19406,5 +19406,11 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
 .quixnav .metismenu > li a > i {
   font-size: 2rem;
 }
-
-/*# sourceMappingURL=style.css.map */
+[data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .quixnav .metismenu li a {
+  padding: 0.8125rem 0.4375rem;
+}
+@media only screen and (min-width: 768px) {
+  [data-sidebar-style="mini"] .quixnav .metismenu li a {
+    padding: 0.8125rem 0.4375rem;
+  }
+}

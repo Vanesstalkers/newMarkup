@@ -6,10 +6,10 @@
     tpl: function (data) {
       return [
         'div',
-        { code: data.code, class: data.class },
+        { code: data.code, class: 'form-group ' + data.class },
         [
           ['label', { text: data.label || '' }],
-          ['input', { type: 'input', class: 'el-value', value: data.value }],
+          ['input', { type: 'input', class: 'form-control el-value', value: data.value }],
         ],
       ];
     },

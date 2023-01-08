@@ -1,6 +1,6 @@
 [
   { v: '', l: '\xa0' },
-  { v: 'guest', l: 'Гостевой доступ', baseForm: 'ce~form', hide: true, tutorial: true, helper: true },
+  { v: 'guest', l: 'Гостевой доступ', baseForm: 'ce~main', hide: true, tutorial: true, helper: true },
   { v: 'admin', l: 'Супервизор', access: { admin: true }, baseForm: 'ce~list', tutorial: true, helper: true },
   { v: 'head', l: 'Администратор', access: { head: true }, tutorial: true, helper: true },
   { v: 'main', l: 'Пользователь', tutorial: true, helper: true },

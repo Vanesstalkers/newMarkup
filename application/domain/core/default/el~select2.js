@@ -21,7 +21,6 @@
             !data.lst.action
               ? {}
               : {
-                  width: '100%',
                   ajax: {
                     transport: function ({ data: { q: query } }, success, failure) {
                       api.markup.search({ form, code, query }).then(({ result, data, msg, stack }) => {

@@ -160,7 +160,6 @@ window.nativeTplToHTML = async function (deepEl, $parent) {
             if (el.on?.load) $el.setAttribute('markup-onload', el.on.load);
             $el.dataset.el = JSON.stringify(el);
             for (const [key, value] of Object.entries(el)) $el.dataset[key] = value;
-
             if (prepare) prepare({ $el, data: el });
           }
         }
@@ -209,23 +208,24 @@ window.addEventListener('load', async () => {
   const token = localStorage.getItem('xaoc.session.token');
 
   let logged = false;
-  // if (token) {
-  const res = await api.auth.restore({ token });
-  logged = res.status === 'logged';
-  if (res.token) localStorage.setItem('xaoc.session.token', res.token);
-  // }
+  if (token) {
+    const res = await api.auth.restore({ token });
+    logged = res.status === 'logged';
+    if (res.token) localStorage.setItem('xaoc.session.token', res.token);
+  }
 
-  // if (!logged) {
-  //   await api.auth.register({ login: 'marcus', password: 'marcus' });
-  //   const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
-  //   console.log({ res });
-  //   if (res.token) {
-  //     localStorage.setItem('xaoc.session.token', res.token);
-  //   }
-  // }
+  if (!logged) {
+    const demoUser = { login: Math.random(), password: 'guest', roles: ['guest', 'admin'] };
+    await api.auth.register({ ...demoUser });
+    //await api.auth.register({ login: 'marcus', password: 'marcus' });
+    const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
+    if (res.token) {
+      localStorage.setItem('xaoc.session.token', res.token);
+    }
+  }
   document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
 
-  new MutationObserver(function (mutationsList, observer) {
+  new MutationObserver(async function (mutationsList, observer) {
     console.log({ mutationsList });
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
@@ -235,6 +235,7 @@ window.addEventListener('load', async () => {
         }
         if (mutation.attributeName === 'markup-onload') {
           const funcName = mutation.target.getAttribute('markup-onload');
+          await new Promise((resolve) => setTimeout(resolve, 0)); // ждем пока все элементы будут добавлены в DOM
           if (window[funcName]) window[funcName](mutation.target);
         }
       }

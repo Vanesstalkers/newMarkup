@@ -8,10 +8,11 @@
     if (!valid) throw new Error('Incorrect login or password');
     console.log(`Logged user: ${login}`);
     const token = api.auth.provider.generateToken();
-    const data = { ...user };
+    const data = { user };
+    user.current = user.roles[0];
     context.client.startSession(token, data);
     const { ip } = context.client;
     api.auth.provider.startSession(token, data, { ip });
-    return { status: 'logged', token, baseForm: config.markup.baseForm };
+    return { status: 'logged', token };
   },
 });

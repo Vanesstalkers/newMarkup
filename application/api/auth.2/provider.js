@@ -29,32 +29,33 @@
     db.mongo.deleteOne('session', record);
   },
 
-  async registerUser(data) {
-    // return db.pg.insert('Account', { login, password });
-    const user = await db.mongo.insertOne('user', data);
-
-    await db.addComplex({
-      name: 'user_role',
-      parent: { name: 'user', _id: user._id },
-      links: { user_role: { user: '__user' }, user: '__user_role' },
-    });
-
+  async registerUser({ login, password, roles }) {
+    const user = await db.mongo.insertOne('user', { login, password });
+    for (const role of roles) {
+      await db.addComplex({
+        name: 'user_role',
+        parent: { name: 'user', _id: user._id },
+        links: { user_role: { user: '__user' }, user: '__user_role' },
+        data: { role },
+      });
+    }
     return user;
   },
 
   async getUser(login) {
     // return db.pg.row('Account', { login });
-    return await db.mongo.findOne('user', { login });
-
-// {
-//   from: "user_role",
-//   localField: "__user_role.l",
-//   foreignField: "_id",
-//     "pipeline": [
-//       { "$project": { "_id": 1, "role": 1 }}
-//     ],
-//   as: "roles"
-// }
-
+    const [user] = await db.mongo.aggregate('user', [
+      { $match: { login } },
+      {
+        $lookup: {
+          from: 'user_role',
+          localField: '__user_role.l',
+          foreignField: '_id',
+          pipeline: [{ $project: { _id: 1, role: 1 } }],
+          as: 'roles',
+        },
+      },
+    ]);
+    return user;
   },
 });
