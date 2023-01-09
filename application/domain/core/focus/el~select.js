@@ -7,9 +7,9 @@
       if (!data.config) data.config = {};
       return [
         'div',
-        { code: data.code, class: 'input-group ' + data.class },
+        { code: data.code, class: 'form-group ' + data.class },
         [
-          ['label', { class: 'form-label', text: data.label || '' }],
+          ['label', { text: data.label || '' }],
           [
             'select',
             {

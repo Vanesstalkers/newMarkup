@@ -175,6 +175,7 @@ window.nativeTplToHTML = async function (deepEl, $parent) {
           if (options.src) $el.onload = window.resOnLoad;
           async function init() {
             $parent.appendChild($el);
+            if (options.on?.load) $el.setAttribute('markup-onload', options.on.load);
             if (options.text) $el.appendChild(document.createTextNode(options.text));
             if (items?.length) await nativeTplToHTML(items, $el);
           }

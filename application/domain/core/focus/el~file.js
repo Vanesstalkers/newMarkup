@@ -5,38 +5,68 @@
     },
     tpl: function (data) {
       if (!data.value) data.value = {};
-      const inputConfig = {};
-      if (data.multiple) inputConfig.multiple = true;
       return [
-        ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
+        'div',
+        { code: data.code, class: 'form-group ' + data.class },
         [
-          'div',
-          { code: data.code, class: 'input-group upload-file-input-group ' + data.class },
+          ['label', { text: data.label || '' }],
           [
-            data.value.l
-              ? [
-                  [
-                    'label',
-                    {
-                      class: 'form-floating input-group-text',
-                    },
+            'div',
+            { class: 'input-group' },
+            [
+              data.value.l
+                ? [
+                    'div',
+                    { class: 'input-group-prepend' },
                     [
-                      ['a', { target: '_blank', href: data.value.l, text: data.value.n }],
-                      ['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }],
+                      [
+                        'button',
+                        { class: 'btn btn-light', type: 'button' },
+                        [['a', { target: '_blank', href: data.value.l }, [['i', { class: 'mdi mdi-download' }]]]],
+                      ],
                     ],
-                  ],
-                  [
-                    'button',
-                    { class: 'btn btn-outline-primary edit-btn', type: 'button' },
-                    [['i', { class: 'bx bx-edit-alt' }]],
-                  ],
-                  [
-                    'button',
-                    { class: 'btn btn-outline-primary delete-btn', type: 'button' },
-                    [['i', { class: 'bx bx-trash' }]],
-                  ],
-                ]
-              : [['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }]],
+                  ]
+                : [],
+              [
+                'div',
+                {
+                  class:
+                    'custom-file' +
+                    `css
+                    .*css* > label.custom-file-label {
+                      cursor: pointer;
+                    }
+                    .*css* > .custom-file-label:after {
+                      content: none;
+                    }
+                  `,
+                },
+                [
+                  ['input', { type: 'file', multiple: true }],
+                  data.value.l
+                    ? ['div', { class: 'custom-file-label', target: '_blank', href: data.value.l, text: data.value.n }]
+                    : ['label', { text: 'Загрузить файл', class: 'custom-file-label' }],
+                ],
+              ],
+              data.value.l
+                ? [
+                    'div',
+                    { class: 'input-group-append' },
+                    [
+                      [
+                        'button',
+                        { class: 'btn btn-light edit-btn', type: 'button' },
+                        [['i', { class: 'mdi mdi-pencil' }]],
+                      ],
+                      [
+                        'button',
+                        { class: 'btn btn-light delete-btn', type: 'button' },
+                        [['i', { class: 'mdi mdi-delete' }]],
+                      ],
+                    ],
+                  ]
+                : [],
+            ],
           ],
         ],
       ];
@@ -115,22 +145,6 @@
         return { uploadedFile: file, uploadPath, result, msg };
       };
     },
-    style: `
-      .upload-file-input-group > label > input {
-        display: none!important;
-      }
-      .upload-file-input-group > label > a {
-        position: absolute;
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        left: 0px;
-        top: 0px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    `,
   },
 
   'file+': {

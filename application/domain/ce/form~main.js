@@ -2,7 +2,7 @@
   config: {
     menu: {
       label: 'Компании',
-      icon: 'mdi mdi-office-building',
+      icon: 'bx bx-building',
     },
   },
   col: 'user',
@@ -78,7 +78,7 @@
             },
           },
         }),
-        FIELD({ name: 'file8', label: 'Файл8', type: 'file' }),
+        FIELD({ name: 'file8', label: 'Файл8', type: 'file', multiple: true }),
         FIELD({ name: 'list', label: 'Список', type: 'select2', lst: { action: 'ce~search' }, multiple: true }),
         FIELD({ name: 'list2', label: 'Список', type: 'select2', lst: 'ce~tutorial' }),
         FUNC(() => {

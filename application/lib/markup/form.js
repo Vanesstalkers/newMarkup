@@ -141,7 +141,7 @@
     await node.fsp.writeFile(`${formCachePath}.js`, `({${cacheFile}})`);
     await node.fsp.writeFile(
       `${formCachePath}.css`,
-      prepared.styleList.map((value) => `${value}\n\n`),
+      prepared.styleList.map((value) => (value ? `${value}\n\n` : '')),
     );
     await node.fsp.writeFile(
       `${formCachePath}.func.js`,
