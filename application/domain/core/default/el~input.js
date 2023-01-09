@@ -4,12 +4,37 @@
       customType: 'html',
     },
     tpl: function (data) {
+      if(!data.config) data.config = {};
+      const float = data.config.float;
       return [
         'div',
-        { code: data.code, class: 'form-group ' + data.class },
+        { code: data.code, class: 'form-group ' + data.class + (float ? ' form-floating' : '') },
         [
-          ['label', { text: data.label || '' }],
-          ['input', { type: 'input', class: 'form-control el-value', value: data.value }],
+          [
+            !float ? ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label || '' }] : [],
+            [
+              'input',
+              {
+                type: data.config.inputType || 'text',
+                class: 'form-control el-value',
+                value: data.value,
+                id: 'input-' + data.code,
+                placeholder: data.placeholder || ' ',
+              },
+            ],
+            float ? ['label', { for: 'input-' + data.code, text: data.label || '' }] : [],
+          ],
+          data.config.comment
+            ? ['div', { class: 'form-text', for: 'input-' + data.code, text: data.config.comment }]
+            : [],
+          [
+            'div',
+            {
+              class: 'form-text error-text',
+              for: 'input-' + data.code,
+              text: data.config.errorComment || 'Поле заполнено с ошибкой',
+            },
+          ],
         ],
       ];
     },
@@ -24,14 +49,25 @@
           if (result === 'error') console.error({ msg, stack });
         });
 
-        // if (data.config && data.config.mask)
-        //   doAfterLoad.push(function () {
-        //     realParent
-        //       .find('input[code=' + data.code + ']')
-        //       .mask(data.config.mask.m || data.config.mask, data.config.mask.c);
-        //   });
+        if (data.config?.mask) {
+          if (!Array.isArray(data.config.mask)) data.config.mask = [data.config.mask];
+          $($input).mask(...data.config.mask);
+        }
       },
     },
+    style: `
+      input.el-value:invalid {
+        border-color: #ff3e1d;
+      }
+      input.el-value:invalid ~ .form-text, input.el-value ~ .error-text {
+        display: none;
+      }
+      input.el-value:invalid ~ .error-text {
+        display: block;
+        color: #ff3e1d;
+      }
+    }  
+    `,
   },
 
   'input+': {

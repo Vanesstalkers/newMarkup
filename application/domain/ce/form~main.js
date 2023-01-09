@@ -32,7 +32,14 @@
         }
     `,
     }),
-    FIELD({ name: 'fullName', label: 'Номер', type: 'input' }),
+    FIELD({
+      name: 'email',
+      label: 'Email',
+      type: 'input',
+      placeholder: 'a@b.ru',
+      config: { inputType: 'email', float: true, comment: 'Электронная почта', errorComment: 'ВСЕ ПЛОХО !!!' },
+    }),
+    FIELD({ name: 'phone', label: 'Phone', type: 'input', config: { inputType: 'password', _mask: '+7 (000) 000-00-00', float: true } }),
     COMPLEX(
       {
         name: 'lvl1',
