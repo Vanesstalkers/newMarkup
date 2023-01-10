@@ -1,8 +1,5 @@
 ({
   file: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       if (!data.value) data.value = {};
       const inputConfig = {};
@@ -119,24 +116,10 @@
       .upload-file-input-group > label > input {
         display: none!important;
       }
-      .upload-file-input-group > label > a {
-        position: absolute;
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        left: 0px;
-        top: 0px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
     `,
   },
 
   'file+': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return [window.el['core/default/el~file|file'].tpl(data)];
     },
@@ -148,9 +131,6 @@
   },
 
   'file-': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return [
         [
@@ -173,9 +153,6 @@
   },
 
   'file--': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return [window.el['core/default/el~file|file-'].tpl(data)];
     },

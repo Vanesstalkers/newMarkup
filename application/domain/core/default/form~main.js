@@ -14,7 +14,12 @@
             HTML('core/default~header'),
             DIV(
               { class: 'content-wrapper' },
-              DIV({ class: 'container-xxl flex-grow-1 container-p-y', id: 'formContent' }),
+              DIV({
+                class: 'container-xxl flex-grow-1 container-p-y',
+                id: 'formContent',
+                on: { load: ['initForm', userRoleConfig.baseForm] },
+              }),
+
               HTML('core/default~footer'),
               DIV({ class: 'content-backdrop fade' }),
             ),
@@ -34,5 +39,10 @@
       window.loadRes('theme/sneat/main.js');
     },
     itemLoad: () => {},
+  },
+  func: () => {
+    window.initForm = function ($el, form) {
+      showForm(location.hash ? JSON.parse(decodeURI(location.hash.substring(1))) : { form, container: $el });
+    };
   },
 });

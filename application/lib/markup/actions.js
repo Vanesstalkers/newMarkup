@@ -1,4 +1,16 @@
 ({
+  handler: async ({ form, code, user, data }) => {
+    const processForm = user.forms[form];
+    const field = processForm.fields[code];
+    const parent = processForm.fields[field.parentCode];
+    const { _id: parentId } = processForm.data[field.parentCode];
+
+    let result = null;
+    const { handler } = processForm.handlers[block.linecode] || {};
+    console.log('markup handler', field);
+    if (typeof handler === 'function') result = await handler({ form, code, user, data });
+    return result;
+  },
   saveField: async ({ form, code, value, user }) => {
     const processForm = user.forms[form];
     const field = processForm.fields[code];
@@ -7,14 +19,17 @@
 
     await db.mongo.updateOne(parent.col, parentId, { $set: { [field.name]: value } });
   },
-  addComplex: async ({ form, code, user }) => {
+  addComplex: async ({ form, code, user, data = {} }) => {
     const processForm = user.forms[form];
     const block = processForm.fields[code];
     const { _id: parentId } = processForm.data[block.parent.code];
+    const handlers = processForm.handlers[block.linecode] || {};
 
-    const newItem = await db.addComplex({ ...block, parent: { ...block.parent, _id: parentId } });
+    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, code, user, data });
+    const newItem = await db.addComplex({ ...block, data, parent: { ...block.parent, _id: parentId } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
     processForm.data[itemCode] = newItem;
+    if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, code, user, data, newItem });
     return await lib.markup.actions.showComplexItem({ itemCode, blockCode: code, user, form: processForm });
   },
   deleteComplex: async ({ form, code, user }) => {
@@ -36,7 +51,12 @@
 
     const itemData = await db.mongo.findOne(item.col, itemId);
     processForm.data[code] = itemData;
-    return await lib.markup.actions.showComplexItem({ itemCode: code, blockCode: item.blockCode, user, form: processForm });
+    return await lib.markup.actions.showComplexItem({
+      itemCode: code,
+      blockCode: item.blockCode,
+      user,
+      form: processForm,
+    });
   },
   showComplexItem: async ({ itemCode, blockCode, user, form }) => {
     const block = form.fields[blockCode];

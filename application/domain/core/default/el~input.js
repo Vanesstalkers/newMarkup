@@ -1,11 +1,8 @@
 ({
   input: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
-      if(!data.config) data.config = {};
-      const float = data.config.float;
+      const config = data.config || {};
+      const float = config.float;
       return [
         'div',
         { code: data.code, class: 'form-group ' + data.class + (float ? ' form-floating' : '') },
@@ -15,7 +12,7 @@
             [
               'input',
               {
-                type: data.config.inputType || 'text',
+                type: config.inputType || 'text',
                 class: 'form-control el-value',
                 value: data.value,
                 id: 'input-' + data.code,
@@ -24,15 +21,15 @@
             ],
             float ? ['label', { for: 'input-' + data.code, text: data.label || '' }] : [],
           ],
-          data.config.comment
-            ? ['div', { class: 'form-text', for: 'input-' + data.code, text: data.config.comment }]
+          config.comment
+            ? ['div', { class: 'form-text', for: 'input-' + data.code, text: config.comment }]
             : [],
           [
             'div',
             {
               class: 'form-text error-text',
               for: 'input-' + data.code,
-              text: data.config.errorComment || 'Поле заполнено с ошибкой',
+              text: config.errorComment || 'Поле заполнено с ошибкой',
             },
           ],
         ],
@@ -66,14 +63,10 @@
         display: block;
         color: #ff3e1d;
       }
-    }  
     `,
   },
 
   'input+': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return window.el['core/default/el~input|input'].tpl(data);
     },
@@ -85,18 +78,12 @@
   },
 
   'input-': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return window.el['core/default/el~label|label'].tpl(data);
     },
   },
 
   'input--': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return window.el['core/default/el~label|label'].tpl(data);
     },

@@ -40,6 +40,7 @@
         tplType: 'form',
         form: {
           markup: {},
+          handlers: {},
           funcList: [func],
           styleList: [style],
           lstList: [],
@@ -74,6 +75,12 @@
       tplEntries.push([key, stringifiedData]);
     }
     cacheList.push(['markup', `{${tplEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+    const handlerEntries = [];
+    for (const [linecode, handlers] of Object.entries(prepared.handlers)) {
+      const stringifiedData = Object.entries(handlers).map(([key, handler]) => `"${key}":${handler.toString()}`);
+      handlerEntries.push([linecode, stringifiedData.join(',')]);
+    }
+    cacheList.push(['handlers', `{${handlerEntries.map(([key, value]) => `"${key}":{${value}}`).join(',')}}`]);
 
     prepared.funcList.push('window.el = {}');
     prepared.elList = prepared.elList.filter((value, index, self) => self.indexOf(value) === index);

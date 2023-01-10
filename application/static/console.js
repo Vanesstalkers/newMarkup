@@ -111,12 +111,19 @@ window.loadRes = function (src, config = {}) {
   });
 };
 
-const showForm = async ({ form, container, _id }) => {
-  const $container = container ? document.getElementById(container) : document.body;
+window.showForm = async ({ form, container, _id }) => {
+  console.log('showForm', form);
+  const $container = container
+    ? container instanceof HTMLElement
+      ? container
+      : document.getElementById(container)
+    : document.body;
   const $parentForm = $container.closest(`[type="form"]`);
+  // await window.api.markup.getForm({ form }); // debug
   const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
   $container.innerHTML = '';
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // только для дебага - без этого не успевает  обновиться статика на сервере
   await loadRes(`cache/${form}.func.js`);
   await nativeTplToHTML([getForm.data], $container);
   await loadRes(`cache/${form}.css`);
@@ -127,12 +134,7 @@ window.nativeTplToHTML = async function (deepEl, $parent) {
   for (const el of deepEl) {
     if (!el) continue;
     if (el.type) {
-      if (el.type === 'subform') {
-        if (el.name) {
-          // !!! если сделать async, то ломается инициация select2 в текущей форме
-          showForm({ form: el.name, container: $parent.id });
-        }
-      } else if (el.type === 'complex' || el.type === 'form') {
+      if (el.type === 'complex' || el.type === 'form') {
         const { tpl, prepare } = window.el[el.elPath] || {};
         await nativeTplToHTML([tpl(el)], $parent);
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
@@ -151,7 +153,7 @@ window.nativeTplToHTML = async function (deepEl, $parent) {
       } else {
         const { tpl, prepare } = window.el[el.elPath] || {};
         if (tpl) {
-          el.class = ['el', `el-${el.name.replace(/\./g, '_')}`, el.class].join(' ');
+          el.class = ['el', el.name ? `el-${el.name.replace(/\./g, '_')}` : '', el.class].join(' ');
           await nativeTplToHTML([tpl(el)], $parent);
           const $el = $parent.querySelector(`.el[code='${el.code}']`);
 
@@ -235,9 +237,9 @@ window.addEventListener('load', async () => {
           // console.log('mutation', { code: mutation.target.getAttribute('markup-code'), mutation });
         }
         if (mutation.attributeName === 'markup-onload') {
-          const funcName = mutation.target.getAttribute('markup-onload');
+          const [funcName, ...args] = mutation.target.getAttribute('markup-onload').split(',');
           await new Promise((resolve) => setTimeout(resolve, 0)); // ждем пока все элементы будут добавлены в DOM
-          if (window[funcName]) window[funcName](mutation.target);
+          if (window[funcName]) window[funcName](mutation.target, ...args);
         }
       }
     }
@@ -249,12 +251,7 @@ window.addEventListener('load', async () => {
     attributeOldValue: true,
   });
 
-  const form = BASE_FORM;
-  await window.api.markup.getForm({ form });
-  await showForm({ form });
-  if (location.hash) {
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  }
+  await showForm({ form: BASE_FORM });
 });
 
 document.addEventListener('click', async (event) => {

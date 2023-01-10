@@ -3,7 +3,6 @@
     { user, form, parent, handlers },
     { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {},
   ) => {
-
     const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
@@ -69,7 +68,11 @@
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: ({ user, form, parent, blockName }, { name, col, links, filter, config, id, on = {} } = {}, tplFunc) => {
+  prepare: (
+    { user, form, parent, blockName },
+    { name, col, links, filter, config, id, on = {}, handlers = {} } = {},
+    tplFunc,
+  ) => {
     const complex = {};
     complex.name = name;
     complex.col = col || name;
@@ -88,6 +91,7 @@
       on: Object.fromEntries(Object.entries(on).map(([key, func]) => [key, func.toString()])),
       links,
     };
+    if (Object.keys(handlers).length) form.handlers[linecode] = handlers;
     if (on) form.scriptList.push(...Object.values(on));
 
     complex.parentDataNotRequired = config?.parentDataNotRequired;

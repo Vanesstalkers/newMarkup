@@ -6,7 +6,7 @@
         id: `${id || ''}-modal`,
         tabindex: '-1',
         'aria-hidden': 'true',
-        on: { load: 'prepareModal' },
+        on: { load: `"prepareModal"` },
       },
       DIV(
         { class: 'modal-dialog', role: 'document' },

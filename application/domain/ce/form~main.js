@@ -8,29 +8,28 @@
   col: 'user',
   id: ({ user }) => [user._id],
   tpl: () => [
-    A({
-      text: 'about',
-      href: '#' + JSON.stringify({ text: 'about', a: { b: { c: 3 } } }),
-      class:
-        'col-xs-8' +
-        `css
-          border-color: red;
-        `,
+    FIELD({
+      name: 'testAction',
+      type: 'button',
+      text: '123',
+      config: { btnType: 'primary', label: true },
+      on: {
+        click: (e) => {
+          console.log(666, e);
+        },
+      },
+      handler: async (data) => {
+        return data;
+      },
     }),
-    A({
-      text: 'contact',
-      href: '#' + JSON.stringify({ text: 'contact', a: { b: { c: 3, d: 4 } } }),
-      class: `css
-        .*css* {
-          border-color: black;
-        }
-        .*css* > div {
-          border-color: green;
-        }
-        body .*css* > div {
-          border-color: orange;
-        }
-    `,
+    FIELD({
+      name: 'testAction2',
+      type: 'button',
+      text: '456',
+      config: { btnType: 'primary', outline: true },
+      handler: async (data) => {
+        return data;
+      },
     }),
     FIELD({
       name: 'email',
@@ -39,7 +38,12 @@
       placeholder: 'a@b.ru',
       config: { inputType: 'email', float: true, comment: 'Электронная почта', errorComment: 'ВСЕ ПЛОХО !!!' },
     }),
-    FIELD({ name: 'phone', label: 'Phone', type: 'input', config: { inputType: 'password', _mask: '+7 (000) 000-00-00', float: true } }),
+    FIELD({
+      name: 'phone',
+      label: 'Phone',
+      type: 'input',
+      config: { inputType: 'password', _mask: '+7 (000) 000-00-00', float: true },
+    }),
     COMPLEX(
       {
         name: 'lvl1',
@@ -95,8 +99,19 @@
           COMPLEX(
             {
               name: 'lvl2',
-              id: async () => [true],
+              // id: () => [true],
               item: { add: { label: '+++' } },
+              handlers: {
+                beforeAdd: async ({ data }) => {
+                  data.test = true;
+                  console.log('beforeAdd', data);
+                  return data;
+                },
+                afterAdd: ({ newItem }) => {
+                  console.log('beforeAdd', newItem);
+                  return newItem;
+                },
+              },
             },
             () => [SPAN({ class: 'col-xs-8' }), IMG({})],
           ),
