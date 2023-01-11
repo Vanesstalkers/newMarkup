@@ -1,8 +1,9 @@
 ({
   get: (
-    { user, form, parent, handlers },
+    { user, form, parent = {}, handlers },
     { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {},
   ) => {
+    if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
     const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
     form.fields[complex.code] = complex;
 
@@ -48,7 +49,7 @@
           const item = {
             ...complex.item,
             code,
-            blockCode: complex.code,
+            complexCode: complex.code,
             name: complex.name,
             col: complex.col,
             linecode,
@@ -69,10 +70,11 @@
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
   prepare: (
-    { user, form, parent, blockName },
+    { user, form, parent = {}, blockName },
     { name, col, links, filter, config, id, on = {}, handlers = {} } = {},
     tplFunc,
   ) => {
+    if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
     const complex = {};
     complex.name = name;
     complex.col = col || name;

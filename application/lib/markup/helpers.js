@@ -56,12 +56,12 @@
                   const skipArray = ['button'];
                   if (!skipArray.includes(baseType)) form.markup[parent.linecode].queryFields[data.name] = 1;
                   if (typeof data.lst === 'string') form.lstList.push(data.lst);
-                  if (data.handler) {
+                  if (typeof data.handler === 'function') {
                     if (!data.name) throw new Error(`action without name (${parent.linecode})`);
-                    const linecode = parent.linecode + '--' + data.name;
-                    if (form.handlers[linecode]) throw new Error(`action linecode dublicates (${linecode})`);
-                    form.handlers[linecode] = { handler: data.handler };
-                    handleAction
+                    if (!form.handlers[parent.linecode]) form.handlers[parent.linecode] = {};
+                    if (form.handlers[parent.linecode][data.name])
+                      throw new Error(`action linecode dublicates (${parent.linecode}.${data.name})`);
+                    form.handlers[parent.linecode][data.name] = data.handler;
                   }
                   if (data.on) form.scriptList.push(...Object.values(data.on));
 
@@ -75,6 +75,7 @@
                 } else {
                   const field = {
                     ...data,
+                    handler: data.handler ? (typeof data.handler === 'string' ? data.handler : true) : undefined,
                     code: lib.markup.helpers.nextCode(form),
                     parentCode: parent.code,
                     elPath,

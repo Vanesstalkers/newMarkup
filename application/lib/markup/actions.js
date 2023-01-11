@@ -6,9 +6,17 @@
     const { _id: parentId } = processForm.data[field.parentCode];
 
     let result = null;
-    const { handler } = processForm.handlers[block.linecode] || {};
-    console.log('markup handler', field);
-    if (typeof handler === 'function') result = await handler({ form, code, user, data });
+    if (typeof field.handler === 'string') {
+      const [block, name] = field.handler.split('~');
+      const action = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `action~${name}`);
+      if (typeof action === 'function') result = await action({ query: '1' });
+    } else {
+      const handler = lib.utils.getDeep(
+        domain,
+        [...form.split('~')[0].split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
+      );
+      if (typeof handler === 'function') result = await handler({ form, code, user, data });
+    }
     return result;
   },
   saveField: async ({ form, code, value, user }) => {
@@ -20,29 +28,30 @@
     await db.mongo.updateOne(parent.col, parentId, { $set: { [field.name]: value } });
   },
   addComplex: async ({ form, code, user, data = {} }) => {
+    const [block, name] = form.split('~');
     const processForm = user.forms[form];
-    const block = processForm.fields[code];
-    const { _id: parentId } = processForm.data[block.parent.code];
-    const handlers = processForm.handlers[block.linecode] || {};
+    const complex = processForm.fields[code];
+    const { _id: parentId } = processForm.data[complex.parent.code];
+    const handlers = lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.'));
 
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, code, user, data });
-    const newItem = await db.addComplex({ ...block, data, parent: { ...block.parent, _id: parentId } });
+    const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentId } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
     processForm.data[itemCode] = newItem;
     if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, code, user, data, newItem });
-    return await lib.markup.actions.showComplexItem({ itemCode, blockCode: code, user, form: processForm });
+    return await lib.markup.actions.showComplexItem({ itemCode, complexCode: code, user, form: processForm });
   },
   deleteComplex: async ({ form, code, user }) => {
     const processForm = user.forms[form];
     const item = processForm.fields[code];
     const { _id: itemId } = processForm.data[code];
-    const block = processForm.fields[item.blockCode];
-    const { _id: parentId } = processForm.data[block.parent.code];
+    const complex = processForm.fields[item.complexCode];
+    const { _id: parentId } = processForm.data[complex.parent.code];
 
     await db.mongo.deleteOne(item.col, itemId);
-    const itemLink = block.links[block.parent.name];
+    const itemLink = complex.links[complex.parent.name];
     const updateData = { $pull: { [`${itemLink}.l`]: itemId }, $inc: { [`${itemLink}.c`]: -1 } };
-    await db.mongo.updateOne(block.parent.col, parentId, updateData);
+    await db.mongo.updateOne(complex.parent.col, parentId, updateData);
   },
   showComplex: async ({ form, code, user }) => {
     const processForm = user.forms[form];
@@ -53,38 +62,38 @@
     processForm.data[code] = itemData;
     return await lib.markup.actions.showComplexItem({
       itemCode: code,
-      blockCode: item.blockCode,
+      complexCode: item.complexCode,
       user,
       form: processForm,
     });
   },
-  showComplexItem: async ({ itemCode, blockCode, user, form }) => {
-    const block = form.fields[blockCode];
+  showComplexItem: async ({ itemCode, complexCode, user, form }) => {
+    const complex = form.fields[complexCode];
 
     const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form });
     handlers.tpl.push(async () => {
       let result = [];
       const item = {
-        ...block.item,
+        ...complex.item,
         code: itemCode,
-        blockCode: block.code,
-        name: block.name,
-        col: block.col,
-        linecode: block.linecode,
+        complexCode: complex.code,
+        name: complex.name,
+        col: complex.col,
+        linecode: complex.linecode,
         elPath: 'core/default/el~complex|item',
       };
       form.fields[item.code] = item;
       const proxyData = { user, form, data: form.data[itemCode], parent: item, handlers };
       try {
-        result = lib.markup.helpers.addProxifiedContextToTplFunc(form.markup[block.linecode].tpl, proxyData)();
+        result = lib.markup.helpers.addProxifiedContextToTplFunc(form.markup[complex.linecode].tpl, proxyData)();
       } catch (err) {
         result = [['div', { class: 'inline-error', error: err.message }]];
       }
-      block.items[item.code] = { ...item, content: result };
+      complex.items[item.code] = { ...item, content: result };
     });
     await execHandlers();
 
-    return block.items[itemCode];
+    return complex.items[itemCode];
   },
   prepareMarkupHandlers: ({ form }) => {
     const handlers = { ids: [], db: {}, tpl: [] };

@@ -15,11 +15,11 @@
     user.forms[form] = processForm;
 
     if (_id !== true) _id = db.mongo.ObjectID(_id);
-    let { col, id, on = {} } = processForm.markup[`.__${form}`];
+    let { col, id, on = {} } = processForm.markup[`__${form}`];
     if (!id) id = () => [_id];
     const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
-      { user, form: processForm, parent: { linecode: '.', code: 0 }, handlers },
+      { user, form: processForm, parent: { code: 0 }, handlers },
       { type: 'form', name: form, col, id, on },
     );
     await execHandlers();
@@ -47,15 +47,13 @@
           elList: ['core/default/el~complex|block', 'core/default/el~complex|item'],
           scriptList: [],
         },
-        parent: { linecode: '.', root: true },
+        parent: { root: true },
       },
       { name: form, col, id, on },
       tpl,
     );
 
     const cacheList = [];
-    // cacheList += 'exports.config = ' + JSON.stringify(SYS.get(__, "process['.'].config"));
-    // cacheList += 'exports.lst = ' + JSON.stringify(__.lst);
     const tplEntries = [];
     for (const [key, value] of Object.entries(prepared.markup)) {
       if (value.parent) {
@@ -75,12 +73,20 @@
       tplEntries.push([key, stringifiedData]);
     }
     cacheList.push(['markup', `{${tplEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+
+    const handlersCachePath = `./application/domain/${form.split('~')[0]}/cache`;
+    await node.fsp.mkdir(handlersCachePath, { recursive: true });
     const handlerEntries = [];
     for (const [linecode, handlers] of Object.entries(prepared.handlers)) {
-      const stringifiedData = Object.entries(handlers).map(([key, handler]) => `"${key}":${handler.toString()}`);
+      const stringifiedData = Object.entries(handlers).map(
+        ([key, handler]) => `"${key}":${typeof handler === 'string' ? `"${handler}"` : handler.toString()}`,
+      );
       handlerEntries.push([linecode, stringifiedData.join(',')]);
     }
-    cacheList.push(['handlers', `{${handlerEntries.map(([key, value]) => `"${key}":{${value}}`).join(',')}}`]);
+    await node.fsp.writeFile(
+      `${handlersCachePath}/handlers.js`,
+      `({${handlerEntries.map(([key, value]) => `"${key}":{${value}}`).join(',')}})`,
+    );
 
     prepared.funcList.push('window.el = {}');
     prepared.elList = prepared.elList.filter((value, index, self) => self.indexOf(value) === index);

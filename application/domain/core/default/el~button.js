@@ -9,24 +9,19 @@
     },
     front: {
       prepare: function ({ $el, data }) {
-        if (data.on?.click && typeof window[data.on.click] === 'function') {
+        if (data.handler) {
+          $el.addEventListener('click', async function (event) {
+            const $btn = event.target;
+            const form = $btn.closest('[type="form"]').dataset.name;
+            const code = $btn.dataset.code;
+            const { result, data, msg, stack } = await api.markup.handleAction({ form, code, data: { test: 123 } });
+            console.log({ result, data });
+            if (result === 'error') console.error({ msg, stack });
+          });
+        } else if (data.on?.click && typeof window[data.on.click] === 'function') {
           $el.addEventListener('click', window[data.on.click]);
         }
       },
-    },
-    func: () => {
-      window.handleAction = async function (event) {
-        const $btn = event.target;
-        const form = $btn.closest('[type="form"]').dataset.name;
-        const code = $btn.dataset.code;
-        const { result, data, msg, stack } = await api.markup.handleAction({ form, code, data: { test: 123 } });
-        console.log({ result, data });
-        if (result === 'error') console.error({ msg, stack });
-        // const { result, data: item, msg, stack } = await api.markup.addComplex({ form, code });
-        // if (result === 'error') {
-        //   console.error({ msg, stack });
-        // }
-      };
     },
   },
   'button+': {

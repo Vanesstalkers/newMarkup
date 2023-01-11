@@ -11,7 +11,7 @@
     FIELD({
       name: 'testAction',
       type: 'button',
-      text: '123',
+      text: '1234',
       config: { btnType: 'primary', label: true },
       on: {
         click: (e) => {
@@ -19,6 +19,7 @@
         },
       },
       handler: async (data) => {
+        console.log(777);
         return data;
       },
     }),
@@ -27,9 +28,7 @@
       type: 'button',
       text: '456',
       config: { btnType: 'primary', outline: true },
-      handler: async (data) => {
-        return data;
-      },
+      handler: 'ce~search',
     }),
     FIELD({
       name: 'email',
@@ -108,7 +107,7 @@
                   return data;
                 },
                 afterAdd: ({ newItem }) => {
-                  console.log('beforeAdd', newItem);
+                  console.log('afterAdd', newItem);
                   return newItem;
                 },
               },

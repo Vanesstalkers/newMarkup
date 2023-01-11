@@ -112,14 +112,12 @@ window.loadRes = function (src, config = {}) {
 };
 
 window.showForm = async ({ form, container, _id }) => {
-  console.log('showForm', form);
   const $container = container
     ? container instanceof HTMLElement
       ? container
       : document.getElementById(container)
     : document.body;
   const $parentForm = $container.closest(`[type="form"]`);
-  // await window.api.markup.getForm({ form }); // debug
   const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
   $container.innerHTML = '';
