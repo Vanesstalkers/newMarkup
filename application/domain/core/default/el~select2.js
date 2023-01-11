@@ -1,8 +1,5 @@
 ({
   select2: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return [window.el['core/default/el~select|select'].tpl(data)];
     },
@@ -55,9 +52,6 @@
   },
 
   'select2+': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return window.el['core/default/el~select2|select2'].tpl(data);
     },
@@ -69,20 +63,14 @@
   },
 
   'select2-': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
-      return window.el['core/default/el~label|label'].tpl(data);
+      data.disabled = true;
+      return window.el['core/default/el~select2|select2'].tpl(data);
     },
-  },
-
-  'select2--': {
-    config: {
-      customType: 'html',
-    },
-    tpl: function (data) {
-      return window.el['core/default/el~label|label'].tpl(data);
+    front: {
+      prepare: function ({ $el, data }) {
+        window.el['core/default/el~select2|select2'].prepare({ $el, data });
+      },
     },
   },
 });

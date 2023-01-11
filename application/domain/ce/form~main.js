@@ -11,13 +11,8 @@
     FIELD({
       name: 'testAction',
       type: 'button',
-      text: '1234',
+      label: '1234',
       config: { btnType: 'primary', label: true },
-      on: {
-        click: (e) => {
-          console.log(666, e);
-        },
-      },
       handler: async (data) => {
         console.log(777);
         return data;
@@ -26,16 +21,27 @@
     FIELD({
       name: 'testAction2',
       type: 'button',
-      text: '456',
-      config: { btnType: 'primary', outline: true },
+      label: '456',
+      config: { btnType: 'primary', outline: true, size: 'xl' },
       handler: 'ce~search',
+    }),
+    FIELD({
+      name: 'testAction3',
+      type: 'button',
+      label: '789',
+      config: { btnType: 'warning', outline: true, size: 'xs' },
+      on: {
+        click: (e) => {
+          console.log(666, e, this);
+        },
+      },
     }),
     FIELD({
       name: 'email',
       label: 'Email',
       type: 'input',
       placeholder: 'a@b.ru',
-      config: { inputType: 'email', float: true, comment: 'Электронная почта', errorComment: 'ВСЕ ПЛОХО !!!' },
+      config: { inputType: 'email', comment: 'Электронная почта', errorComment: 'ВСЕ ПЛОХО !!!' },
     }),
     FIELD({
       name: 'phone',
@@ -75,6 +81,9 @@
         //     },
         //   },
         // }),
+        FIELD({ name: 'date', label: 'datetime-local', type: 'input', config: { inputType: 'date' } }),
+        FIELD({ name: 'text666', type: 'textarea', label: 'Textarea', config: { rows: 1 }, disabled: true }),
+        FIELD({ name: 'text777', type: 'textarea', label: 'Textarea' }),
         FIELD({
           name: 'file',
           label: 'Файл',
@@ -89,10 +98,19 @@
           },
         }),
         FIELD({ name: 'file8', label: 'Файл8', type: 'file', multiple: true }),
-        FIELD({ name: 'list', label: 'Список', type: 'select2', lst: { action: 'ce~search' }, multiple: true }),
-        FIELD({ name: 'list2', label: 'Список', type: 'select2', lst: 'ce~tutorial' }),
-        FUNC(() => {
-          // console.log(2);
+        FIELD({
+          name: 'list',
+          label: 'select2-cписок',
+          type: 'select2-',
+          lst: { action: 'ce~search' },
+          multiple: true,
+        }),
+        FIELD({ name: 'list2', label: 'Список', type: 'radio', lst: 'ce~tutorial' }),
+        FIELD({
+          name: 'check',
+          _label: 'Галочка',
+          type: 'check-',
+          config: { content: 'Едем в Казань', switch: false },
         }),
         IF(true, () => [
           COMPLEX(

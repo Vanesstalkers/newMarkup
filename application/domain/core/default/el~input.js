@@ -17,13 +17,12 @@
                 value: data.value,
                 id: 'input-' + data.code,
                 placeholder: data.placeholder || ' ',
+                ...(data.disabled ? { disabled: '' } : {}),
               },
             ],
             float ? ['label', { for: 'input-' + data.code, text: data.label || '' }] : [],
           ],
-          config.comment
-            ? ['div', { class: 'form-text', for: 'input-' + data.code, text: config.comment }]
-            : [],
+          config.comment ? ['div', { class: 'form-text', for: 'input-' + data.code, text: config.comment }] : [],
           [
             'div',
             {
@@ -79,13 +78,8 @@
 
   'input-': {
     tpl: function (data) {
-      return window.el['core/default/el~label|label'].tpl(data);
-    },
-  },
-
-  'input--': {
-    tpl: function (data) {
-      return window.el['core/default/el~label|label'].tpl(data);
+      data.disabled = true;
+      return window.el['core/default/el~input|input'].tpl(data);
     },
   },
 });

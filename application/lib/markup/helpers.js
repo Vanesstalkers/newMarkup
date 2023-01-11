@@ -48,6 +48,7 @@
                 if (typeof data != 'object') data = { name: data };
                 if (!data.keyvalue) data.keyvalue = data.name;
                 if (!data.type) data.type = 'input';
+                data.type = data.type.replace('--', '-');
                 const baseType = data.type.replace(/[+-]/g, '');
                 if (data.type.includes('*')) data.type = data.type.replace('*', 'json');
                 const elPath = `core/default/el~${baseType}|${data.type}`;
@@ -70,7 +71,7 @@
                   const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
                   const el = elType ? elFile?.[elType] : elFile;
 
-                  if (typeof el.tpl === 'function')
+                  if (el && typeof el.tpl === 'function')
                     lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { form })(data);
                 } else {
                   const field = {

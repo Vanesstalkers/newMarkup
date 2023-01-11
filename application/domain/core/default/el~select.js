@@ -1,13 +1,10 @@
 ({
   select: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       if (!data.config) data.config = {};
       return [
         'div',
-        { code: data.code, class: 'input-group ' + data.class },
+        { code: data.code, class: 'form-group ' + data.class },
         [
           ['label', { class: 'form-label', text: data.label || '' }],
           [
@@ -16,13 +13,14 @@
               value: data.value || '',
               class: 'form-control el-value',
               ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
+              ...(data.disabled ? { disabled: '' } : {}),
             },
             [
               (data.config.element = function (e) {
                 const selected = (data.value || []).filter(({ value }) => value === e.v).length
                   ? { selected: 'selected' }
                   : {};
-                return [['option', { text: e.l, value: e.v, ...selected }]];
+                return ['option', { text: e.l, value: e.v, ...selected }];
               }),
             ],
           ],
@@ -43,9 +41,9 @@
 
         const $select = $el.querySelector('select');
         if (typeof data.config.element === 'function') {
-          window.LST[data.lst].forEach((l) => {
-            if (!l.hide) nativeTplToHTML(data.config.element(l), $select);
-          });
+          for (const l of window.LST[data.lst]) {
+            if (!l.hide) nativeTplToHTML([data.config.element(l)], $select);
+          }
         }
 
         if (addListener)
@@ -63,9 +61,6 @@
   },
 
   'select+': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       return [window.el['core/default/el~select|select'].tpl(data)];
     },
@@ -77,20 +72,14 @@
   },
 
   'select-': {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+      data.disabled = true;
+      return [window.el['core/default/el~select|select'].tpl(data)];
     },
-  },
-
-  'select--': {
-    config: {
-      customType: 'html',
-    },
-    tpl: function (data) {
-      return [window.el['core/default/el~label|label'].tpl(data)];
+    front: {
+      prepare: function ({ $el, data }) {
+        window.el['core/default/el~select|select'].prepare({ $el, data });
+      },
     },
   },
 });

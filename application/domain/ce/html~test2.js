@@ -21,7 +21,7 @@
           name: 'lvl3',
           item: {add: {label: '+ lvl3'}},
         },
-        () => [FIELD({ name: 'test' })],
+        () => [FIELD({ name: 'test', type: 'input-', label: 'Текстовое поле' })],
       ),
     ];
   },

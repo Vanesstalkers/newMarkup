@@ -151,10 +151,4 @@
       ];
     },
   },
-
-  'file--': {
-    tpl: function (data) {
-      return [window.el['core/default/el~file|file-'].tpl(data)];
-    },
-  },
 });
