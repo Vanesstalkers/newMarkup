@@ -52,9 +52,9 @@
                 const baseType = data.type.replace(/[+-]/g, '');
                 if (data.type.includes('*')) data.type = data.type.replace('*', 'json');
                 const elPath = `core/default/el~${baseType}|${data.type}`;
+                const skipArray = ['button'];
                 if (prepareCall) {
                   form.elList.push(elPath);
-                  const skipArray = ['button'];
                   if (!skipArray.includes(baseType)) form.markup[parent.linecode].queryFields[data.name] = 1;
                   if (typeof data.lst === 'string') form.lstList.push(data.lst);
                   if (typeof data.handler === 'function') {
@@ -82,7 +82,9 @@
                     elPath,
                   };
                   form.fields[field.code] = field;
-                  const value = form.data[parent.code]?.[field.keyvalue] || '';
+                  const value = skipArray.includes(baseType)
+                    ? null
+                    : lib.utils.getDeep(form.data[parent.code] || {}, field.keyvalue) || '';
                   return { ...field, value };
                 }
               },
@@ -169,6 +171,44 @@
       },
     );
     return f;
+  },
+  prepareMarkupHandlers: ({ form }) => {
+    const handlers = { ids: [], db: {}, tpl: [] };
+
+    async function execHandlers() {
+      try {
+        if (handlers.tpl.length) {
+          const idsHandlers = [...handlers.ids];
+          const tplHandlers = [...handlers.tpl];
+          handlers.ids.splice(0, handlers.ids.length);
+          handlers.tpl.splice(0, handlers.tpl.length);
+          for (const handler of idsHandlers) await handler();
+
+          for (const [name, map] of Object.entries(handlers.db)) {
+            for (const [linecode, { col, ids }] of Object.entries(map)) {
+              const findData = await db.mongo.find(
+                col,
+                { _id: { $in: ids } },
+                { projection: form.markup[linecode].queryFields },
+              );
+              for (const item of findData) {
+                const itemCode = form.data[`${linecode}-${item._id}`];
+                form.data[itemCode] = item;
+                delete form.data[`${linecode}-${item._id}`];
+              }
+            }
+          }
+
+          for (const handler of tplHandlers) await handler();
+          handlers.db = {};
+          await execHandlers();
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    return { handlers, execHandlers };
   },
   nextCode(form) {
     return [++form.codeCount, form.codeSfx].filter((item) => item).join('_');

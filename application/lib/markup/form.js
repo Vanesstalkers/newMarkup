@@ -17,7 +17,7 @@
     if (_id !== true) _id = db.mongo.ObjectID(_id);
     let { col, id, on = {} } = processForm.markup[`__${form}`];
     if (!id) id = () => [_id];
-    const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form: processForm });
+    const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
       { user, form: processForm, parent: { code: 0 }, handlers },
       { type: 'form', name: form, col, id, on },

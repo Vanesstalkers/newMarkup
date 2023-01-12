@@ -1,7 +1,7 @@
 ({
   button: {
     tpl: function (data) {
-      const config = data.config || {};
+      const config = data.config || { btnType: 'secondary', label: true };
       if (data.label) data.text = data.label;
       let btnStyle = '';
       if (config.outline) btnStyle = 'outline-';

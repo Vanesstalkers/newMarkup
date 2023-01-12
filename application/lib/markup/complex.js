@@ -1,10 +1,10 @@
 ({
   get: (
     { user, form, parent = {}, handlers },
-    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on } = {},
+    { type = 'complex', name, col, links, config = {}, item = {}, id, on, filter, custom } = {},
   ) => {
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
-    const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, on };
+    const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, id, on };
     form.fields[complex.code] = complex;
 
     complex.name = name;
@@ -14,13 +14,13 @@
     complex.linecode = linecode;
     const idFunc =
       id ||
-      async function (cb) {
-        return form.data[parent.code][`__${complex.name}`]?.l || [];
+      async function () {
+        return form.data[parent.code][complex.links[parent.name]]?.l || [];
       };
     const tplFunc = form.markup[linecode].tpl;
 
     handlers.ids.push(async () => {
-      const ids = await idFunc({ user, form, complex });
+      const ids = await idFunc({ user, form, complex, query: custom?.query });
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
@@ -37,9 +37,9 @@
           form.data[`${linecode}-${id}`] = itemCode;
           complex.items[itemCode] = {};
         }
-        if (!handlers.db[complex.col]) handlers.db[complex.col] = {};
-        if (!handlers.db[complex.col][linecode]) handlers.db[complex.col][linecode] = [];
-        handlers.db[complex.col][linecode].push(...findIds);
+        if (!handlers.db[complex.name]) handlers.db[complex.name] = {};
+        if (!handlers.db[complex.name][linecode]) handlers.db[complex.name][linecode] = { col: complex.col, ids: [] };
+        handlers.db[complex.name][linecode].ids.push(...findIds);
       }
     });
     handlers.tpl.push(async () => {

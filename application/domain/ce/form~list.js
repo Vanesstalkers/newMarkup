@@ -7,28 +7,48 @@
   },
   col: 'user',
   id: ({ user }) => [user._id],
-  tpl: () => [
+  tpl: ({ data }) => [
     HTML('core/default~table', {
       col: 'lvl1',
+      filter: {
+        items: [
+          { class: 'col-3', f: { name: 'filter.find_text', label: 'Название', config: { float: true } } },
+          {
+            class: 'col-3',
+            f: { name: 'filter.is_deleted', label: 'Показывать удаленные', type: 'check', config: { switch: true } },
+          },
+        ],
+      },
       table: {
-        id: async ({ complex }) => {
-          const findData = await db.mongo.find(complex.col, {}, { projection: { _id: 1 } });
+        id: async ({ user, complex, query = {} }) => {
+          const find = { add_time: { $regex: query['filter.find_text'] || '' } };
+          const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
           return findData.map(({ _id }) => _id);
         },
         cols: [
           { label: 'Добавлена', c: { name: 'lvl2', f: { name: 'add_time', config: { inputType: 'datetime' } } } },
-          // { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
-          // { label: 'Название', f: { name: 'name', type: 'input' } },
-          // { label: 'ИНН', f: { name: 'inn', type: 'input' } },
-          { label: 'Тест', html: ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test' })] },
+          { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
+          { label: 'Название', f: { name: 'name', type: 'input' } },
+          { label: 'ИНН', f: { name: 'inn', type: 'input' } },
+          // { label: 'Тест', html: ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test' })] },
           {
             label: 'Тест2',
             html: ({ data }) => [
               // COMPLEX({ name: 'lvl3', add: false, item: { add: false, config: {} } }, () => [FIELD({ name: 'test' })]),
-              COMPLEX({ name: 'lvl2-deep', col: 'lvl2', item: { add: false } }, () => [
-                FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
-                COMPLEX({ name: 'lvl3', item: { add: true } }, () => [FIELD({ name: 'test' })]),
-              ]),
+              COMPLEX(
+                {
+                  name: 'lvl2-deep',
+                  col: 'lvl2',
+                  links: { lvl1: '__lvl2' },
+                  item: { add: false },
+                },
+                ({ data }) => [
+                  FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
+                  COMPLEX({ name: 'lvl3', links: { 'lvl2-deep': '__lvl3' }, item: { add: true } }, () => [
+                    FIELD({ name: 'test' }),
+                  ]),
+                ],
+              ),
             ],
           },
           /*{label: 'ОГРН', f: {name: 'ogrn', type: 'text--', value: ''}},

@@ -54,24 +54,36 @@
     const updateData = { $pull: { [`${itemLink}.l`]: itemId }, $inc: { [`${itemLink}.c`]: -1 } };
     await db.mongo.updateOne(complex.parent.col, parentId, updateData);
   },
-  showComplex: async ({ form, code, user }) => {
+  showComplex: async ({ form, code, user, query }) => {
     const processForm = user.forms[form];
     const item = processForm.fields[code];
-    const { _id: itemId } = processForm.data[code];
-
-    const itemData = await db.mongo.findOne(item.col, itemId);
-    processForm.data[code] = itemData;
-    return await lib.markup.actions.showComplexItem({
-      itemCode: code,
-      complexCode: item.complexCode,
-      user,
-      form: processForm,
-    });
+    if (item.type === 'complex') {
+      // if (_id !== true) _id = db.mongo.ObjectID(_id);
+      // let { col, id, on = {} } = processForm.markup[`__${form}`];
+      // if (!id) id = () => [_id];
+      const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
+      const result = lib.markup.complex.get(
+        { user, form: processForm, data: processForm.data, parent: item.parent, handlers },
+        { ...item, custom: { query } },
+      );
+      await execHandlers();
+      return result;
+    } else {
+      const { _id: itemId } = processForm.data[code] || {};
+      const itemData = await db.mongo.findOne(item.col, itemId);
+      processForm.data[code] = itemData;
+      return await lib.markup.actions.showComplexItem({
+        itemCode: code,
+        complexCode: item.complexCode,
+        user,
+        form: processForm,
+      });
+    }
   },
   showComplexItem: async ({ itemCode, complexCode, user, form }) => {
     const complex = form.fields[complexCode];
 
-    const { handlers, execHandlers } = lib.markup.actions.prepareMarkupHandlers({ form });
+    const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form });
     handlers.tpl.push(async () => {
       let result = [];
       const item = {
@@ -98,43 +110,5 @@
     await execHandlers();
 
     return complex.items[itemCode];
-  },
-  prepareMarkupHandlers: ({ form }) => {
-    const handlers = { ids: [], db: {}, tpl: [] };
-
-    async function execHandlers() {
-      try {
-        if (handlers.tpl.length) {
-          const idsHandlers = [...handlers.ids];
-          const tplHandlers = [...handlers.tpl];
-          handlers.ids.splice(0, handlers.ids.length);
-          handlers.tpl.splice(0, handlers.tpl.length);
-          for (const handler of idsHandlers) await handler();
-
-          for (const [col, map] of Object.entries(handlers.db)) {
-            for (const [linecode, ids] of Object.entries(map)) {
-              const findData = await db.mongo.find(
-                col,
-                { _id: { $in: ids } },
-                { projection: form.markup[linecode].queryFields },
-              );
-              for (const item of findData) {
-                const itemCode = form.data[`${linecode}-${item._id}`];
-                form.data[itemCode] = item;
-                delete form.data[`${linecode}-${item._id}`];
-              }
-            }
-          }
-
-          for (const handler of tplHandlers) await handler();
-          handlers.db = {};
-          await execHandlers();
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    return { handlers, execHandlers };
   },
 });
