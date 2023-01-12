@@ -36,12 +36,12 @@
 
                       lib.markup.complex.prepare({ user, form, parent, blockName }, ...args);
                     })()
-                  : lib.markup.complex.get({ user, form, parent, handlers }, ...args),
+                  : lib.markup.complex.get({ user, form, data, parent, handlers }, ...args),
               HTML: (...args) => {
                 if (prepareCall) {
                   lib.markup.html.prepare({ user, form, parent, blockName }, ...args);
                 } else {
-                  return lib.markup.html.get({ user, form, parent, handlers }, ...args);
+                  return lib.markup.html.get({ user, form, data, parent, handlers }, ...args);
                 }
               },
               FIELD: function (data) {

@@ -20,7 +20,7 @@
     const tplFunc = form.markup[linecode].tpl;
 
     handlers.ids.push(async () => {
-      const ids = await idFunc({ user });
+      const ids = await idFunc({ user, form, complex });
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
@@ -58,7 +58,7 @@
           form.fields[code] = item;
           const proxyData = { user, form, data: form.data[code], parent: item, handlers };
           try {
-            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
+            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
           } catch (err) {
             result = [['div', { class: 'inline-error', error: err.message }]];
           }
@@ -71,11 +71,11 @@
   },
   prepare: (
     { user, form, parent = {}, blockName },
-    { name, col, links, filter, config, id, on = {}, handlers = {} } = {},
+    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on = {}, handlers = {} } = {},
     tplFunc,
   ) => {
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
-    const complex = {};
+    const complex = { type, parent, items: {}, config, item, on };
     complex.name = name;
     complex.col = col || name;
     if (!links) links = { [parent.name]: `__${complex.name}` };
@@ -107,7 +107,7 @@
     if (typeof tplFunc === 'function') {
       const proxyData = { prepareCall: true, user, form, data: {}, parent: complex, blockName };
       try {
-        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)();
+        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
       } catch (err) {
         console.log(err);
       }

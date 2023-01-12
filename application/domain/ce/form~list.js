@@ -1,0 +1,43 @@
+({
+  config: {
+    menu: {
+      label: 'Компании',
+      icon: 'bx bx-building',
+    },
+  },
+  col: 'user',
+  id: ({ user }) => [user._id],
+  tpl: () => [
+    HTML('core/default~table', {
+      col: 'lvl1',
+      table: {
+        id: async ({ complex }) => {
+          const findData = await db.mongo.find(complex.col, {}, { projection: { _id: 1 } });
+          return findData.map(({ _id }) => _id);
+        },
+        cols: [
+          { label: 'Добавлена', c: { name: 'lvl2', f: { name: 'add_time', config: { inputType: 'datetime' } } } },
+          // { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
+          // { label: 'Название', f: { name: 'name', type: 'input' } },
+          // { label: 'ИНН', f: { name: 'inn', type: 'input' } },
+          { label: 'Тест', html: ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test' })] },
+          {
+            label: 'Тест2',
+            html: ({ data }) => [
+              // COMPLEX({ name: 'lvl3', add: false, item: { add: false, config: {} } }, () => [FIELD({ name: 'test' })]),
+              COMPLEX({ name: 'lvl2-deep', col: 'lvl2', item: { add: false } }, () => [
+                FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
+                COMPLEX({ name: 'lvl3', item: { add: true } }, () => [FIELD({ name: 'test' })]),
+              ]),
+            ],
+          },
+          /*{label: 'ОГРН', f: {name: 'ogrn', type: 'text--', value: ''}},
+        {label: 'КПП', f: {name: 'kpp', type: 'text--', value: ''}},*/
+        ],
+      },
+    }),
+  ],
+  func: () => {},
+  style: `
+  `,
+});

@@ -1,7 +1,7 @@
 ({
   config: {
     menu: {
-      label: 'Компании',
+      label: 'Форма компании',
       icon: 'bx bx-building',
     },
   },

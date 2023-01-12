@@ -32,7 +32,8 @@
     const processForm = user.forms[form];
     const complex = processForm.fields[code];
     const { _id: parentId } = processForm.data[complex.parent.code];
-    const handlers = lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.'));
+    const handlers =
+      lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, code, user, data });
     const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentId } });
@@ -85,7 +86,10 @@
       form.fields[item.code] = item;
       const proxyData = { user, form, data: form.data[itemCode], parent: item, handlers };
       try {
-        result = lib.markup.helpers.addProxifiedContextToTplFunc(form.markup[complex.linecode].tpl, proxyData)();
+        result = lib.markup.helpers.addProxifiedContextToTplFunc(
+          form.markup[complex.linecode].tpl,
+          proxyData,
+        )({ data: form.data[itemCode] });
       } catch (err) {
         result = [['div', { class: 'inline-error', error: err.message }]];
       }

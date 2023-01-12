@@ -493,11 +493,7 @@
       data.class =
         (data.class || '') +
         ' ' +
-        [
-          'complex-item',
-          data.name ? 'complex-' + data.name : undefined,
-          true || controls.length ? 'has-controls' : undefined,
-        ]
+        ['complex-item', data.name ? 'complex-' + data.name : undefined, controls.length ? 'has-controls' : undefined]
           .filter((item) => item)
           .join(' ');
 
@@ -505,14 +501,16 @@
         tag,
         { class: data.class, code: data.code },
         [
-          [
-            'div',
-            { class: 'item-controls' },
-            [
-              ['div', { class: 'h btn-reload' }],
-              ['div', { class: 'h btn-delete' }],
-            ],
-          ],
+          controls.length
+            ? [
+                'div',
+                { class: 'item-controls' },
+                [
+                  ['div', { class: 'h btn-reload' }],
+                  ['div', { class: 'h btn-delete' }],
+                ],
+              ]
+            : [],
         ],
       ];
 
