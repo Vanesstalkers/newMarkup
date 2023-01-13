@@ -9,7 +9,7 @@
   id: ({ user }) => [user._id],
   tpl: ({ data }) => [
     HTML('core/default~table', {
-      col: 'lvl1',
+      col: 'lvl11',
       filter: {
         items: [
           { class: 'col-3', f: { name: 'filter.find_text', label: 'Название', config: { float: true } } },
@@ -21,17 +21,18 @@
       },
       table: {
         id: async ({ user, complex, query = {} }) => {
-          const find = { add_time: { $regex: query['filter.find_text'] || '' } };
+          const find = {};
+          if (query['filter.find_text']) find.add_time = { $regex: query['filter.find_text'] || '' };
           const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
           return findData.map(({ _id }) => _id);
         },
         cols: [
-          { label: 'Добавлена', c: { name: 'lvl2', f: { name: 'add_time', config: { inputType: 'datetime' } } } },
+          // { label: 'Добавлена', c: { name: 'lvl2', f: { name: 'add_time', config: { inputType: 'datetime' } } } },
           { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
           { label: 'Название', f: { name: 'name', type: 'input' } },
           { label: 'ИНН', f: { name: 'inn', type: 'input' } },
           // { label: 'Тест', html: ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test' })] },
-          {
+          {} || {
             label: 'Тест2',
             html: ({ data }) => [
               // COMPLEX({ name: 'lvl3', add: false, item: { add: false, config: {} } }, () => [FIELD({ name: 'test' })]),
@@ -44,9 +45,7 @@
                 },
                 ({ data }) => [
                   FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
-                  COMPLEX({ name: 'lvl3', links: { 'lvl2-deep': '__lvl3' }, item: { add: true } }, () => [
-                    FIELD({ name: 'test' }),
-                  ]),
+                  COMPLEX({ name: 'lvl3', links: { 'lvl2-deep': '__lvl3' } }, () => [FIELD({ name: 'test' })]),
                 ],
               ),
             ],

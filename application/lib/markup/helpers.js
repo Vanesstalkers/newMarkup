@@ -22,8 +22,12 @@
               SUBFORM: (data) => {
                 return { ...data, type: 'subform', code: lib.markup.helpers.nextCode(form) };
               },
-              COMPLEX: (...args) =>
-                prepareCall
+              COMPLEX: (complexData = {}, ...args) => {
+                if (!complexData.type) complexData.type = 'complex';
+                if (!complexData.item) complexData.item = { add: true };
+                if (!complexData.config) complexData.config = {};
+
+                return prepareCall
                   ? (() => {
                       const elPath = `core/default/el~complex|block`;
                       form.elList.push(elPath);
@@ -32,11 +36,12 @@
                       const elFile = domain[corePath][themePath][filePath.replace(/[+-]/g, '')];
                       const el = elType ? elFile?.[elType] : elFile;
                       if (typeof el.tpl === 'function')
-                        lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { user, form })(...args);
+                        lib.markup.helpers.addProxifiedContextToElTplFunc(el.tpl, { user, form })(complexData, ...args);
 
-                      lib.markup.complex.prepare({ user, form, parent, blockName }, ...args);
+                      lib.markup.complex.prepare({ user, form, parent, blockName }, complexData, ...args);
                     })()
-                  : lib.markup.complex.get({ user, form, data, parent, handlers }, ...args),
+                  : lib.markup.complex.get({ user, form, data, parent, handlers }, complexData, ...args);
+              },
               HTML: (...args) => {
                 if (prepareCall) {
                   lib.markup.html.prepare({ user, form, parent, blockName }, ...args);

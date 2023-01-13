@@ -1,13 +1,6 @@
 ({
-  config: {
-    multi: true,
-    customName: (key) => 'complex_' + key,
-  },
 
   block: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data, config) {
       const tag = data.config?.tag || 'div';
       const itemTag = data.item.config?.tag || 'div';
@@ -482,9 +475,6 @@
   },
 
   item: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data, config) {
       const tag = data.config?.tag || 'div';
       const controls = (data.controls || '').split(',').filter((item) => item);

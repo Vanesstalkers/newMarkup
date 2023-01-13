@@ -15,7 +15,7 @@
         domain,
         [...form.split('~')[0].split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
       );
-      if (typeof handler === 'function') result = await handler({ form, code, user, data });
+      if (typeof handler === 'function') result = await handler({ form: processForm, field, user, data });
     }
     return result;
   },
@@ -24,10 +24,10 @@
     const field = processForm.fields[code];
     const parent = processForm.fields[field.parentCode];
     const { _id: parentId } = processForm.data[field.parentCode];
-
+    processForm.data[field.parentCode][field.name] = value; // !!! доделать setDeep
     await db.mongo.updateOne(parent.col, parentId, { $set: { [field.name]: value } });
   },
-  addComplex: async ({ form, code, user, data = {} }) => {
+  addComplex: async ({ form, code, user, data = {}, returnId = false }) => {
     const [block, name] = form.split('~');
     const processForm = user.forms[form];
     const complex = processForm.fields[code];
@@ -40,7 +40,9 @@
     const itemCode = lib.markup.helpers.nextCode(processForm);
     processForm.data[itemCode] = newItem;
     if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, code, user, data, newItem });
-    return await lib.markup.actions.showComplexItem({ itemCode, complexCode: code, user, form: processForm });
+    return returnId // !!! переделать защиту от form.fields[item.code] в showComplexItem
+      ? newItem._id
+      : await lib.markup.actions.showComplexItem({ itemCode, complexCode: code, user, form: processForm });
   },
   deleteComplex: async ({ form, code, user }) => {
     const processForm = user.forms[form];
@@ -101,7 +103,7 @@
         result = lib.markup.helpers.addProxifiedContextToTplFunc(
           form.markup[complex.linecode].tpl,
           proxyData,
-        )({ data: form.data[itemCode] });
+        )({ data: form.data[itemCode], custom: item.custom || {} });
       } catch (err) {
         result = [['div', { class: 'inline-error', error: err.message }]];
       }

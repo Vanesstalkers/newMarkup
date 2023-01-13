@@ -4,6 +4,42 @@
     return [
       DIV(
         { class: 'card' },
+        IF(config.add?.modal, () => {
+          const { items } = config.add || {};
+          return [
+            HTML('core/default~modal', {
+              id: `${config.col}-add`,
+              title: `Новый объект '${config.col}'`,
+              html: {
+                body: [
+                  COMPLEX(
+                    { name: 'tmp_obj_' + config.col, col: 'tmp_obj', item: { addAuto: true, custom: { col: config.col, items } } },
+                    ({ custom }) => {
+                      const { items } = custom;
+                      return [
+                        DIV(
+                          {},
+                        ),
+                      ];
+                    },
+                  ),
+                ],
+              },
+              button: {
+                html: [
+                  BUTTON(
+                    {
+                      class: 'btn rounded-pill btn-icon btn-success',
+                      'data-bs-toggle': 'modal',
+                      'data-bs-target': `#${config.col}-add-modal`,
+                    },
+                    SPAN({ class: 'tf-icons bx bx-plus' }),
+                  ),
+                ],
+              },
+            }),
+          ];
+        }),
         H5(
           { class: 'card-header', text: filters.length ? 'Фильтры поиска' : '' },
           IF(filters.length, () => [
@@ -73,11 +109,11 @@
                 name: config.col,
                 config: { tag: 'tbody' },
                 class: 'table-border-bottom-0',
-                item: { add: false, config: { tag: 'tr', content: config.table.cols } },
+                item: { add: false, config: { tag: 'tr' }, custom: { cols: config.table.cols } },
                 id: config.table.id,
               },
-              ({ data }) => {
-                const cols = (parent.type === 'complex' ? parent.item.config?.content : parent.config?.content) || [];
+              ({ data, custom }) => {
+                const { cols } = custom;
                 return cols.map((col) =>
                   TD(
                     { class: col.class || '' },
@@ -90,11 +126,10 @@
                                 {
                                   name: col.c.name,
                                   add: false,
-                                  item: { config: { content: col.c.f } },
+                                  item: { custom: { content: col.c.f } },
                                 },
-                                () => {
-                                  const content =
-                                    parent.type === 'complex' ? parent.item.config?.content : parent.config?.content;
+                                ({ custom }) => {
+                                  const { content } = custom;
                                   return [FIELD(content)];
                                 },
                               ),

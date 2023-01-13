@@ -15,12 +15,12 @@
     user.forms[form] = processForm;
 
     if (_id !== true) _id = db.mongo.ObjectID(_id);
-    let { col, id, on = {} } = processForm.markup[`__${form}`];
+    let { col, id, on = {}, item = {} } = processForm.markup[`__${form}`];
     if (!id) id = () => [_id];
     const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
       { user, form: processForm, parent: { code: 0 }, handlers },
-      { type: 'form', name: form, col, id, on },
+      { type: 'form', name: form, col, id, on, item },
     );
     await execHandlers();
 
@@ -29,7 +29,7 @@
 
   prepare: async ({ form, user }) => {
     const [block, name] = form.split('~');
-    const { tpl, col, id, on, func, style } = lib.utils.getDeep(
+    const { tpl, col, id, on, item = {}, func, style } = lib.utils.getDeep(
       domain,
       block.replace(/\//g, '.') + '.' + `form~${name}`,
     );
@@ -49,7 +49,7 @@
         },
         parent: { root: true },
       },
-      { name: form, col, id, on },
+      { name: form, col, id, on, item },
       tpl,
     );
 

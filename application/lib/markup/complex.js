@@ -1,10 +1,8 @@
 ({
-  get: (
-    { user, form, parent = {}, handlers },
-    { type = 'complex', name, col, links, config = {}, item = {}, id, on, filter, custom } = {},
-  ) => {
+  get: ({ user, form, parent = {}, handlers }, data) => {
+    const { name, col, links, id, custom } = data;
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
-    const complex = { code: lib.markup.helpers.nextCode(form), type, parent, items: {}, config, item, id, on };
+    const complex = { ...data, code: lib.markup.helpers.nextCode(form), parent, items: {} };
     form.fields[complex.code] = complex;
 
     complex.name = name;
@@ -15,7 +13,20 @@
     const idFunc =
       id ||
       async function () {
-        return form.data[parent.code][complex.links[parent.name]]?.l || [];
+        let ids = form.data[parent.code][complex.links[parent.name]]?.l || [];
+        if (ids.length === 0 && complex.item.addAuto === true) {
+          const _id = await lib.markup.actions.addComplex({
+            form: form.fields[[1, form.codeSfx].join('_')]?.name,
+            code: complex.code,
+            user,
+            returnId: true,
+          });
+          if (!form.data[parent.code][complex.links[parent.name]])
+            form.data[parent.code][complex.links[parent.name]] = { c: 1, l: [] };
+          form.data[parent.code][complex.links[parent.name]].l.push(_id);
+          ids = [_id];
+        }
+        return ids;
       };
     const tplFunc = form.markup[linecode].tpl;
 
@@ -58,7 +69,10 @@
           form.fields[code] = item;
           const proxyData = { user, form, data: form.data[code], parent: item, handlers };
           try {
-            result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: form.data[code] });
+            result = lib.markup.helpers.addProxifiedContextToTplFunc(
+              tplFunc,
+              proxyData,
+            )({ data: form.data[code], custom: item.custom || {} });
           } catch (err) {
             result = [['div', { class: 'inline-error', error: err.message }]];
           }
@@ -69,13 +83,13 @@
 
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
-  prepare: (
-    { user, form, parent = {}, blockName },
-    { type = 'complex', name, col, links, filter, config = {}, item = {}, id, on = {}, handlers = {} } = {},
-    tplFunc,
-  ) => {
+  prepare: ({ user, form, parent = {}, blockName }, data, tplFunc) => {
+    const { name, col, filter } = data;
+    let links = data.links;
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
-    const complex = { type, parent, items: {}, config, item, on };
+    if (!data.on) data.on = {};
+    if (!data.handlers) data.handlers = {};
+    const complex = { ...data, parent, items: {} };
     complex.name = name;
     complex.col = col || name;
     if (!links) links = { [parent.name]: `__${complex.name}` };
@@ -89,14 +103,14 @@
       queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
       tpl: tplFunc.toString(),
       col: JSON.stringify(col),
-      id: id?.toString(),
-      on: Object.fromEntries(Object.entries(on).map(([key, func]) => [key, func.toString()])),
+      id: data.id?.toString(),
+      on: Object.fromEntries(Object.entries(data.on).map(([key, func]) => [key, func.toString()])),
       links,
     };
-    if (Object.keys(handlers).length) form.handlers[linecode] = handlers;
-    if (on) form.scriptList.push(...Object.values(on));
+    if (Object.keys(data.handlers).length) form.handlers[linecode] = data.handlers;
+    if (data.on) form.scriptList.push(...Object.values(data.on));
 
-    complex.parentDataNotRequired = config?.parentDataNotRequired;
+    complex.parentDataNotRequired = data.config?.parentDataNotRequired;
     if (!complex.parentDataNotRequired && form.markup[parent.linecode]) {
       const childLink = links[parent.name];
       form.markup[parent.linecode].queryFields[childLink + '.l'] =
@@ -107,7 +121,10 @@
     if (typeof tplFunc === 'function') {
       const proxyData = { prepareCall: true, user, form, data: {}, parent: complex, blockName };
       try {
-        lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data: {} });
+        lib.markup.helpers.addProxifiedContextToTplFunc(
+          tplFunc,
+          proxyData,
+        )({ data: {}, custom: complex.item.custom || {} });
       } catch (err) {
         console.log(err);
       }

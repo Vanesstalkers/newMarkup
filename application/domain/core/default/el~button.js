@@ -14,14 +14,18 @@
     front: {
       prepare: function ({ $el, data }) {
         if (data.handler) {
+          const beforeHandler = data.on?.beforeHandler;
+          const afterHandler = data.on?.afterHandler;
           $el.addEventListener('click', async function (event) {
             event.target.setAttribute('disabled', '');
             const $btn = event.target;
             const form = $btn.closest('[type="form"]').dataset.name;
             const code = $btn.dataset.code;
-            const { result, data, msg, stack } = await api.markup.handleAction({ form, code, data: { test: 123 } });
-            console.log({ result, data });
+            let handlerData = {};
+            if (typeof window[beforeHandler] === 'function') handlerData = await window[beforeHandler](event);
+            const { result, data, msg, stack } = await api.markup.handleAction({ form, code, data: handlerData });
             if (result === 'error') console.error({ msg, stack });
+            if (typeof window[afterHandler] === 'function') await window[afterHandler](event, data);
             event.target.removeAttribute('disabled');
           });
         } else if (data.on?.click && typeof window[data.on.click] === 'function') {
