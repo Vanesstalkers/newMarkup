@@ -49,7 +49,7 @@
       name: 'phone',
       label: 'Phone',
       type: 'input',
-      config: { inputType: 'password', _mask: '+7 (000) 000-00-00', float: true },
+      config: { inputType: 'phone', mask: '+7 (000) 000-00-00', float: true },
     }),
     COMPLEX(
       {

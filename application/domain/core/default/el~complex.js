@@ -24,16 +24,17 @@
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card shadow-none bg-transparent border border-secondary' : 'content-holder',
+          !disableCardView ? 'card card-action shadow-none' : 'content-holder',
           'complex-block',
           data.name ? 'complex-' + data.name : undefined,
           add ? 'has-controls' : undefined,
+          data.config?.inline ? 'inline-style' : undefined,
         ]
           .filter((item) => item)
           .join(' ');
 
       const bodyWrapper = !disableCardView
-        ? (html) => ['div', { class: 'card-body p-0 content-holder' }, html]
+        ? (html) => ['div', { class: 'card-body collapse show p-0 content-holder' }, html]
         : (html) => html;
 
       return [
@@ -66,36 +67,41 @@
                         [
                           [
                             'button',
-                            { type: 'button', class: 'btn btn-sm btn-primary me-4 btn-add', text: add.label || 'Добавить' },
+                            {
+                              type: 'button',
+                              class: 'btn btn-sm btn-primary me-4 btn-add',
+                              text: add.label || 'Добавить',
+                            },
                           ],
 
-                        //   add.type != 'file'
-                        //   ? []
-                        //   : [
-                        //       window.el['core/default/el~file|file'].tpl({
-                        //         class: 'el control-el',
-                        //         addLabel: add.label,
-                        //         delete: false,
-                        //       }),
-                        //     ],
+                          //   add.type != 'file'
+                          //   ? []
+                          //   : [
+                          //       window.el['core/default/el~file|file'].tpl({
+                          //         class: 'el control-el',
+                          //         addLabel: add.label,
+                          //         delete: false,
+                          //       }),
+                          //     ],
 
-                        // add.type != 'search'
-                        //   ? []
-                        //   : [
-                        //       window.el['core/default/el~select2|select2'].tpl({
-                        //         class: 'el',
-                        //         label: add.label,
-                        //         onSave: 'addWithSearch',
-                        //         code: data.code,
-                        //         id: false,
-                        //       }),
-                        //     ],
+                          // add.type != 'search'
+                          //   ? []
+                          //   : [
+                          //       window.el['core/default/el~select2|select2'].tpl({
+                          //         class: 'el',
+                          //         label: add.label,
+                          //         onSave: 'addWithSearch',
+                          //         code: data.code,
+                          //         id: false,
+                          //       }),
+                          //     ],
 
                           [
                             'a',
                             { class: 'card-reload btn-reload' },
                             [['i', { class: 'tf-icons bx bx-rotate-left scaleX-n1-rtl' }]],
                           ],
+                          ['a', { class: 'card-expand' }, [['i', { class: 'tf-icons bx bx-fullscreen' }]]],
                           ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
                         ],
                       ],
@@ -128,6 +134,22 @@
           $el.dataset.l = data.l;
           $el.dataset.o = 0;
         }
+
+        for (const $toggle of $el.querySelectorAll('.card-collapsible')) {
+          $toggle.addEventListener('click', async (event) => {
+            event.preventDefault();
+            // new bootstrap.Collapse($toggle.closest(".card").querySelector(".collapse")),
+            // $toggle.closest(".card-title").classList.toggle("collapsed"),
+            // Helpers._toggleClass($toggle.firstElementChild, "bx-chevron-down", "bx-chevron-up")
+          });
+        }
+        const $expand = $el.querySelector('.card-expand');
+        if ($expand)
+          $expand.addEventListener('click', async (event) => {
+            event.preventDefault();
+            Helpers._toggleClass($expand.firstElementChild, 'bx-fullscreen', 'bx-exit-fullscreen'),
+              $expand.closest('.card').classList.toggle('card-fullscreen');
+          });
 
         /*if(data[1].l != undefined && data[1].showOnScroll){
 				doAfterLoad.push(function(){
@@ -399,13 +421,21 @@
 			});
 		});*/
     },
+    style: `
+      .complex-block.inline-style .card-body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0px;
+      }
+    `,
   },
 
   item: {
     tpl: function (data, config) {
-      const tag = data.config?.tag || 'div';
       const disableCardView = data.parent.config?.disableCardView;
-      const controls = (data.controls || '').split(',').filter((item) => item);
+      if (!data.controls) data.controls = { reload: true, expand: true, delete: true };
+      controls = data.controls;
+      const hasControls = Object.keys(controls).length;
       delete data.controls;
       data.class =
         (data.class || '') +
@@ -414,7 +444,9 @@
           !disableCardView ? 'card mb-3' : 'content-holder',
           'complex-item',
           data.name ? 'complex-' + data.name : undefined,
-          controls.length ? 'has-controls' : undefined,
+          hasControls ? 'has-controls' : undefined,
+          controls.config?.simple ? 'simple-controls' : undefined,
+          data.parent.config?.inline ? 'inline-style' : undefined,
         ]
           .filter((item) => item)
           .join(' ');
@@ -424,14 +456,14 @@
         : (html) => html;
 
       return [
-        tag,
-        { class: data.class, code: data.code },
+        data.config?.tag || 'div',
+        { code: data.code, class: data.class },
         [
           bodyWrapper([
-            disableCardView
+            !hasControls
               ? []
               : [
-                  'div',
+                  controls.config?.tag || 'div',
                   {
                     class: 'card-header d-flex align-items-center justify-content-between complex-controls',
                   },
@@ -456,8 +488,18 @@
                           'div',
                           { class: 'dropdown-menu dropdown-menu-end' },
                           [
-                            ['a', { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' }],
-                            ['a', { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' }],
+                            controls.reload
+                              ? [
+                                  'a',
+                                  { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' },
+                                ]
+                              : [],
+                            controls.delete
+                              ? [
+                                  'a',
+                                  { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' },
+                                ]
+                              : [],
                           ],
                         ],
                       ],
@@ -475,7 +517,6 @@
         for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
         $parentEl.dataset.itemcount = $parentEl.dataset.itemcount * 1 + 1;
         $parentEl.dataset.o = ($parentEl.dataset.o || 0) * 1 + 1;
-
         // // без этого lastitem отображается после добавления нового item
         // const l = Math.abs(realParent.attr('l') || 0);
         // l && realParent.attr('o') * 1 >= l
@@ -531,6 +572,29 @@
         return false;
       });
     },
+    style: `
+      .complex-item.simple-controls {
+        position: relative;
+      }
+      .complex-item.simple-controls > .card-body > .card-header, .complex-item.simple-controls > .card-header {
+        position: absolute;
+        z-index: 1;
+        right: 0px;
+        top: 0px;
+        padding: 0;
+      }
+      .complex-item.inline-style {
+        margin-right: 1rem;
+      }
+      .complex-item.inline-style > .card-body {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+      }
+      .complex-item.inline-style > .card-body > .card-header, .complex-item.inline-style > .card-header {
+        padding: 0px;
+      }
+    `,
   },
 
   addobj: {

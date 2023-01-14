@@ -282,6 +282,7 @@ document.addEventListener('click', async (event) => {
     }
   }
   if ($el.closest('.btn-delete')) {
+    if (!confirm('Подтвердите удаление')) return false;
     const form = $el.closest('[type="form"]').dataset.name;
     const $item = $el.closest('.complex-item');
     const code = $item.dataset.code;

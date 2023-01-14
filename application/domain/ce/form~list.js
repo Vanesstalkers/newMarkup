@@ -7,6 +7,7 @@
   },
   col: 'user',
   id: ({ user }) => [user._id],
+  item: { controls: { reload: true, config: { simple: true } } },
   tpl: ({ data }) => [
     HTML('core/default~table', {
       col: 'lvl11',

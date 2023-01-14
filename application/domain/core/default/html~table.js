@@ -13,7 +13,11 @@
               html: {
                 body: [
                   COMPLEX(
-                    { name: 'tmp_obj_' + config.col, col: 'tmp_obj', item: { addAuto: true, custom: { col: config.col, items } } },
+                    {
+                      name: 'tmp_obj_' + config.col,
+                      col: 'tmp_obj',
+                      item: { addAuto: true, custom: { col: config.col, items } },
+                    },
                     ({ custom }) => {
                       const { items } = custom;
                       return [
@@ -111,18 +115,23 @@
           { class: 'table-responsive text-nowrap' },
           TABLE(
             { class: 'table' },
-            THEAD({}, TR({}, ...config.table.cols.map((col) => TH({ text: col.label })))),
+            THEAD({}, TR({}, ...config.table.cols.filter(({ label }) => label).map((col) => TH({ text: col.label })))),
             COMPLEX(
               {
                 name: config.col,
                 config: { tag: 'tbody', disableCardView: true },
                 class: 'table-border-bottom-0',
-                item: { add: false, config: { tag: 'tr' }, custom: { cols: config.table.cols } },
+                item: {
+                  add: false,
+                  config: { tag: 'tr' },
+                  controls: {},
+                  custom: { cols: config.table.cols },
+                },
                 id: config.table.id,
               },
               ({ data, custom }) => {
                 const { cols } = custom;
-                return cols.map((col) =>
+                return cols.filter(({ label }) => label).map((col) =>
                   TD(
                     { class: col.class || '' },
                     ...[]

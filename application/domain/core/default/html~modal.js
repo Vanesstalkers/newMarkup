@@ -13,7 +13,7 @@
         id: `${id || ''}-modal`,
         tabindex: '-1',
         'aria-hidden': 'true',
-        on: { load: `"prepareModal"` },
+        on: { load: 'prepareModal' },
       },
       DIV(
         { class: 'modal-dialog', role: 'document' },
@@ -57,12 +57,13 @@
               on: {
                 beforeHandler: (event) => {
                   const $modal = event.target.closest('.modal');
-                  const $item = $modal.querySelector('.modal-body > .complex-block > .complex-item');
+                  const $item = $modal.querySelector('.modal-body > .complex-block .complex-item');
                   const $form = event.target.closest('[type="form"]');
                   const $table = $form.querySelector('table > .complex-block');
                   return { tmpObjCode: $item.getAttribute('code'), tableCode: $table.getAttribute('code') };
                 },
                 afterHandler: (event, data) => {
+                  console.log('afterHandler', event, data);
                   location.reload();
                 },
               },

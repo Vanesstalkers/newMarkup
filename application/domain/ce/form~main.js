@@ -5,176 +5,114 @@
       icon: 'bx bx-building',
     },
   },
+  item: { controls: { reload: true, config: { simple: true } } },
+  //   col: 'ce',
   col: 'user',
-  id: ({ user }) => [user._id],
+  id: function ({ user, query }) {
+    // return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
+    return [this.db.mongo.ObjectID(user._id)];
+  },
   tpl: () => [
-    FIELD({
-      name: 'testAction',
-      type: 'button',
-      label: '1234',
-      config: { btnType: 'primary', label: true },
-      handler: async (data) => {
-        console.log(777);
-        return data;
-      },
-    }),
-    FIELD({
-      name: 'testAction2',
-      type: 'button',
-      label: '456',
-      config: { btnType: 'primary', outline: true, size: 'xl' },
-      handler: 'ce~search',
-    }),
-    FIELD({
-      name: 'testAction3',
-      type: 'button',
-      label: '789',
-      config: { btnType: 'warning', outline: true, size: 'xs' },
-      on: {
-        click: (e) => {
-          console.log(666, e, this);
-        },
-      },
-    }),
-    FIELD({
-      name: 'email',
-      label: 'Email',
-      type: 'input',
-      placeholder: 'a@b.ru',
-      config: { inputType: 'email', comment: 'Электронная почта', errorComment: 'ВСЕ ПЛОХО !!!' },
-    }),
-    FIELD({
-      name: 'phone',
-      label: 'Phone',
-      type: 'input',
-      config: { inputType: 'password', _mask: '+7 (000) 000-00-00', float: true },
-    }),
-    COMPLEX(
-      {
-        name: 'lvl1',
-        config: { tag: 'table' },
-        item: { add: true || { type: 'file' }, config: { tag: 'tr' } },
-        id: () => {
-          return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f'), db.mongo.ObjectID('63aee515b11faaaba5c00306')];
-        },
-        on: {
-          load: (data) => {
-            // console.log('onLoad', this, { data });
-          },
-          itemLoad: (data) => {
-            // console.log('onItemLoad', this, { data });
-          },
-        },
-      },
-      () => [
-        HTML('ce~test'),
-        // FIELD({
-        //   name: 'num',
-        //   label: 'Номер',
-        //   type: 'input',
-        //   on: {
-        //     save: (a, b, c) => {
-        //       // alert(1);
-        //     },
-        //     load: ($el) => {
-        //       //console.log('onLoad', $el);
-        //     },
-        //   },
-        // }),
-        FIELD({ name: 'date', label: 'datetime-local', type: 'input', config: { inputType: 'date' } }),
-        FIELD({ name: 'text666', type: 'textarea', label: 'Textarea', config: { rows: 1 }, disabled: true }),
-        FIELD({ name: 'text777', type: 'textarea', label: 'Textarea' }),
-        FIELD({
-          name: 'file',
-          label: 'Файл',
-          type: 'file',
-          on: {
-            save: (a, b, c) => {
-              // alert(1);
-            },
-            load: ($el) => {
-              // console.log('onLoad', $el);
-            },
-          },
+    DIV(
+      { class: 'row' },
+      DIV(
+        { class: 'col-xs-4' },
+        HTML('core/default~card', {
+          title: 'Контакты',
+          html: [
+            HTML('core/default~phones', {
+              name: 'user_phone',
+              links: { user_phone: { 'ce~main': '__user' }, 'ce~main': '__phone' },
+            }),
+            HTML('core/default~emails', {
+              name: 'user_email',
+              links: { user_email: { 'ce~main': '__user' }, 'ce~main': '__email' },
+            }),
+            HTML('core/default~card', {
+              title: 'Реквизиты',
+              html: [HTML('ce~info')],
+            }),
+          ],
         }),
-        FIELD({ name: 'file8', label: 'Файл8', type: 'file', multiple: true }),
-        FIELD({
-          name: 'list',
-          label: 'select2-cписок',
-          type: 'select2-',
-          lst: { action: 'ce~search' },
-          multiple: true,
-        }),
-        FIELD({ name: 'list2', label: 'Список', type: 'radio', lst: 'ce~tutorial' }),
-        FIELD({
-          name: 'check',
-          _label: 'Галочка',
-          type: 'check-',
-          config: { content: 'Едем в Казань', switch: false },
-        }),
-        IF(true, () => [
-          COMPLEX(
-            {
-              name: 'lvl2',
-              // id: () => [true],
-              item: { add: { label: '+++' } },
-              handlers: {
-                beforeAdd: async ({ data }) => {
-                  data.test = true;
-                  console.log('beforeAdd', data);
-                  return data;
-                },
-                afterAdd: ({ newItem }) => {
-                  console.log('afterAdd', newItem);
-                  return newItem;
-                },
-              },
-            },
-            () => [SPAN({ class: 'col-xs-8' }), IMG({})],
-          ),
-          COMPLEX(
-            {
-              name: 'lvl2-1',
-              item: { add: { label: '+ lvl2-1' } },
-              links: { 'lvl2-1': { lvl1: '__lvl1' }, lvl1: '__lvl2-1' },
-            },
-            () => [
-              PPP({ _id: data._id }),
-              SPAN({ class: 'col-xs-8' }),
-              IMG({}),
-              FIELD({
-                name: 'num666',
-                label: 'Номер666',
-                type: 'select2',
-                lst: { action: 'ce~search' },
-                multiple: true,
-              }),
-            ],
-          ),
-        ]),
-        DIV(
-          {
-            class: 'row',
-          },
-          SPAN({ class: 'col-xs-8' }),
-          SPAN({ class: 'col-xs-8' }),
-          IMG({}),
-        ),
-      ],
+      ),
     ),
   ],
-  func: () => {
-    // console.log('from export');
-  },
-  style: `
-    .body {
-      display: 1px solid black;
-    }
-    .inline-error:before {
-      content: attr(error);
-      font-size: 10px;
-      color: red;
-      text-overflow: ellipsis;
-    }
-  `,
 });
+/* 
+exports.access = (__, data, callback)=>SYS.requireFile('func', 'user~access').f(__, {
+	allow: ['ce']
+}, callback);
+*/
+// exports.tpl = (_, d) => {
+//   return [
+//     DIV(
+//       { class: 'row' },
+//       DIV(
+//         { class: 'col-xs-4' },
+//         HTML('code/default~card', { title: 'Контакты', html: [DIV({ text: 123 })] }),
+//         // _.html('__tpl~ibox', _, d, {
+//         //   title: 'Контакты',
+//         //   titleClass: 'contacts-block',
+//         //   content: (_, d) => [
+//         // _.html('__tpl~phone_block', _, d, { c: { name: 'ce_phone', sub: true, config: { bClass: 'col-xs-6' } } }),
+//         // _.html('__tpl~email_block', _, d, { c: { name: 'ce_email', sub: true, config: { bClass: 'col-xs-6' } } }),
+
+//         // !!! надо добавить правильные links к phone и email (сейчас не работает как нужно)
+//         // links: {
+//         // ce_email: {ce: '__ce'},
+//         // ce: '__email',
+//         // },
+//         //   ],
+//         // }),
+//         // _.html('__tpl~ibox', _, d, { title: 'Реквизиты', content: (_, d) => [_.html('ce~info', _, d)] }),
+//       ),
+//       /* ["div",{"class": "col-xs-8"},[
+// 				["div",{"class": "row"},[
+// 					["div",{"class": "col-xs-12"},[
+// 						_.html('__tpl~ibox', _, d, {title: 'Контактные лица и сотрудники', content: (_,d)=>
+// 						[
+// 							["div",{class:`css
+// 								.*css* .bPageFilters {
+// 									margin-top: -40px;
+// 									margin-right: 20px;
+// 								}
+// 							`},[
+// 								_.html('worker~table', _, d, {filter: {}}),
+// 							]]
+// 						]}),
+// 					]],
+// 					["div",{"class": "col-xs-12"},[
+// 						_.c({name: 'client', add: false, process: {
+// 							tpl: (_, d)=>[
+// 								_.html('__tpl~ibox', _, d, {title: 'Анкеты клиента', hide: true, content: (_,d)=>
+// 								[
+// 									_.html('app~list', _, d, {parent: _.__.pre || d._id}),
+// 								]}),
+// 							],
+// 						}}),
+// 					]],
+// 				]],
+// 			]] */
+//     ),
+//   ];
+// };
+/*
+exports.func = ()=>{
+
+}
+
+exports.script = ()=>{
+
+	window.updateMenuCustom = function (info)
+	{
+		if (!window.breadcrumb.length)
+			window.breadcrumb.push({text: "Юридические лица", query: { form: "ce~list", container: "formContent" } });
+
+		let $nameField = $("#formContent .el-name:not(.no-breadcrumb) .el-value");
+		
+		window.breadcrumb.push({
+			text: $nameField.text() || $nameField.val(),
+			query: history.state.subform, active: true,
+		});
+	};
+} */

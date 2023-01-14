@@ -20,10 +20,16 @@
     return result;
   },
   saveField: async ({ form, code, value, user }) => {
+    const [block, name] = form.split('~');
     const processForm = user.forms[form];
     const field = processForm.fields[code];
     const parent = processForm.fields[field.parentCode];
     const { _id: parentId } = processForm.data[field.parentCode];
+    const handler = lib.utils.getDeep(
+      domain,
+      [...block.split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
+    );
+    if (handler) await handler({ form, field, parent, user, value });
     processForm.data[field.parentCode][field.name] = value; // !!! доделать setDeep
     await db.mongo.updateOne(parent.col, parentId, { $set: { [field.name]: value } });
   },

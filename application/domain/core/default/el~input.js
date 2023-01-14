@@ -37,12 +37,18 @@
     front: {
       prepare: function ({ $el, data }) {
         const $input = $el.querySelector('input');
+        const beforeSave = data.on?.beforeSave && window[data.on.beforeSave];
         $input.addEventListener('change', async (event) => {
           const form = $input.closest('[type="form"]').dataset.name;
           const code = $input.closest('.el').dataset.code;
           const value = $input.value;
+          event.target.setCustomValidity('');
+          if (typeof beforeSave === 'function' && (await beforeSave({ value, event })) !== true) return;
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
-          if (result === 'error') console.error({ msg, stack });
+          if (result === 'error') {
+            event.target.setCustomValidity(msg);
+            console.error({ msg, stack });
+          }
         });
 
         if (data.config?.mask) {
@@ -59,8 +65,10 @@
         display: none;
       }
       input.el-value:invalid ~ .error-text {
+        position: absolute;
         display: block;
         color: #ff3e1d;
+        z-index: 1;
       }
     `,
   },

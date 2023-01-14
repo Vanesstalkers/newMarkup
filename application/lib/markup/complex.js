@@ -85,7 +85,7 @@
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
   prepare: ({ user, form, parent = {}, blockName }, data, tplFunc) => {
-    const { name, col, config, filter } = data;
+    const { name, col, config, item, filter } = data;
     let links = data.links;
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
     if (!data.on) data.on = {};
@@ -105,6 +105,7 @@
       tpl: tplFunc.toString(),
       col: JSON.stringify(col),
       config: JSON.stringify(config),
+      item: JSON.stringify(item),
       id: data.id?.toString(),
       on: Object.fromEntries(Object.entries(data.on).map(([key, func]) => [key, func.toString()])),
       links,
