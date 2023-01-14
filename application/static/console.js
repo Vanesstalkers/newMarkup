@@ -138,13 +138,19 @@ window.nativeTplToHTML = async function (deepEl, $parent) {
         const $block = $parent.querySelector(`.complex-block[code='${el.code}']`);
         if (prepare) prepare({ $el: $block, data: el });
         if (el.items) {
+          const $contentHolder = $block.className.match(/\bcontent-holder\b/)
+            ? $block
+            : $block.querySelector(`.content-holder`);
           for (const item of Object.values(el.items)) {
             const { tpl, prepare } = window.el[item.elPath] || {};
             if (typeof tpl === 'function') {
-              await nativeTplToHTML([tpl({ ...item, parent: el })], $block);
-              const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
+              await nativeTplToHTML([tpl({ ...item, parent: el })], $contentHolder);
+              const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
               if (prepare) prepare({ $el: $item, data: item, parent: { data: el, $el: $block } });
-              await nativeTplToHTML(item.content, $item);
+              const $itemContentHolder = $item.className.match(/\bcontent-holder\b/)
+                ? $item
+                : $item.querySelector(`.content-holder`);
+              await nativeTplToHTML(item.content, $itemContentHolder);
             }
           }
         }
@@ -254,7 +260,7 @@ window.addEventListener('load', async () => {
 
 document.addEventListener('click', async (event) => {
   const $el = event.target;
-  if ($el.closest('.complex-controls.control-add')) {
+  if ($el.className.match(/\btn-add\b/) || $el.closest('.btn-add')) {
     const form = $el.closest('[type="form"]').dataset.name;
     const $block = $el.closest('.complex-block');
     const code = $block.dataset.code;
@@ -263,10 +269,16 @@ document.addEventListener('click', async (event) => {
       console.error({ msg, stack });
     } else {
       const { tpl, prepare } = window.el[item.elPath] || {};
-      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
-      const $item = $block.querySelector(`.complex-item[code='${item.code}']`);
+      const $contentHolder = $block.className.match(/\bcontent-holder\b/)
+        ? $block
+        : $block.querySelector(`.content-holder`);
+      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $contentHolder);
+      const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
+      const $itemContentHolder = $item.className.match(/\bcontent-holder\b/)
+        ? $item
+        : $item.querySelector(`.content-holder`);
       if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
-      await nativeTplToHTML(item.content, $item);
+      await nativeTplToHTML(item.content, $itemContentHolder);
     }
   }
   if ($el.closest('.btn-delete')) {
@@ -287,10 +299,16 @@ document.addEventListener('click', async (event) => {
     else if (result === 'success') {
       item.class = (item.class || '') + ' reloaded';
       const { tpl, prepare } = window.el[item.elPath] || {};
-      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $block);
-      const $newItem = $block.querySelector(`.reloaded.complex-item[code='${item.code}']`);
+      const $contentHolder = $block.className.match(/\bcontent-holder\b/)
+        ? $block
+        : $block.querySelector(`.content-holder`);
+      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $contentHolder);
+      const $newItem = $contentHolder.querySelector(`.reloaded.complex-item[code='${item.code}']`);
       if (prepare) prepare({ $el: $newItem, data: item, parent: { data: $block.dataset, $el: $block } });
-      await nativeTplToHTML(item.content, $newItem);
+      const $itemContentHolder = $newItem.className.match(/\bcontent-holder\b/)
+        ? $newItem
+        : $newItem.querySelector(`.content-holder`);
+      await nativeTplToHTML(item.content, $itemContentHolder);
       $newItem.classList.remove('reloaded');
       $item.replaceWith($newItem);
     }

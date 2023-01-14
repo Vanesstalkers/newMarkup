@@ -19,9 +19,9 @@
       COMPLEX(
         {
           name: 'lvl3',
-          item: {add: {label: '+ lvl3'}},
+          item: { add: { label: '+ lvl3' } },
         },
-        () => [FIELD({ name: 'test', type: 'input-', label: 'Текстовое поле' })],
+        ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test', type: 'input-', label: 'Текстовое поле' })],
       ),
     ];
   },

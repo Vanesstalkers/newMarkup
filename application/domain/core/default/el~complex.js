@@ -1,9 +1,9 @@
 ({
-
   block: {
-    tpl: function (data, config) {
+    tpl: function (data) {
       const tag = data.config?.tag || 'div';
       const itemTag = data.item.config?.tag || 'div';
+      const disableCardView = data.config?.disableCardView;
 
       let add = data.item.add;
       if (add && typeof add != 'object') add = add !== true ? { type: add } : {};
@@ -23,60 +23,86 @@
       data.class =
         (data.class || '') +
         ' ' +
-        ['complex-block', data.name ? 'complex-' + data.name : undefined, add ? 'has-controls' : undefined]
+        [
+          !disableCardView ? 'card shadow-none bg-transparent border border-secondary' : 'content-holder',
+          'complex-block',
+          data.name ? 'complex-' + data.name : undefined,
+          add ? 'has-controls' : undefined,
+        ]
           .filter((item) => item)
           .join(' ');
+
+      const bodyWrapper = !disableCardView
+        ? (html) => ['div', { class: 'card-body p-0 content-holder' }, html]
+        : (html) => html;
+
       return [
         tag,
         { class: data.class, code: data.code, type: data.type },
         [
-          !add
-            ? []
-            : [
-                // itemTag,
-                // Object.assign(
-                //   {
-                //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
-                //     addField: add.field,
-                //     code: data.code,
-                //     id: false, // без id: false элемент подменит собой комплексный блок
-                //   },
-                //   data.front || {},
-                // ),
-                // [
-                [
-                  itemTag,
-                  {
-                    class: 'complex-controls control-add',
-                    addField: add.field,
-                    text: !add.type ? add.label || 'Добавить' : undefined,
-                  },
+          bodyWrapper([
+            !add
+              ? []
+              : [
+                  // itemTag,
+                  // Object.assign(
+                  //   {
+                  //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
+                  //     addField: add.field,
+                  //     code: data.code,
+                  //     id: false, // без id: false элемент подменит собой комплексный блок
+                  //   },
+                  //   data.front || {},
+                  // ),
+                  // [
                   [
-                    add.type != 'file'
-                      ? []
-                      : [
-                          window.el['core/default/el~file|file'].tpl({
-                            class: 'el control-el',
-                            addLabel: add.label,
-                            delete: false,
-                          }),
-                        ],
+                    'div',
+                    { class: 'card-title header-elements' },
+                    [
+                      ['h5', { class: 'm-3', text: data.label || data.name }],
+                      [
+                        'div',
+                        { class: 'card-title-elements m-3 ms-auto' },
+                        [
+                          [
+                            'button',
+                            { type: 'button', class: 'btn btn-sm btn-primary me-4 btn-add', text: add.label || 'Добавить' },
+                          ],
 
-                    add.type != 'search'
-                      ? []
-                      : [
-                          window.el['core/default/el~select2|select2'].tpl({
-                            class: 'el',
-                            label: add.label,
-                            onSave: 'addWithSearch',
-                            code: data.code,
-                            id: false,
-                          }),
+                        //   add.type != 'file'
+                        //   ? []
+                        //   : [
+                        //       window.el['core/default/el~file|file'].tpl({
+                        //         class: 'el control-el',
+                        //         addLabel: add.label,
+                        //         delete: false,
+                        //       }),
+                        //     ],
+
+                        // add.type != 'search'
+                        //   ? []
+                        //   : [
+                        //       window.el['core/default/el~select2|select2'].tpl({
+                        //         class: 'el',
+                        //         label: add.label,
+                        //         onSave: 'addWithSearch',
+                        //         code: data.code,
+                        //         id: false,
+                        //       }),
+                        //     ],
+
+                          [
+                            'a',
+                            { class: 'card-reload btn-reload' },
+                            [['i', { class: 'tf-icons bx bx-rotate-left scaleX-n1-rtl' }]],
+                          ],
+                          ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
                         ],
+                      ],
+                    ],
                   ],
                 ],
-                // ],
-              ],
+          ]),
         ],
 
         // !controls.show
@@ -373,158 +399,74 @@
 			});
 		});*/
     },
-    style: `
-        .complex-block:before {
-          color: green;
-          content: attr(data-name);
-        }
-        .complex-block {
-            position: relative;
-            padding: 8px;
-            border: 1px solid green;
-            box-shadow: inset 0 0 4px 0px green;
-        }
-        .complex-block.has-controls > .complex-controls {
-            // position: absolute;
-            // top: 0px;
-            // left: 0px;
-            width: 100%;
-            text-align: center;
-            cursor: pointer;
-        }
-        .complex-block.single-item:not([itemcount='0']) > .complex-controls {
-            display: none!important;
-        }
-        body.editMode .complex-block.has-controls {
-            position: relative;
-            padding-top: 30px;
-            padding-bottom: 30px;
-        }
-        .complex-block.has-controls > .complex-controls.--add-after {
-            top: inherit;
-            bottom: 0px;
-        }
-        .complex-block.has-controls > .complex-controls.control-add {
-            // position: absolute;
-            // left: 0px;
-            // top: -15px;
-            // width: auto;
-            // height: 100%;
-            min-height: 15px;
-            color: #1c84c6;
-            white-space: nowrap;
-            min-width: 100%;
-        }
-        .complex-block.has-controls > .complex-controls > input[type=file], 
-        .complex-block.has-controls > .complex-controls > .el > input[type=file] {
-            opacity: 0;
-            width: 100%;
-        }
-        
-        .complex-block.has-controls .complex-close {
-            color: white;
-            font-size: 12px;
-            cursor: pointer;
-            padding: 6px;
-            width: 100%;
-            text-align: center;
-        }
-        .complex-block > .btn-lastitem:hover {
-            opacity: 0.5;
-            cursor: pointer;
-        }
-        
-        .add-with-search.complex-controls label {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            left: 0px;
-            z-index: 101;
-            color: white;
-            line-height: 30px;
-            font-weight: normal;
-        }
-        .add-with-search.complex-controls {
-            width: 200px!important;
-            height: 30px!important;
-            left: auto!important;
-            right: 20px!important;
-            top: -40px!important;
-        }
-        .add-with-search.complex-controls .select2-container {
-            width: 100%;
-            max-width: 200px;
-        }
-        .add-with-search.complex-controls .select2-container .select2-selection__rendered {
-            display: none;
-        }
-        .add-with-search.complex-controls .select2-selection {
-            background-color: #1c84c6;
-            border-radius: 3px;
-        }
-        .add-with-search.complex-controls .select2-selection:before {
-            content: '';
-            color: white;
-            line-height: 26px;
-        }
-        
-        .add-with-sub {
-            display: none;
-        }
-    `,
   },
 
   item: {
     tpl: function (data, config) {
       const tag = data.config?.tag || 'div';
+      const disableCardView = data.parent.config?.disableCardView;
       const controls = (data.controls || '').split(',').filter((item) => item);
       delete data.controls;
-
       data.class =
         (data.class || '') +
         ' ' +
-        ['complex-item', data.name ? 'complex-' + data.name : undefined, controls.length ? 'has-controls' : undefined]
+        [
+          !disableCardView ? 'card mb-3' : 'content-holder',
+          'complex-item',
+          data.name ? 'complex-' + data.name : undefined,
+          controls.length ? 'has-controls' : undefined,
+        ]
           .filter((item) => item)
           .join(' ');
+
+      const bodyWrapper = !disableCardView
+        ? (html) => ['div', { class: 'card-body content-holder' }, html]
+        : (html) => html;
 
       return [
         tag,
         { class: data.class, code: data.code },
         [
-          controls.length
-            ? [
-                'div',
-                { class: 'item-controls' },
-                [
-                  ['div', { class: 'h btn-reload' }],
-                  ['div', { class: 'h btn-delete' }],
+          bodyWrapper([
+            disableCardView
+              ? []
+              : [
+                  'div',
+                  {
+                    class: 'card-header d-flex align-items-center justify-content-between complex-controls',
+                  },
+                  [
+                    ['h5', { class: 'card-title m-0 me-2' }],
+                    [
+                      'div',
+                      { class: 'dropdown' },
+                      [
+                        [
+                          'button',
+                          {
+                            class: 'btn p-0',
+                            type: 'button ',
+                            'data-bs-toggle': 'dropdown',
+                            'aria-haspopup': 'true',
+                            'aria-expanded': 'false',
+                          },
+                          [['i', { class: 'bx bx-dots-vertical-rounded' }]],
+                        ],
+                        [
+                          'div',
+                          { class: 'dropdown-menu dropdown-menu-end' },
+                          [
+                            ['a', { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' }],
+                            ['a', { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' }],
+                          ],
+                        ],
+                      ],
+                    ],
+                  ],
                 ],
-              ]
-            : [],
+          ]),
         ],
       ];
-
-      // return [
-      // [
-      // tag,
-      // data,
-      // [
-      //   !controls.length
-      //     ? []
-      //     : [
-      //         itemTag,
-      //         {
-      //           class: 'item-controls',
-      //           code: data.code,
-      //           id: false,
-      //         },
-      //         [controls.indexOf('delete') == -1 ? [] : ['div', { class: 'h btn-delete' }]],
-      //       ],
-
-      //   // если добавлять не через concat, то потеряются все (криво вставленные) теги внутри complex-item, кроме первого
-      // ].concat(data[2] || []),
-      // ],
-      // ];
     },
     front: {
       prepare: function ({ $el, data, parent: { $el: $parentEl, data: parentData } }) {
@@ -589,49 +531,6 @@
         return false;
       });
     },
-    style: `
-      .complex-item, .complex-item.has-controls {
-          position: relative;
-          padding: 8px;
-          border: 1px solid blue;
-          box-shadow: 0 0 0px 2px blue;
-      }
-      .complex-item.has-controls > .item-controls {
-          position: absolute;
-          right: 6px;
-          top: 6px;
-          z-index: 1;
-          text-align: left;
-          height: 15px;
-          font-size: 10px;
-          display: none;
-      }
-      .complex-item.has-controls > .item-controls > div {
-          cursor: pointer;
-          width: 15px;
-          height: 15px;
-          border-radius: 50%;
-          background-repeat: no-repeat;
-          background-position: center;
-          background-size: cover;
-          background-color: transparent;
-      }
-      .complex-item.has-controls > .item-controls > div.btn-delete {
-          background-image: url(/delete.png);
-      }
-      .complex-item.has-controls > .item-controls > div.btn-reload {
-        background-image: url(/reload.png);
-    }
-
-      body.editMode .complex-block.has-controls .complex-item.has-controls > .item-controls {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: flex-start;
-      }
-      .complex-item.has-controls > .item-controls {
-          display: block;
-      }	
-    `,
   },
 
   addobj: {

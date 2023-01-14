@@ -1,4 +1,5 @@
 ({
+  config: { disableCardView: true },
   col: 'user',
   id: ({ user }) => [user._id],
   tpl: () => {

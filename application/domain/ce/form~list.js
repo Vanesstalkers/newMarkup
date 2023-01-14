@@ -54,6 +54,10 @@
         {label: 'КПП', f: {name: 'kpp', type: 'text--', value: ''}},*/
         ],
       },
+      add: {
+        modal: true,
+        items: [{ f: { name: 'name', label: 'Название' } }, { html: (_, d) => [_.html('ce/fields~inn', _, d)] }],
+      },
     }),
   ],
   func: () => {},

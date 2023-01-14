@@ -29,9 +29,10 @@
         return ids;
       };
     const tplFunc = form.markup[linecode].tpl;
-
     handlers.ids.push(async () => {
-      const ids = await idFunc({ user, form, complex, query: custom?.query });
+      if (data.type === 'form') console.log({ custom });
+      const ids = await idFunc.call({ db }, { user, form, complex, query: custom?.query });
+      if (data.type === 'form') console.log({ ids, col: complex.col });
       const findIds = [];
       for (const id of ids) {
         if (id === true) {
@@ -84,7 +85,7 @@
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
   prepare: ({ user, form, parent = {}, blockName }, data, tplFunc) => {
-    const { name, col, filter } = data;
+    const { name, col, config, filter } = data;
     let links = data.links;
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
     if (!data.on) data.on = {};
@@ -103,6 +104,7 @@
       queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
       tpl: tplFunc.toString(),
       col: JSON.stringify(col),
+      config: JSON.stringify(config),
       id: data.id?.toString(),
       on: Object.fromEntries(Object.entries(data.on).map(([key, func]) => [key, func.toString()])),
       links,

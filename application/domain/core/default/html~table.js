@@ -19,6 +19,14 @@
                       return [
                         DIV(
                           {},
+                          ...items
+                            .filter((item) => item)
+                            .map(
+                              (item) =>
+                                [].concat(
+                                  item.f ? [FIELD(item.f)] : [],
+                                ) /* .concat(item.html ? item.html(_, d) : []) */,
+                            ),
                         ),
                       ];
                     },
@@ -107,7 +115,7 @@
             COMPLEX(
               {
                 name: config.col,
-                config: { tag: 'tbody' },
+                config: { tag: 'tbody', disableCardView: true },
                 class: 'table-border-bottom-0',
                 item: { add: false, config: { tag: 'tr' }, custom: { cols: config.table.cols } },
                 id: config.table.id,
