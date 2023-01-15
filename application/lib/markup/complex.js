@@ -14,7 +14,7 @@
       id ||
       async function () {
         let ids = form.data[parent.code][complex.links[parent.name]]?.l || [];
-        if (ids.length === 0 && complex.item.addAuto === true) {
+        if (ids.length === 0 && complex.add?.auto === true) {
           const _id = await lib.markup.actions.addComplex({
             form: form.fields[[1, form.codeSfx].join('_')]?.name,
             code: complex.code,
@@ -30,9 +30,7 @@
       };
     const tplFunc = form.markup[linecode].tpl;
     handlers.ids.push(async () => {
-      if (data.type === 'form') console.log({ custom });
       const ids = await idFunc.call({ db }, { user, form, complex, query: custom?.query });
-      if (data.type === 'form') console.log({ ids, col: complex.col });
       const findIds = [];
       for (const id of ids) {
         if (id === true) {

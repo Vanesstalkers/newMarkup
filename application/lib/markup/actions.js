@@ -41,11 +41,11 @@
     const handlers =
       lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
-    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, code, user, data });
+    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data });
     const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentId } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
     processForm.data[itemCode] = newItem;
-    if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, code, user, data, newItem });
+    if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, complex, user, data, newItem });
     return returnId // !!! переделать защиту от form.fields[item.code] в showComplexItem
       ? newItem._id
       : await lib.markup.actions.showComplexItem({ itemCode, complexCode: code, user, form: processForm });

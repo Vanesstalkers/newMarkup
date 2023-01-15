@@ -1,24 +1,30 @@
 ({
   block: {
     tpl: function (data) {
-      const tag = data.config?.tag || 'div';
-      const itemTag = data.item.config?.tag || 'div';
       const disableCardView = data.config?.disableCardView;
 
-      let add = data.item.add;
-      if (add && typeof add != 'object') add = add !== true ? { type: add } : {};
-
-      const controls = data.controls || {};
-
-      if (controls.show || data.l) {
-        if (typeof controls.show != 'object') controls.show = { label: controls.show };
-
-        if (data.l != undefined && data.showOnButton) controls.show.type = 'btn';
-        if (data.l != undefined && data.showOnScroll) controls.show.type = 'scroll';
-
-        if (!controls.show.label) controls.show.label = 'Показать еще';
-        if (!controls.show.type && controls.show.label) controls.show.type = 'btn';
+      if (!data.controls)
+        data.controls = {
+          /* reload: true, expand: true */
+        };
+      if (data.add && !data.add.auto) {
+        if (typeof data.add === true) data.add = {};
+        else if (typeof data.add === 'string') data.add = { type: data.add };
+        data.controls.add = data.add;
       }
+      const hasControls = Object.keys(data.controls).length;
+      if (hasControls) {
+      }
+
+      // if (controls.show || data.l) {
+      //   if (typeof controls.show != 'object') controls.show = { label: controls.show };
+
+      //   if (data.l != undefined && data.showOnButton) controls.show.type = 'btn';
+      //   if (data.l != undefined && data.showOnScroll) controls.show.type = 'scroll';
+
+      //   if (!controls.show.label) controls.show.label = 'Показать еще';
+      //   if (!controls.show.type && controls.show.label) controls.show.type = 'btn';
+      // }
 
       data.class =
         (data.class || '') +
@@ -27,88 +33,93 @@
           !disableCardView ? 'card card-action shadow-none' : 'content-holder',
           'complex-block',
           data.name ? 'complex-' + data.name : undefined,
-          add ? 'has-controls' : undefined,
+          hasControls ? 'has-controls' : undefined,
+          data.controls.config?.simple ? 'simple-controls' : undefined,
           data.config?.inline ? 'inline-style' : undefined,
         ]
           .filter((item) => item)
           .join(' ');
 
-      const bodyWrapper = !disableCardView
-        ? (html) => ['div', { class: 'card-body collapse show p-0 content-holder' }, html]
-        : (html) => html;
-
       return [
-        tag,
+        data.config?.tag || 'div',
         { class: data.class, code: data.code, type: data.type },
         [
-          bodyWrapper([
-            !add
-              ? []
-              : [
-                  // itemTag,
-                  // Object.assign(
-                  //   {
-                  //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
-                  //     addField: add.field,
-                  //     code: data.code,
-                  //     id: false, // без id: false элемент подменит собой комплексный блок
-                  //   },
-                  //   data.front || {},
-                  // ),
-                  // [
+          !hasControls
+            ? []
+            : [
+                // itemTag,
+                // Object.assign(
+                //   {
+                //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
+                //     addField: add.field,
+                //     code: data.code,
+                //     id: false, // без id: false элемент подменит собой комплексный блок
+                //   },
+                //   data.front || {},
+                // ),
+                // [
+                [
+                  'div',
+                  {
+                    'parent-code': data.code,
+                    class: 'card-header header-elements' + (data.controls.config?.hide ? ' d-none' : ''),
+                  },
                   [
-                    'div',
-                    { class: 'card-title header-elements' },
+                    data.label ? ['h5', { class: 'm-3', text: data.label }] : [],
                     [
-                      ['h5', { class: 'm-3', text: data.label || data.name }],
+                      'div',
+                      { class: 'card-title-elements m-3 ms-auto' },
                       [
-                        'div',
-                        { class: 'card-title-elements m-3 ms-auto' },
-                        [
-                          [
-                            'button',
-                            {
-                              type: 'button',
-                              class: 'btn btn-sm btn-primary me-4 btn-add',
-                              text: add.label || 'Добавить',
-                            },
-                          ],
+                        !data.controls.add
+                          ? []
+                          : [
+                              'button',
+                              {
+                                type: 'button',
+                                class: 'btn btn-sm btn-primary me-4 btn-add',
+                                text: add.label || 'Добавить',
+                              },
+                            ],
 
-                          //   add.type != 'file'
-                          //   ? []
-                          //   : [
-                          //       window.el['core/default/el~file|file'].tpl({
-                          //         class: 'el control-el',
-                          //         addLabel: add.label,
-                          //         delete: false,
-                          //       }),
-                          //     ],
+                        //   add.type != 'file'
+                        //   ? []
+                        //   : [
+                        //       window.el['core/default/el~file|file'].tpl({
+                        //         class: 'el control-el',
+                        //         addLabel: add.label,
+                        //         delete: false,
+                        //       }),
+                        //     ],
 
-                          // add.type != 'search'
-                          //   ? []
-                          //   : [
-                          //       window.el['core/default/el~select2|select2'].tpl({
-                          //         class: 'el',
-                          //         label: add.label,
-                          //         onSave: 'addWithSearch',
-                          //         code: data.code,
-                          //         id: false,
-                          //       }),
-                          //     ],
+                        // add.type != 'search'
+                        //   ? []
+                        //   : [
+                        //       window.el['core/default/el~select2|select2'].tpl({
+                        //         class: 'el',
+                        //         label: add.label,
+                        //         onSave: 'addWithSearch',
+                        //         code: data.code,
+                        //         id: false,
+                        //       }),
+                        //     ],
 
-                          [
-                            'a',
-                            { class: 'card-reload btn-reload' },
-                            [['i', { class: 'tf-icons bx bx-rotate-left scaleX-n1-rtl' }]],
-                          ],
-                          ['a', { class: 'card-expand' }, [['i', { class: 'tf-icons bx bx-fullscreen' }]]],
-                          ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
-                        ],
+                        !data.controls.reload
+                          ? []
+                          : [
+                              'a',
+                              { class: 'card-reload btn-reload' },
+                              [['i', { class: 'tf-icons bx bx-rotate-left scaleX-n1-rtl' }]],
+                            ],
+                        !data.controls.expand
+                          ? []
+                          : ['a', { class: 'card-expand' }, [['i', { class: 'tf-icons bx bx-fullscreen' }]]],
+                        ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
                       ],
                     ],
                   ],
                 ],
-          ]),
+              ],
+          !disableCardView ? ['div', { class: 'card-body collapse show p-0 content-holder' }] : [],
         ],
 
         // !controls.show
@@ -128,7 +139,9 @@
 
         $el.setAttribute('markup-code', data.code);
         if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
-        for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
+        for (const [key, value] of Object.entries(data)) {
+          $el.dataset[key] = FIELD_JSON_KEYS.includes(key) ? JSON.stringify(value) : value;
+        }
         $el.dataset.itemcount = 0;
         if (data.l) {
           $el.dataset.l = data.l;
@@ -138,9 +151,9 @@
         for (const $toggle of $el.querySelectorAll('.card-collapsible')) {
           $toggle.addEventListener('click', async (event) => {
             event.preventDefault();
-            // new bootstrap.Collapse($toggle.closest(".card").querySelector(".collapse")),
-            // $toggle.closest(".card-title").classList.toggle("collapsed"),
-            // Helpers._toggleClass($toggle.firstElementChild, "bx-chevron-down", "bx-chevron-up")
+            new bootstrap.Collapse($toggle.closest('.card').querySelector('.collapse'));
+            $toggle.closest('.card-header').classList.toggle('collapsed');
+            Helpers._toggleClass($toggle.firstElementChild, 'bx-chevron-down', 'bx-chevron-up');
           });
         }
         const $expand = $el.querySelector('.card-expand');
@@ -422,10 +435,23 @@
 		});*/
     },
     style: `
+      .complex-block.simple-controls {
+        position: relative;
+      }
+      .complex-block.simple-controls > .card-body > .card-header, .complex-block.simple-controls > .card-header {
+        position: absolute;
+        z-index: 1;
+        right: 0px;
+        top: 0px;
+        padding: 0;
+      }
       .complex-block.inline-style .card-body {
         display: flex;
         flex-wrap: wrap;
         padding: 0px;
+      }
+      .complex-block.inline-style .card-body.collapse:not(.show) {
+        display: none;
       }
     `,
   },
@@ -433,10 +459,11 @@
   item: {
     tpl: function (data, config) {
       const disableCardView = data.parent.config?.disableCardView;
-      if (!data.controls) data.controls = { reload: true, expand: true, delete: true };
-      controls = data.controls;
-      const hasControls = Object.keys(controls).length;
-      delete data.controls;
+      if (!data.controls)
+        data.controls = {
+          /* reload: true, expand: true, delete: true */
+        };
+      const hasControls = Object.keys(data.controls).length;
       data.class =
         (data.class || '') +
         ' ' +
@@ -445,68 +472,64 @@
           'complex-item',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
-          controls.config?.simple ? 'simple-controls' : undefined,
+          data.controls.config?.simple ? 'simple-controls' : undefined,
           data.parent.config?.inline ? 'inline-style' : undefined,
         ]
           .filter((item) => item)
           .join(' ');
 
-      const bodyWrapper = !disableCardView
-        ? (html) => ['div', { class: 'card-body content-holder' }, html]
-        : (html) => html;
-
       return [
         data.config?.tag || 'div',
         { code: data.code, class: data.class },
         [
-          bodyWrapper([
-            !hasControls
-              ? []
-              : [
-                  controls.config?.tag || 'div',
-                  {
-                    class: 'card-header d-flex align-items-center justify-content-between complex-controls',
-                  },
+          !hasControls
+            ? []
+            : [
+                data.controls.config?.tag || 'div',
+                {
+                  'parent-code': data.code,
+                  class:
+                    'card-header d-flex align-items-center justify-content-between complex-controls' +
+                    (data.controls.config?.hide ? ' d-none' : ''),
+                },
+                [
+                  ['h5', { class: 'card-title m-0 me-2' }],
                   [
-                    ['h5', { class: 'card-title m-0 me-2' }],
+                    'div',
+                    { class: 'dropdown' },
                     [
-                      'div',
-                      { class: 'dropdown' },
                       [
+                        'button',
+                        {
+                          class: 'btn p-0',
+                          type: 'button ',
+                          'data-bs-toggle': 'dropdown',
+                          'aria-haspopup': true,
+                          'aria-expanded': false,
+                        },
+                        [['i', { class: 'bx bx-dots-vertical-rounded' }]],
+                      ],
+                      // ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
+                      [
+                        'div',
+                        { class: 'dropdown-menu dropdown-menu-end' },
                         [
-                          'button',
-                          {
-                            class: 'btn p-0',
-                            type: 'button ',
-                            'data-bs-toggle': 'dropdown',
-                            'aria-haspopup': 'true',
-                            'aria-expanded': 'false',
-                          },
-                          [['i', { class: 'bx bx-dots-vertical-rounded' }]],
-                        ],
-                        [
-                          'div',
-                          { class: 'dropdown-menu dropdown-menu-end' },
-                          [
-                            controls.reload
-                              ? [
-                                  'a',
-                                  { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' },
-                                ]
-                              : [],
-                            controls.delete
-                              ? [
-                                  'a',
-                                  { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' },
-                                ]
-                              : [],
-                          ],
+                          data.controls.reload
+                            ? [
+                                'a',
+                                { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' },
+                              ]
+                            : [],
+                          data.controls.delete
+                            ? ['a', { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' }]
+                            : [],
                         ],
                       ],
                     ],
                   ],
                 ],
-          ]),
+              ],
+          !disableCardView ? ['div', { class: 'card-body collapse show content-holder' }] : [],
         ],
       ];
     },
@@ -514,9 +537,21 @@
       prepare: function ({ $el, data, parent: { $el: $parentEl, data: parentData } }) {
         $el.setAttribute('markup-code', data.code);
         if (parentData.on?.itemLoad) $el.setAttribute('markup-onload', parentData.on.itemLoad);
-        for (const [key, value] of Object.entries(data)) $el.dataset[key] = value;
+        for (const [key, value] of Object.entries(data)) {
+          $el.dataset[key] = FIELD_JSON_KEYS.includes(key) ? JSON.stringify(value) : value;
+        }
         $parentEl.dataset.itemcount = $parentEl.dataset.itemcount * 1 + 1;
         $parentEl.dataset.o = ($parentEl.dataset.o || 0) * 1 + 1;
+
+        for (const $toggle of $el.querySelectorAll('.card-collapsible')) {
+          $toggle.addEventListener('click', async (event) => {
+            event.preventDefault();
+            new bootstrap.Collapse($toggle.closest('.card').querySelector('.collapse'));
+            $toggle.closest('.card-header').classList.toggle('collapsed');
+            Helpers._toggleClass($toggle.firstElementChild, 'bx-chevron-down', 'bx-chevron-up');
+          });
+        }
+
         // // без этого lastitem отображается после добавления нового item
         // const l = Math.abs(realParent.attr('l') || 0);
         // l && realParent.attr('o') * 1 >= l
@@ -590,6 +625,9 @@
         display: flex;
         flex-direction: row-reverse;
         justify-content: flex-end;
+      }
+      .complex-item.inline-style > .card-body.collapse:not(.show) {
+        display: none;
       }
       .complex-item.inline-style > .card-body > .card-header, .complex-item.inline-style > .card-header {
         padding: 0px;

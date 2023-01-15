@@ -36,19 +36,11 @@
           {} || {
             label: 'Тест2',
             html: ({ data }) => [
-              // COMPLEX({ name: 'lvl3', add: false, item: { add: false, config: {} } }, () => [FIELD({ name: 'test' })]),
-              COMPLEX(
-                {
-                  name: 'lvl2-deep',
-                  col: 'lvl2',
-                  links: { lvl1: '__lvl2' },
-                  item: { add: false },
-                },
-                ({ data }) => [
-                  FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
-                  COMPLEX({ name: 'lvl3', links: { 'lvl2-deep': '__lvl3' } }, () => [FIELD({ name: 'test' })]),
-                ],
-              ),
+              // COMPLEX({ name: 'lvl3', item: { config: {} } }, () => [FIELD({ name: 'test' })]),
+              COMPLEX({ name: 'lvl2-deep', col: 'lvl2', links: { lvl1: '__lvl2' } }, ({ data }) => [
+                FIELD({ name: 'add_time', config: { inputType: 'datetime' } }),
+                COMPLEX({ name: 'lvl3', links: { 'lvl2-deep': '__lvl3' } }, () => [FIELD({ name: 'test' })]),
+              ]),
             ],
           },
           /*{label: 'ОГРН', f: {name: 'ogrn', type: 'text--', value: ''}},

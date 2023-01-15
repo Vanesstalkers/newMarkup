@@ -16,13 +16,10 @@
             }
         `,
       }),
-      COMPLEX(
-        {
-          name: 'lvl3',
-          item: { add: { label: '+ lvl3' } },
-        },
-        ({ data }) => [DIV({ text: data?._id }), FIELD({ name: 'test', type: 'input-', label: 'Текстовое поле' })],
-      ),
+      COMPLEX({ name: 'lvl3', add: { label: '+ lvl3' } }, ({ data }) => [
+        DIV({ text: data?._id }),
+        FIELD({ name: 'test', type: 'input-', label: 'Текстовое поле' }),
+      ]),
     ];
   },
 });

@@ -11,7 +11,7 @@
             'select',
             {
               value: data.value || '',
-              class: 'form-control el-value',
+              class: 'form-select el-value',
               ...(data.multiple ? { multiple: 'multiple', size: 5 } : {}),
               ...(data.disabled ? { disabled: '' } : {}),
             },

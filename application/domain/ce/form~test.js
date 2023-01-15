@@ -55,7 +55,8 @@
       {
         name: 'lvl1',
         config: { tag: 'table' },
-        item: { add: true || { type: 'file' }, config: { tag: 'tr' } },
+        add: true || { type: 'file' },
+        item: { config: { tag: 'tr' } },
         id: () => {
           return [db.mongo.ObjectID('63ab2965979681e5e8e23a4f'), db.mongo.ObjectID('63aee515b11faaaba5c00306')];
         },
@@ -120,7 +121,7 @@
             {
               name: 'lvl2',
               // id: () => [true],
-              item: { add: { label: '+++' } },
+              add: { label: '+++' },
               handlers: {
                 beforeAdd: async ({ data }) => {
                   data.test = true;
@@ -138,7 +139,7 @@
           COMPLEX(
             {
               name: 'lvl2-1',
-              item: { add: { label: '+ lvl2-1' } },
+              add: { label: '+ lvl2-1' },
               links: { 'lvl2-1': { lvl1: '__lvl1' }, lvl1: '__lvl2-1' },
             },
             () => [

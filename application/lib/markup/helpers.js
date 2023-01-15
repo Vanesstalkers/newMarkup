@@ -24,8 +24,9 @@
               },
               COMPLEX: (complexData = {}, ...args) => {
                 if (!complexData.type) complexData.type = 'complex';
-                if (!complexData.item) complexData.item = { add: true };
+                if (!complexData.item) complexData.item = {};
                 if (!complexData.config) complexData.config = {};
+                if (complexData.add === undefined) complexData.add = {};
 
                 return prepareCall
                   ? (() => {
@@ -121,7 +122,7 @@
     return f;
   },
   addProxifiedContextToElTplFunc(tplFunc, { form }) {
-    const appContext = { console, JSON, process, api, lib, db, bus, domain };
+    const appContext = { console, Object, JSON, process, api, lib, db, bus, domain };
     const stringifiedFunc = tplFunc.toString();
 
     const { exports: f } = new npm.metavm.MetaScript(

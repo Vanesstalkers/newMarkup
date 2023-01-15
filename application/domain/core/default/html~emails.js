@@ -7,7 +7,8 @@
         label: 'Электронные адреса',
         config: { inline: true },
         links,
-        item: { add: { label: 'Добавить адрес' }, controls: { delete: true, config: { simple: true } } },
+        add: { label: 'Добавить адрес' },
+        item: { controls: { delete: true, config: { simple: true } } },
       },
       () => [
         FIELD({

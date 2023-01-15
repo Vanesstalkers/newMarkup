@@ -13,7 +13,7 @@
               { class: 'list-inline-item' },
               A(
                 { href: 'javascript:void(0);', class: 'card-collapsible', on: { load: 'prepareCollapsableCard' } },
-                I({ class: 'tf-icons bx ' + (hide ? 'bx-chevron-up' : 'bx-chevron-down') }),
+                I({ class: 'tf-icons bx ' + (hide ? 'bx-chevron-down' : 'bx-chevron-up') }),
               ),
             ),
           ),

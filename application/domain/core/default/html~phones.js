@@ -7,7 +7,8 @@
         label: 'Телефоны',
         config: { inline: true },
         links,
-        item: { add: { label: 'Добавить телефон' }, controls: { delete: true, config: { simple: true } } },
+        add: { label: 'Добавить телефон' },
+        item: { controls: { delete: true, config: { simple: true } } },
       },
       () => [
         FIELD({

@@ -16,7 +16,7 @@
     DIV(
       { class: 'row' },
       DIV(
-        { class: 'col-xs-4' },
+        { class: 'col-12 col-lg-6' },
         HTML('core/default~card', {
           title: 'Контакты',
           html: [
@@ -35,6 +35,13 @@
           ],
         }),
       ),
+      DIV(
+        { class: 'col-12 col-lg-6' },
+        HTML('core/default~card', {
+          title: 'Сотрудники',
+          html: [HTML('worker~table', { hideFilters: false })],
+        }),
+      ),
     ),
   ],
 });
@@ -47,25 +54,6 @@ exports.access = (__, data, callback)=>SYS.requireFile('func', 'user~access').f(
 //   return [
 //     DIV(
 //       { class: 'row' },
-//       DIV(
-//         { class: 'col-xs-4' },
-//         HTML('code/default~card', { title: 'Контакты', html: [DIV({ text: 123 })] }),
-//         // _.html('__tpl~ibox', _, d, {
-//         //   title: 'Контакты',
-//         //   titleClass: 'contacts-block',
-//         //   content: (_, d) => [
-//         // _.html('__tpl~phone_block', _, d, { c: { name: 'ce_phone', sub: true, config: { bClass: 'col-xs-6' } } }),
-//         // _.html('__tpl~email_block', _, d, { c: { name: 'ce_email', sub: true, config: { bClass: 'col-xs-6' } } }),
-
-//         // !!! надо добавить правильные links к phone и email (сейчас не работает как нужно)
-//         // links: {
-//         // ce_email: {ce: '__ce'},
-//         // ce: '__email',
-//         // },
-//         //   ],
-//         // }),
-//         // _.html('__tpl~ibox', _, d, { title: 'Реквизиты', content: (_, d) => [_.html('ce~info', _, d)] }),
-//       ),
 //       /* ["div",{"class": "col-xs-8"},[
 // 				["div",{"class": "row"},[
 // 					["div",{"class": "col-xs-12"},[

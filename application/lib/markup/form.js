@@ -116,7 +116,7 @@
     prepared.funcList.push('window.LST = {}');
     for (const lstCode of prepared.lstList.filter((value, index, self) => self.indexOf(value) === index)) {
       const [path, name] = lstCode.split('~');
-      const lst = lib.utils.getDeep(domain, path.replace(/\//g, '.') + '.' + name);
+      const lst = lib.utils.getDeep(domain, path.replace(/\//g, '.') + '.lst~' + name);
       lstEntries.push([
         lstCode,
         JSON.stringify(lst, (key, value) => {
@@ -141,7 +141,7 @@
       }
       prepared.funcList.push(sLst);
     }
-    cacheList.push(['lst', `{${lstEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
+    // cacheList.push(['lst', `{${lstEntries.map(([key, value]) => `"${key}":${value}`).join(',')}}`]);
 
     let cacheFile = cacheList.map(([key, value]) => `${key}:${value}`).join(',');
     for (const script of prepared.scriptList) {

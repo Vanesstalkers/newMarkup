@@ -58,13 +58,23 @@
                 beforeHandler: (event) => {
                   const $modal = event.target.closest('.modal');
                   const $item = $modal.querySelector('.modal-body > .complex-block .complex-item');
-                  const $form = event.target.closest('[type="form"]');
-                  const $table = $form.querySelector('table > .complex-block');
+                  const $card = event.target.closest('.card');
+                  const $table = $card.querySelector('table > .complex-block');
+                  const $tableReloadBtn = $table.querySelector(
+                    `.card-header[parent-code="${$table.getAttribute('code')}"] .btn-reload`,
+                  );
+                  if ($tableReloadBtn) $tableReloadBtn.click();
+
                   return { tmpObjCode: $item.getAttribute('code'), tableCode: $table.getAttribute('code') };
                 },
                 afterHandler: (event, data) => {
-                  console.log('afterHandler', event, data);
-                  location.reload();
+                  const $card = event.target.closest('.card');
+                  const $table = $card.querySelector('table > .complex-block');
+                  const $tableReloadBtn = $table.querySelector(
+                    `.card-header[parent-code="${$table.getAttribute('code')}"] .btn-reload`,
+                  );
+                  if ($tableReloadBtn) $tableReloadBtn.click();
+                  $(event.target).closest('.modal').modal('hide');
                 },
               },
             }),
