@@ -16,8 +16,12 @@
         'div',
         { code: data.code, class: 'form-group ' + data.class },
         [
-          data.config?.hideLabel ? [] : ['label', { class: 'form-label', text: data.label || '' }],
-          ['div', { text, class: 'el-value' }],
+          data.label === false ? [] : ['label', { class: 'form-label', text: data.label || '' }],
+          [
+            'div',
+            { class: 'el-value' },
+            [data.config?.callto ? ['a', { href: `callto:${text}`, text }] : ['span', { text }]],
+          ],
         ],
       ];
     },

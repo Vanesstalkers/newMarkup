@@ -8,7 +8,11 @@
         { code: data.code, class: 'form-group ' + data.class + (float ? ' form-floating' : '') },
         [
           [
-            !float ? ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label || '' }] : [],
+            float
+              ? []
+              : data.label === false
+              ? []
+              : ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label || '' }],
             [
               'input',
               {
@@ -86,8 +90,14 @@
 
   'input-': {
     tpl: function (data) {
-      data.disabled = true;
+      // data.disabled = true;
       return window.el['core/default/el~input|input'].tpl(data);
+    },
+    front: {
+      prepare: function ({ $el, data }) {
+        window.el['core/default/el~input|input'].prepare({ $el, data });
+        $el.querySelector('input').disabled = true;
+      },
     },
   },
 });

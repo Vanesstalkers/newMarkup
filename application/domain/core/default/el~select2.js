@@ -5,6 +5,7 @@
     },
     front: {
       prepare: async function ({ $el, data }) {
+        console.log('prepare', { data });
         window.el['core/default/el~select|select'].prepare({ $el, data, addListener: false });
 
         const $select = $el.querySelector('select');
@@ -43,6 +44,7 @@
         );
         $$select.on('change.select2', async function () {
           const value = $$select.select2('data').map(({ text, id }) => ({ label: text, value: id }));
+          if (data.onChange) return await data.onChange(value);
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
           if (result === 'error') return console.error({ msg, stack });
         });

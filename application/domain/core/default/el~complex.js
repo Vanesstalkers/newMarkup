@@ -12,6 +12,7 @@
         else if (typeof data.add === 'string') data.add = { type: data.add };
         data.controls.add = data.add;
       }
+
       const hasControls = Object.keys(data.controls).length;
       if (hasControls) {
       }
@@ -72,6 +73,12 @@
                       [
                         !data.controls.add
                           ? []
+                          : data.controls.add.type === 'search'
+                          ? [
+                              ((data.controls.add.class = 'el'),
+                              (data.controls.add.code = data.code),
+                              window.el['core/default/el~select2|select2'].tpl(data.controls.add)),
+                            ].filter((item) => item)
                           : [
                               'button',
                               {
@@ -88,18 +95,6 @@
                         //         class: 'el control-el',
                         //         addLabel: add.label,
                         //         delete: false,
-                        //       }),
-                        //     ],
-
-                        // add.type != 'search'
-                        //   ? []
-                        //   : [
-                        //       window.el['core/default/el~select2|select2'].tpl({
-                        //         class: 'el',
-                        //         label: add.label,
-                        //         onSave: 'addWithSearch',
-                        //         code: data.code,
-                        //         id: false,
                         //       }),
                         //     ],
 
@@ -135,8 +130,6 @@
     },
     front: {
       prepare: function ({ $el, data }) {
-        //console.log('prepare complex', { $el, data });
-
         $el.setAttribute('markup-code', data.code);
         if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
         for (const [key, value] of Object.entries(data)) {
@@ -157,19 +150,77 @@
           });
         }
         const $expand = $el.querySelector('.card-expand');
-        if ($expand)
+        if ($expand) {
           $expand.addEventListener('click', async (event) => {
             event.preventDefault();
             Helpers._toggleClass($expand.firstElementChild, 'bx-fullscreen', 'bx-exit-fullscreen'),
               $expand.closest('.card').classList.toggle('card-fullscreen');
           });
+        }
 
-        /*if(data[1].l != undefined && data[1].showOnScroll){
-				doAfterLoad.push(function(){
-					realParent.addClass('need-scroll-check');
-					realParent.off('scroll').on('scroll', function(e){ window.scrollCheck($(e.target)) });
-				});
-			}*/
+        // if (data[1].l != undefined && data[1].showOnScroll) {
+        //   doAfterLoad.push(function () {
+        //     realParent.addClass('need-scroll-check');
+        //     realParent.off('scroll').on('scroll', function (e) {
+        //       window.scrollCheck($(e.target));
+        //     });
+        //   });
+        // }
+
+        if (data.controls.add) {
+          if (data.controls.add.type === 'search') {
+            const $select = $el.querySelector('.el');
+            data.controls.add.onChange = async (value) => {
+              const form = $el.closest('[type="form"]').dataset.name;
+              const {
+                result,
+                data: item,
+                msg,
+                stack,
+              } = await api.markup.addComplex({ form, code: data.code, data: { type: value } });
+              if (result === 'error') {
+                console.error({ msg, stack });
+              } else {
+                const { tpl, prepare } = window.el[item.elPath] || {};
+                const $contentHolder = $el.classList.contains('content-holder')
+                  ? $el
+                  : $el.querySelector(`.content-holder`);
+                await nativeTplToHTML([tpl({ ...item, parent: data })], $contentHolder);
+                const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
+                const $itemContentHolder = $item.classList.contains('content-holder')
+                  ? $item
+                  : $item.querySelector(`.content-holder`);
+                if (prepare) prepare({ $el: $item, data: item, parent: { data, $el } });
+                await nativeTplToHTML(item.content, $itemContentHolder);
+              }
+            };
+            window.el['core/default/el~select2|select2'].prepare({ $el: $select, data: data.controls.add });
+          } else {
+            const $add = $el.querySelector('.btn-add');
+            if ($add) {
+              $add.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const form = $el.closest('[type="form"]').dataset.name;
+                const { result, data: item, msg, stack } = await api.markup.addComplex({ form, code: data.code });
+                if (result === 'error') {
+                  console.error({ msg, stack });
+                } else {
+                  const { tpl, prepare } = window.el[item.elPath] || {};
+                  const $contentHolder = $el.classList.contains('content-holder')
+                    ? $el
+                    : $el.querySelector(`.content-holder`);
+                  await nativeTplToHTML([tpl({ ...item, parent: data })], $contentHolder);
+                  const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
+                  const $itemContentHolder = $item.classList.contains('content-holder')
+                    ? $item
+                    : $item.querySelector(`.content-holder`);
+                  if (prepare) prepare({ $el: $item, data: item, parent: { data, $el } });
+                  await nativeTplToHTML(item.content, $itemContentHolder);
+                }
+              });
+            }
+          }
+        }
 
         // if (data[1].add) {
         //   $parent.addClass('has-controls');
@@ -493,7 +544,7 @@
                     (data.controls.config?.hide ? ' d-none' : ''),
                 },
                 [
-                  ['h5', { class: 'card-title m-0 me-2' }],
+                  // ['h5', { class: 'card-title m-0 me-2' }],
                   [
                     'div',
                     { class: 'dropdown' },

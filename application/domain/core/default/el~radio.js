@@ -6,7 +6,13 @@
         'div',
         { code: data.code, class: 'form-group ' + data.class },
         [
-          ['label', { class: 'form-label', text: data.label || '' }],
+          [
+            'label',
+            {
+              class: ['form-label', data.config.inline ? 'w-100' : ''].join(' '),
+              text: data.label || '',
+            },
+          ],
           (data.config.element = function (e) {
             const checked = (data.value || []).filter(({ value }) => value === e.v).length
               ? { checked: 'checked' }
@@ -14,7 +20,7 @@
             return [
               [
                 'div',
-                { class: 'form-check' },
+                { class: ['form-check', data.config.inline ? 'form-check-inline' : ''].join(' ') },
                 [
                   [
                     'input',

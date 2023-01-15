@@ -15,6 +15,7 @@
             ],
       },
       table: {
+        addRowLink: true,
         id: async ({ user, complex, query = {} }) => {
           const find = {};
           if (query['filter.find_text']) find.second_name = { $regex: query['filter.find_text'] || '' };
@@ -23,46 +24,40 @@
         },
         cols: [
           //   { class: 'hidden', f: { name: 'delete_time' } },
-          { label: 'Добавлен', f: { name: 'add_time', type: 'label', config: { hideLabel: true } } },
+          { label: 'Добавлен', f: { name: 'add_time', type: 'label', label: false } },
           {
             label: 'Должность',
-            f: { name: 'position', type: 'label', config: { hideLabel: true } },
+            f: { name: 'position', type: 'label', label: false },
           },
           {
             label: 'ФИО',
             html: ({ data }) => [
+              COMPLEX({ name: 'pp', add: false, config: { disableCardView: true } }, () => [
+                FIELD({ name: 'second_name', type: 'json' }),
+                FIELD({ name: 'first_name', type: 'json' }),
+                SPAN({ text: `${data.second_name} ${data.first_name}` }),
+              ]),
+            ],
+          },
+          {
+            label: 'Телефоны',
+            html: () => [
               COMPLEX(
-                { name: 'pp', add: false, controls: {}, item: { controls: {reload: true} }, config: { disableCardView: true } },
+                {
+                  name: 'pp_phone',
+                  col: 'pp',
+                  links: { worker: '__pp' },
+                  add: false,
+                  config: { disableCardView: true },
+                },
                 () => [
-                  FIELD({ name: 'second_name', type: 'json' }),
-                  FIELD({ name: 'first_name', type: 'json' }),
-                  SPAN({ text: `${data.second_name} ${data.first_name}` }),
+                  COMPLEX({ name: 'phone', add: false, config: { disableCardView: true } }, ({ data }) => [
+                    FIELD({ name: 'num', type: 'label', label: false, config: { callto: true } }),
+                  ]),
                 ],
               ),
             ],
           },
-          //   {
-          //     label: 'Телефоны',
-          //     html: (_, d) => [
-          //       _.c({
-          //         name: 'pp_phone',
-          //         col: 'pp',
-          //         link: '__pp',
-          //         add: false,
-          //         process: {
-          //           tpl: (_, d) => [
-          //             _.c({
-          //               name: 'phone',
-          //               add: false,
-          //               process: {
-          //                 tpl: (_, d) => [_.f({ name: 'num', type: 'phone--', config: { callLink: true } }), ['br']],
-          //               },
-          //             }),
-          //           ],
-          //         },
-          //       }),
-          //     ],
-          //   },
         ],
       },
       add: {
@@ -70,19 +65,14 @@
         items: [
           {
             html: () => [
-              COMPLEX(
-                {
-                  name: 'pp',
-                  add: { auto: true },
-                  controls: {},
-                  item: { controls: {} },
-                  config: { disableCardView: true },
-                },
-                () => [FIELD({ label: 'Фамилия', name: 'second_name' }), FIELD({ label: 'Имя', name: 'first_name' })],
-              ),
+              COMPLEX({ name: 'pp', add: { auto: true }, config: { disableCardView: true } }, () => [
+                FIELD({ label: 'Фамилия', name: 'second_name' }),
+                FIELD({ label: 'Имя', name: 'first_name' }),
+              ]),
             ],
           },
-          { f: { label: 'Должность', name: 'position', type: 'select', lst: 'worker~type' } },
+          { f: { label: 'Тип должности', name: 'type', type: 'select', lst: 'worker~type' } },
+          { f: { label: 'Название должности', name: 'position' } },
         ],
       },
     }),
@@ -119,53 +109,6 @@
 // 				]
 // 			},
 // 		},
-// 		add: {
-// 			modal: true,
-// 			items: [
-// 				{f: {name: 'second_name', label: "Фамилия"}},
-// 				{f: {name: 'first_name', label: "Имя"}},
-// 				{f: {name: 'third_name', label: "Отчество"}},
-// 				{f: {name: 'type', label: "Тип должности", type: 'select', lst: 'worker~type'}},
-// 				{f: {name: 'position', label: "Должность"}},
-// 			],
-// 			afterValid: (conn, data, parents, cb)=>{
-// 				cb();
-// 			},
-// 			beforeAdd: (conn, data, parents, callback)=>{
-
-// 				async.waterfall([(cb)=>{
-
-// 					DB.addComplex( conn, { col: 'pp' }, [], {
-// 						first_name: data.tmp_obj.first_name,
-// 						second_name: data.tmp_obj.second_name,
-// 						third_name: data.tmp_obj.third_name,
-// 					}, (err, pp) => {
-
-// 						delete data.tmp_obj.first_name;
-// 						delete data.tmp_obj.second_name;
-// 						delete data.tmp_obj.third_name;
-
-// 						parents.push(pp);
-
-// 						cb();
-// 					});
-// 				},(cb)=>{
-
-// 					conn.db.collection('ce')
-// 						.findAndModify(
-// 							{ _id: ObjectId(data.parent.parent._id) }, [], {$inc: {'counters.worker': 1}}, {},
-// 							(err, ce)=>{try{
-// 								console.log(err, ce, data.parent.parent._id);
-// 								data.tmp_obj.code = ce.value.code+'-'+((SYS.get(ce, 'value.counters.worker')||0) + 1);
-// 								cb();
-// 							}catch(err){
-// 								console.log(err);
-// 								cb({status: 'err', err: 'Ошибка получения кода сотрудника'})
-// 							}
-// 					});
-// 				}], (err)=>{ callback(err) });
-// 			},
-// 		},
 // 		table: {
 // 			itemLink: {
 // 				type: 'col',
@@ -180,23 +123,6 @@
 // 			checkItems: true,
 // 			items: [
 // 				{class: 'hidden', f: {name: 'delete_time', type: 'datetime--', value: ''}},
-// 				{label: 'Добавлен', f: {name: 'add_time', type: 'datetime--', value: ''}},
-// 				{label: 'Должность', f: {name: 'position', type: 'text--', value: ''}},
-// 				{label: 'ФИО', html: (_, d)=>[
-// 					_.html('pp~fio', _, d, {complex: {col: 'pp', link: '__pp'}}),
-// 				]},
-// 				{label: 'Телефоны', html: (_, d)=>[
-// 					_.c({name: 'pp_phone', col: 'pp', link: '__pp', add: false, process: {
-// 						tpl: (_, d)=>[
-// 							_.c({name: 'phone', add: false, process: {
-// 								tpl: (_, d)=>[
-// 									_.f({name: 'num', type: 'phone--', config: {callLink: true}}),
-// 									['br'],
-// 								],
-// 							}}),
-// 						],
-// 					}}),
-// 				]},
 // 			],
 // 			id: {
 // 				baseField: 'add_time',
@@ -222,11 +148,3 @@
 // 		}
 // 	}),
 // ]}
-
-// exports.script = ()=>{
-
-// }
-
-// exports.style = ()=>{/*
-
-// */}

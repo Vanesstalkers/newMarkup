@@ -1,6 +1,7 @@
 ({
   tpl: ({}, config) => {
     const filters = config.filter?.items || [];
+    const table = config.table || {};
     return [
       DIV(
         { class: 'card' },
@@ -131,7 +132,16 @@
           { class: 'table-responsive text-nowrap' },
           TABLE(
             { class: 'table' },
-            THEAD({}, TR({}, ...config.table.cols.filter(({ label }) => label).map((col) => TH({ text: col.label })))),
+            THEAD(
+              {},
+              TR(
+                {},
+                ...table.cols
+                  .filter(({ label }) => label)
+                  .map((col) => TH({ text: col.label }))
+                  .concat(table.addRowLink ? [TH()] : []),
+              ),
+            ),
             COMPLEX(
               {
                 name: config.col,
@@ -139,8 +149,12 @@
                 config: { tag: 'tbody', disableCardView: true },
                 controls: { reload: true, config: { hide: true } },
                 class: 'table-border-bottom-0',
-                item: { config: { tag: 'tr' }, controls: {}, custom: { cols: config.table.cols } },
-                id: config.table.id,
+                item: {
+                  config: { tag: 'tr' },
+                  controls: {},
+                  custom: { col: config.col, addRowLink: table.addRowLink, cols: table.cols },
+                },
+                id: table.id,
               },
               ({ data, custom }) => {
                 const { cols } = custom;
@@ -163,6 +177,25 @@
                         )
                         .concat(col.html ? [HTML(col.html, { test: true })] : []),
                     ),
+                  )
+                  .concat(
+                    custom.addRowLink
+                      ? [
+                          TD(
+                            {},
+                            A(
+                              {
+                                href: `#${JSON.stringify({
+                                  form: `${custom.col}~main`,
+                                  container: 'formContent',
+                                  _id: data._id,
+                                })}`,
+                              },
+                              I({ class: 'bx bx-link-alt me-1' }),
+                            ),
+                          ),
+                        ]
+                      : [],
                   );
                 //   .concat(
                 //     item.c

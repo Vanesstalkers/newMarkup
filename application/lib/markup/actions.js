@@ -44,7 +44,7 @@
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data });
     const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentId } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
-    processForm.data[itemCode] = newItem;
+    processForm.data[itemCode] = { ...newItem, ...data };
     if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, complex, user, data, newItem });
     return returnId // !!! переделать защиту от form.fields[item.code] в showComplexItem
       ? newItem._id

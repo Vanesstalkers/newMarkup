@@ -10,7 +10,7 @@ const isMobile = () =>
   userAgent.match(/BlackBerry/i) ||
   userAgent.match(/Windows Phone/i);
 
-const sleep = (msec) =>
+window.sleep = (msec) =>
   new Promise((resolve) => {
     setTimeout(() => {
       resolve();
@@ -122,7 +122,7 @@ window.showForm = async ({ form, container, _id }) => {
   const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
   $container.innerHTML = '';
-  await new Promise((resolve) => setTimeout(resolve, 1000)); // только для дебага - без этого не успевает  обновиться статика на сервере
+  await sleep(1000); // только для дебага - без этого не успевает  обновиться статика на сервере
   await loadRes(`cache/${form}.func.js`);
   await nativeTplToHTML([getForm.data], $container);
   await loadRes(`cache/${form}.css`);
@@ -261,27 +261,6 @@ window.addEventListener('load', async () => {
 
 document.addEventListener('click', async (event) => {
   const $el = event.target;
-  if ($el.className.match(/\btn-add\b/) || $el.closest('.btn-add')) {
-    const form = $el.closest('[type="form"]').dataset.name;
-    const $block = $el.closest('.complex-block');
-    const code = $block.dataset.code;
-    const { result, data: item, msg, stack } = await api.markup.addComplex({ form, code });
-    if (result === 'error') {
-      console.error({ msg, stack });
-    } else {
-      const { tpl, prepare } = window.el[item.elPath] || {};
-      const $contentHolder = $block.className.match(/\bcontent-holder\b/)
-        ? $block
-        : $block.querySelector(`.content-holder`);
-      await nativeTplToHTML([tpl({ ...item, parent: $block.dataset })], $contentHolder);
-      const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
-      const $itemContentHolder = $item.className.match(/\bcontent-holder\b/)
-        ? $item
-        : $item.querySelector(`.content-holder`);
-      if (prepare) prepare({ $el: $item, data: item, parent: { data: $block.dataset, $el: $block } });
-      await nativeTplToHTML(item.content, $itemContentHolder);
-    }
-  }
   if ($el.closest('.btn-delete')) {
     if (!confirm('Подтвердите удаление')) return false;
     const form = $el.closest('[type="form"]').dataset.name;

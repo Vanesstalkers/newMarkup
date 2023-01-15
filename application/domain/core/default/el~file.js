@@ -4,6 +4,21 @@
       if (!data.value) data.value = {};
       const inputConfig = {};
       if (data.multiple) inputConfig.multiple = true;
+
+      // ['div',{class: data.class+" "},[
+      //   !data.label ? [] : ['label',{},[
+      //     ['span',{text: data.label}],
+      //   ]],
+      //   ['div', {type: 'img', style:`
+      //     background-image: url(`+(data.value.l||'')+`);
+      //     background-size: contain;
+      //     background-repeat: no-repeat;
+      //     background-position: center center;
+      //     width: 100%;
+      //     height: 100%;
+      //   `}],
+      // ]],
+
       return [
         ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
         [
@@ -11,28 +26,41 @@
           { code: data.code, class: 'input-group upload-file-input-group ' + data.class },
           [
             data.value.l
-              ? [
-                  [
-                    'label',
-                    {
-                      class: 'form-floating input-group-text',
-                    },
+              ? data.config?.img
+                ? [
+                    ['input', { ...inputConfig, type: 'file', class: 'form-control d-none', id: 'input-' + data.code }],
+                    ['img', { src: data.value.l, class: 'w-100' }],
                     [
-                      ['a', { target: '_blank', href: data.value.l, text: data.value.n }],
-                      ['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }],
+                      'button',
+                      { class: 'btn btn-outline-primary edit-btn', type: 'button' },
+                      [['i', { class: 'bx bx-edit-alt' }]],
                     ],
-                  ],
-                  [
-                    'button',
-                    { class: 'btn btn-outline-primary edit-btn', type: 'button' },
-                    [['i', { class: 'bx bx-edit-alt' }]],
-                  ],
-                  [
-                    'button',
-                    { class: 'btn btn-outline-primary delete-btn', type: 'button' },
-                    [['i', { class: 'bx bx-trash' }]],
-                  ],
-                ]
+                    [
+                      'button',
+                      { class: 'btn btn-outline-primary delete-btn', type: 'button' },
+                      [['i', { class: 'bx bx-trash' }]],
+                    ],
+                  ]
+                : [
+                    [
+                      'label',
+                      { class: 'form-floating input-group-text' },
+                      [
+                        ['a', { target: '_blank', href: data.value.l, text: data.value.n }],
+                        ['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }],
+                      ],
+                    ],
+                    [
+                      'button',
+                      { class: 'btn btn-outline-primary edit-btn', type: 'button' },
+                      [['i', { class: 'bx bx-edit-alt' }]],
+                    ],
+                    [
+                      'button',
+                      { class: 'btn btn-outline-primary delete-btn', type: 'button' },
+                      [['i', { class: 'bx bx-trash' }]],
+                    ],
+                  ]
               : [['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }]],
           ],
         ],
@@ -82,6 +110,7 @@
             if (result === 'error') console.error({ msg, stack });
             i++;
             if (i < files.length) return uploadNext();
+            await sleep(1000); // ждем пока бэк обновит библиотеку статики
             await reloadEl(value);
             return null;
           };
@@ -89,6 +118,7 @@
         };
         if ($deleteBtn)
           $deleteBtn.onclick = async () => {
+            if (!confirm('Подтвердите удаление')) return false;
             const { name: form } = $input.closest('[type="form"]').dataset;
             const { code } = $input.closest('.el').dataset;
             const { result, msg, stack } = await api.markup.saveField({ form, code, value: null });
