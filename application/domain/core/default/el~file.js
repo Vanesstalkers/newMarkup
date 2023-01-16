@@ -4,23 +4,8 @@
       if (!data.value) data.value = {};
       const inputConfig = {};
       if (data.multiple) inputConfig.multiple = true;
-
-      // ['div',{class: data.class+" "},[
-      //   !data.label ? [] : ['label',{},[
-      //     ['span',{text: data.label}],
-      //   ]],
-      //   ['div', {type: 'img', style:`
-      //     background-image: url(`+(data.value.l||'')+`);
-      //     background-size: contain;
-      //     background-repeat: no-repeat;
-      //     background-position: center center;
-      //     width: 100%;
-      //     height: 100%;
-      //   `}],
-      // ]],
-
       return [
-        ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
+        data.label === false ? [] : ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
         [
           'div',
           { code: data.code, class: 'input-group upload-file-input-group ' + data.class },
@@ -61,7 +46,18 @@
                       [['i', { class: 'bx bx-trash' }]],
                     ],
                   ]
-              : [['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }]],
+              : [
+                  [
+                    'input',
+                    {
+                      ...inputConfig,
+                      type: 'file',
+                      class: 'form-control',
+                      id: 'input-' + data.code,
+                      placeholder: data.placeholder,
+                    },
+                  ],
+                ],
           ],
         ],
       ];
@@ -93,7 +89,9 @@
         const $deleteBtn = $el.querySelector('.delete-btn');
         $input.onchange = () => {
           const { name: form } = $input.closest('[type="form"]').dataset;
-          const { code } = $input.closest('.el').dataset;
+          let $el = $input.closest('.el');
+          if ($el.classList.contains('el-complex-add')) $el = $el.closest('.complex-block');
+          const { code } = $el.dataset;
 
           const files = Array.from($input.files);
           files.sort((a, b) => a.size - b.size);
@@ -104,14 +102,19 @@
               uploadPath,
               uploadedFile: { name },
             } = await window.uploadFile(file, { form, code });
-            // console.log({ uploadData });
             const value = { l: uploadPath, n: name };
-            const { result, msg, stack } = await api.markup.saveField({ form, code, value });
-            if (result === 'error') console.error({ msg, stack });
+            if (data.onChange) {
+              await data.onChange(value);
+            } else {
+              const { result, msg, stack } = await api.markup.saveField({ form, code, value });
+              if (result === 'error') console.error({ msg, stack });
+            }
             i++;
             if (i < files.length) return uploadNext();
             await sleep(1000); // ждем пока бэк обновит библиотеку статики
-            await reloadEl(value);
+            if (!data.onChange) {
+              await reloadEl(value);
+            }
             return null;
           };
           uploadNext();
@@ -136,8 +139,12 @@
           data: { uploadPath } = {},
           result,
           msg,
+          stack,
         } = await api.markup.upload({ ...formData, streamId: uploader.streamId, name: file.name });
-        if (result === 'error') throw new Error(msg);
+        if (result === 'error') {
+          console.error({ msg, stack });
+          throw new Error(msg);
+        }
         await uploader.upload();
         return { uploadedFile: file, uploadPath, result, msg };
       };

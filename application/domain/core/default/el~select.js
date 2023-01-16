@@ -6,7 +6,7 @@
         'div',
         { code: data.code, class: 'form-group ' + data.class },
         [
-          ['label', { class: 'form-label', text: data.label || '' }],
+          data.label === false ? [] : ['label', { class: 'form-label', text: data.label || '' }],
           [
             'select',
             {
@@ -46,7 +46,7 @@
           }
         }
 
-        if (addListener)
+        if (addListener) {
           $select.addEventListener('change', async (event) => {
             const form = $select.closest('[type="form"]').dataset.name;
             const code = $select.closest('.el').dataset.code;
@@ -56,6 +56,7 @@
             const { result, msg, stack } = await api.markup.saveField({ form, code, value });
             if (result === 'error') console.error({ msg, stack });
           });
+        }
       },
     },
   },

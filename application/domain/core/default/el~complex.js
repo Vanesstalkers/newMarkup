@@ -1,21 +1,19 @@
 ({
   block: {
     tpl: function (data) {
+
+      // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
+      // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
+
       const disableCardView = data.config?.disableCardView;
 
-      if (!data.controls)
-        data.controls = {
-          /* reload: true, expand: true */
-        };
+      if (!data.controls) data.controls = {};
       if (data.add && !data.add.auto) {
         if (typeof data.add === true) data.add = {};
         else if (typeof data.add === 'string') data.add = { type: data.add };
         data.controls.add = data.add;
       }
-
       const hasControls = Object.keys(data.controls).length;
-      if (hasControls) {
-      }
 
       // if (controls.show || data.l) {
       //   if (typeof controls.show != 'object') controls.show = { label: controls.show };
@@ -48,22 +46,11 @@
           !hasControls
             ? []
             : [
-                // itemTag,
-                // Object.assign(
-                //   {
-                //     class: 'complex-controls' + (add.type ? ' add-with-' + add.type : ' add-simple'),
-                //     addField: add.field,
-                //     code: data.code,
-                //     id: false, // без id: false элемент подменит собой комплексный блок
-                //   },
-                //   data.front || {},
-                // ),
-                // [
                 [
                   'div',
                   {
                     'parent-code': data.code,
-                    class: 'card-header header-elements' + (data.controls.config?.hide ? ' d-none' : ''),
+                    class: 'card-header header-elements p-0 ' + (data.controls.config?.hide ? ' d-none' : ''),
                   },
                   [
                     data.label ? ['h5', { class: 'm-3', text: data.label }] : [],
@@ -75,10 +62,24 @@
                           ? []
                           : data.controls.add.type === 'search'
                           ? [
-                              ((data.controls.add.class = 'el'),
-                              (data.controls.add.code = data.code),
-                              window.el['core/default/el~select2|select2'].tpl(data.controls.add)),
-                            ].filter((item) => item)
+                              !data.controls.add.field
+                                ? ['span', { text: 'Add field is not defined', style: 'color: #ff3e1d;' }]
+                                : ((add) => {
+                                    add.class = 'el el-complex-add';
+                                    add.code = data.code;
+                                    return window.el['core/default/el~select2|select2'].tpl(add); // ссылка на add не должна пропасть из-за data.config.element
+                                  })(data.controls.add),
+                            ]
+                          : data.controls.add.type === 'file'
+                          ? [
+                              !data.controls.add.field
+                                ? ['span', { text: 'Add field is not defined', style: 'color: #ff3e1d;' }]
+                                : ((add) => {
+                                    add.class = 'el el-complex-add';
+                                    add.code = data.code;
+                                    return window.el['core/default/el~file|file'].tpl(add);
+                                  })(data.controls.add),
+                            ]
                           : [
                               'button',
                               {
@@ -86,17 +87,8 @@
                                 class: 'btn btn-sm btn-primary me-4 btn-add',
                                 text: add.label || 'Добавить',
                               },
+                              [['span', { class: 'tf-icons bx bx-plus ms-1' }]],
                             ],
-
-                        //   add.type != 'file'
-                        //   ? []
-                        //   : [
-                        //       window.el['core/default/el~file|file'].tpl({
-                        //         class: 'el control-el',
-                        //         addLabel: add.label,
-                        //         delete: false,
-                        //       }),
-                        //     ],
 
                         !data.controls.reload
                           ? []
@@ -168,16 +160,17 @@
         // }
 
         if (data.controls.add) {
-          if (data.controls.add.type === 'search') {
-            const $select = $el.querySelector('.el');
+          if (data.controls.add.type) {
+            if (!data.controls.add.field) console.error('Add field is not defined', data);
             data.controls.add.onChange = async (value) => {
+              if (!value?.[0]?.value && !value?.l) return;
               const form = $el.closest('[type="form"]').dataset.name;
               const {
                 result,
                 data: item,
                 msg,
                 stack,
-              } = await api.markup.addComplex({ form, code: data.code, data: { type: value } });
+              } = await api.markup.addComplex({ form, code: data.code, data: { [data.controls.add.field]: value } });
               if (result === 'error') {
                 console.error({ msg, stack });
               } else {
@@ -193,8 +186,18 @@
                 if (prepare) prepare({ $el: $item, data: item, parent: { data, $el } });
                 await nativeTplToHTML(item.content, $itemContentHolder);
               }
+              if (data.controls.add.type === 'search') {
+                $($el.querySelector('select')).val('').trigger('change.select2');
+              }
             };
-            window.el['core/default/el~select2|select2'].prepare({ $el: $select, data: data.controls.add });
+            const $add = $el.querySelector('.el');
+            if ($add) {
+              // может отсутствовать, если передан неправильный конфиг для add
+              let elPath;
+              if (data.controls.add.type === 'search') elPath = 'core/default/el~select2|select2';
+              if (data.controls.add.type === 'file') elPath = 'core/default/el~file|file';
+              if (elPath) window.el[elPath].prepare({ $el: $add, data: data.controls.add });
+            }
           } else {
             const $add = $el.querySelector('.btn-add');
             if ($add) {
@@ -221,150 +224,11 @@
             }
           }
         }
-
-        // if (data[1].add) {
-        //   $parent.addClass('has-controls');
-        //   if (data[1].add.singleItem) $parent.addClass('single-item');
-
-        //   switch (data[1].add.type) {
-        //     case 'file':
-        //       if (window.el['core/default/el~file|file'].prepare)
-        //         window.el['core/default/el~file|file'].prepare.bind(this)(tpl, {}, doAfterLoad, realParent);
-        //       break;
-        //     case 'search':
-        //       window.el['core/default/el~select2|select2'].prepare.bind(this)(
-        //         tpl,
-        //         {
-        //           lst: data[1].add.lst || 'addobj',
-        //           ajax: data[1].add.lst == undefined,
-        //           prepare: data[1].add.lst ? 'select2_obj_0' : 'select2_obj',
-        //           addOption: data[1].add.option,
-        //           code: data[1].code,
-        //           addEmpty: (data[1].add || {}).addEmpty,
-        //         },
-        //         doAfterLoad,
-        //         realParent,
-        //       );
-        //       break;
-        //   }
-        // }
-
-        // if (!data[1].controls) data[1].controls = {};
-        // // controls зарезервировано html (((
-        // $parent.attr(
-        //   'ctrl',
-        //   Object.keys(data[1].controls)
-        //     .filter((c) => data[1].controls[c])
-        //     .concat([data[1].add ? 'add' : ''])
-        //     .join(','),
-        // );
       },
     },
     script: () => {
-      $(document)
-        .off('click', '.complex-controls.add-with-search label')
-        .on('click', '.complex-controls.add-with-search label', function (e) {
-          var $parent = $(this).closest('label').parent();
-          $parent.find('select').select2(false ? 'close' : 'open'); // надо заменить на проверку уже открытого блока
-        });
 
-      window.addWithSearch = function ($e, data, callback) {
-        var $controls = $e.closest('.complex-controls');
-
-        if (data.value !== null) {
-          var complexAddValues = {},
-            complexProcessData = {};
-
-          if (data.value.indexOf('process_') == 0) {
-            if (data.value == 'process_new') {
-              //delete processData.cid;
-              //complexAddValues = processData;
-            } else {
-              var processData = JSON.parse(data.value.replace('process_', ''));
-              complexProcessData = processData;
-            }
-          } else {
-            complexAddValues[$controls.attr('addField') || 'existId'] = data.value;
-          }
-          $controls.attr('complexProcessData', JSON.stringify(complexProcessData));
-          $controls.attr('complexAddValues', JSON.stringify(complexAddValues));
-
-          window.addComplex($controls.find('> .control-add')); // сюда не передается callback, чтобы не вызывать сохранение поля (но если он будет нужен, то можно добавить параметр stype в инициирующий el)
-
-          $e.val('').trigger('change.select2'); // без этого нельзя повторно добавлять item с тем же значением, что и предыдущий (было подозрение, что будет вызываться лишний onchange, то пока такой ошибки не замечено)
-        } else {
-          $e.val('').trigger('change.select2');
-          if (typeof callback == 'function') callback({ err: 'with-out-notify' });
-        }
-      };
-
-      $(document)
-        .off('change', '.control-el input[type=file]')
-        .on('change', '.control-el input[type=file]', function (e) {
-          // !!! не будет работать, если complex вставлен в другой complex без html-прослойки (обернуть в div)
-
-          function addItemFromFiles(files, $e) {
-            if (!files.length) return;
-
-            window.addComplex($e, function (answer) {
-              var $item = $('.complex-item[code=' + answer.codes[1] + ']');
-              var addField = $e.closest('.complex-controls').attr('addField') || 'file';
-              var $field = $item.find('[name=' + addField + ']'); // это надо заменить на подстановку поля из конфига
-
-              // асинхронно загружаем файл в созданный complex-item
-              uploadFile(files.shift(), $field, function () {
-                reloadItem($item);
-              });
-
-              addItemFromFiles(files, $e);
-            });
-          }
-
-          addItemFromFiles(Array.from(e.currentTarget.files), $(this));
-        });
-
-      window.addComplex = function ($e, callback) {
-        if ($e.hasClass('tutorial-link-target')) return;
-
-        var $controls = $e.closest('.complex-controls'),
-          $complex = $e.closest('.complex-block.has-controls');
-        var data = { code: $e.closest('.complex-controls').attr('code') };
-
-        var sub = $e.hasClass('subAction');
-        if (sub) {
-          data.sub = true;
-          $e.removeClass('subAction');
-        }
-
-        $complex[$complex.attr('l') * 1 < 0 ? 'prepend' : 'append']($('<div />', { id: '_' + data.code }));
-
-        if ($controls.attr('complexAddValues')) {
-          data.values = JSON.parse($controls.attr('complexAddValues'));
-          $controls.attr('complexAddValues', false);
-        }
-        if ($controls.attr('complexProcessData')) {
-          data.process = JSON.parse($controls.attr('complexProcessData'));
-          $controls.attr('complexProcessData', false);
-        }
-
-        wsSendCallback(Object.assign({ action: 'add' }, data), function (answer) {
-          if (!sub) if ($controls.attr('onAdd')) window[$controls.attr('onAdd')]($complex, answer);
-
-          if (typeof callback == 'function') callback(answer);
-        });
-      };
-
-      $(document)
-        .off('click', '.complex-controls.add-simple > .control-add')
-        .on('click', '.complex-controls.add-simple > .control-add', function () {
-          window.addComplex($(this));
-        })
-        .off('click', '.complex-controls.add-with-sub > .control-add')
-        .on('click', '.complex-controls.add-with-sub > .control-add', function () {
-          window.addComplex($(this));
-        });
-
-      window.moreComplex = function (e, filter, replace) {
+/*       window.moreComplex = function (e, filter, replace) {
         try {
           var $e = $(e);
           var $block = $e.closest('.complex-block');
@@ -395,61 +259,6 @@
         } catch (e) {}
       };
 
-      window.reloadComplex = function (e, filter, callback) {
-        var $e = $(e);
-        var $block = $e.closest('.complex-block');
-        var data = { code: $block.attr('code') };
-        if (filter) {
-          data.filter = filter;
-          if (filter.force) {
-            $block.attr('o', 0);
-            $block.attr('lastfilter', JSON.stringify(filter));
-          }
-        }
-
-        var $tmp = $('<div >');
-        $block.find('> .complex-controls, > .save-on-reload, > .lastitem').appendTo($tmp);
-        myEmpty($block);
-        if ($block.html()) $block.html('');
-        $tmp.find('> .complex-controls, > .save-on-reload, > .lastitem').appendTo($block);
-        $block.append($('<div />', { id: '_' + data.code }));
-
-        wsSendCallback(extend({ action: 'show' }, data), function () {
-          setTimeout(function () {
-            allResLoaded();
-            if (typeof callback == 'function') callback($block);
-          }, 0);
-        });
-      };
-
-      window.reloadItem = function (e, filter, callback) {
-        // item обязательно должен быть обернут в собственный div, иначе херит всю разметку
-        var $e = $(e);
-        var $item = $e.closest('.complex-item');
-        var itemCode = $item.attr('code'),
-          $parent = $item.parent(),
-          realParent = $item.attr('realParent');
-        var $block = realParent ? $('.complex-block[code=' + realParent + ']') : $e.parent().closest('.complex-block');
-        $block.attr('itemcount', $block.attr('itemcount') * 1 - 1);
-        var data = { code: $block.attr('code'), itemCodes: [itemCode] };
-        if (filter) data.filter = filter;
-        var onItemLoad = $block.attr('onItemLoad');
-        var onLastItem = $block.attr('onLastItem');
-        data.itemCodes.forEach(function (code) {
-          $item
-            .attr('id', '_' + code)
-            .attr('onItemLoad', onItemLoad)
-            .attr('onLastItem', onLastItem);
-        });
-        wsSendCallback(extend({ action: 'show' }, data), function () {
-          setTimeout(function () {
-            allResLoaded();
-            if (realParent) $parent.find('.complex-item[code=' + itemCode + ']').attr('realParent', realParent);
-            if (typeof callback == 'function') callback($block, data);
-          }, 0);
-        });
-      };
-
       $(document)
         .off('click', '.btn-lastitem')
         .on('click', '.btn-lastitem', function () {
@@ -459,7 +268,7 @@
             o = $parent.attr('o') * 1;
           window.moreComplex($lastitem, { l: l, o: o, showOnButton: true });
         });
-
+ */
       /*window.scrollCheck = function($p){
 
 			var $items = $p ? $p.find('.scroll-lastitem') : $('.scroll-lastitem');
@@ -504,16 +313,68 @@
       .complex-block.inline-style .card-body.collapse:not(.show) {
         display: none;
       }
+
+      .complex-block.has-controls .el-complex-add .select2-selection {
+        background-color: #696cff;
+        border-color: #696cff;
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(105 108 255 / 40%);
+        margin-right: 1.5rem;
+      }
+      .complex-block.has-controls .el-complex-add .select2-selection .select2-selection__arrow {
+        display: none;
+      }
+      .complex-block.has-controls .el-complex-add .select2-selection .select2-selection__placeholder {
+        color: #fff;
+      }
+      .complex-block.has-controls .el-complex-add .select2-selection .select2-selection__placeholder:after {
+        content: "";
+        margin-left: 0.25rem;
+        font-family: "boxicons" !important;
+        line-height: 1.15;
+        font-size: 18px;
+        vertical-align: middle;
+      }
+
+      .complex-block.has-controls .el-complex-add {
+        width: auto;
+      }
+      .complex-block.has-controls .el-complex-add.upload-file-input-group input {
+        color: white;
+        background-color: #696cff;
+        border-color: #696cff;
+        box-shadow: 0 0.125rem 0.25rem 0 rgb(105 108 255 / 40%);
+        width: 100%;
+        height: 30px;
+      }
+      .complex-block.has-controls .el-complex-add.upload-file-input-group input:before {
+        content: attr(placeholder);
+        font-size: 12px;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        background-color: #696cff;
+        width: 100%;
+        height: 100%;
+        padding: 5px;
+        padding-left: 12px;
+      }
+      .complex-block.has-controls .el-complex-add.upload-file-input-group input:after {
+        font-size: 18px;
+        font-family: "boxicons" !important;
+        content: "";
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        padding: 1px;
+        padding-right: 8px;
+      }
     `,
   },
 
   item: {
     tpl: function (data, config) {
       const disableCardView = data.parent.config?.disableCardView;
-      if (!data.controls)
-        data.controls = {
-          /* reload: true, expand: true, delete: true */
-        };
+      if (!data.controls) data.controls = {};
       const hasControls = Object.keys(data.controls).length;
       data.class =
         (data.class || '') +
@@ -544,7 +405,6 @@
                     (data.controls.config?.hide ? ' d-none' : ''),
                 },
                 [
-                  // ['h5', { class: 'card-title m-0 me-2' }],
                   [
                     'div',
                     { class: 'dropdown' },
@@ -609,54 +469,6 @@
         //   ? realParent.find('> .btn-lastitem').removeClass('hidden')
         //   : realParent.find('> .btn-lastitem').addClass('hidden');
       },
-    },
-    script: () => {
-      $(document).off('click', '.item-controls > div.custom-action');
-      $(document).on('click', '.item-controls > div.custom-action', function () {
-        var $e = $(this);
-        var type = $e.attr('action');
-        var text = '';
-
-        if ($e.hasClass('with-comment')) {
-          if (!(text = prompt('Добавьте комментарий к действию', ''))) return false;
-        } else {
-          if (!confirm('Подтвердите действие "' + type + '"')) return false;
-        }
-
-        var data = {
-          action: 'control',
-          type: type,
-          code: $e.closest('.item-controls').attr('code'),
-          text: text,
-        };
-        wsSendCallback(data, function () {
-          $e.addClass('ready');
-        });
-      });
-
-      $(document).off('click', '.item-controls > div.btn-delete');
-      $(document).on('click', '.item-controls > div.btn-delete', function () {
-        var $e = $(this);
-
-        if ($e.hasClass('tutorial-link-target')) return false;
-
-        if (!$e.attr('force') && !confirm('Подтвердите удаление')) return false;
-
-        var data = { code: $e.closest('.item-controls').attr('code') };
-        if ($e.hasClass('subAction')) data.sub = true;
-
-        wsSendCallback(extend({ action: 'delete' }, data), function (data) {
-          $e.closest('.complex-item')
-            .addClass('just-deleted')
-            .hide(500, function () {
-              var $complex = $(this).parent().closest('.complex-block');
-              if ($complex.attr('onDelete')) window[$complex.attr('onDelete')]($e);
-              if ($complex.attr('itemcount')) $complex.attr('itemcount', $complex.attr('itemcount') * 1 - 1);
-            });
-        });
-
-        return false;
-      });
     },
     style: `
       .complex-item.simple-controls {

@@ -15,7 +15,7 @@
         const $$select = $($select);
         $$select.select2(
           !data.lst.action
-            ? {}
+            ? { placeholder: data.placeholder || 'Искать по...' }
             : {
                 ajax: {
                   transport: function ({ data: { q: query } }, success, failure) {

@@ -5,30 +5,11 @@
       LABEL({}, SPAN({ text: 'Документы' })),
 
       DIV(
-        {
-          class: `css
-			.*css* {
-				position: relative;
-				display: flex;
-				flex-wrap: wrap;
-				padding-top: 10px;
-			}
-			.*css* > .complex-item > .item-controls {
-				display: block;
-			}
-			.*css* > .complex-item {
-				width: 100%;
-			}
-			.*css* > .complex-controls {
-				top: -20px!important;
-			}
-		`,
-        },
-
+        {},
         COMPLEX(
           {
             name: 'pp_doc',
-            add: { type: 'search', label: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
+            add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
             item: { controls: { delete: true, config: { simple: true } } },
           },
           ({ data }) => {
@@ -40,10 +21,7 @@
               DIV(
                 { class: 'row' },
 
-                DIV(
-                  { class: 'col-2' },
-                  FIELD({ name: 'type', label: 'Тип', type: 'select', lst: 'pp~doc_type', value: '' }),
-                ),
+                DIV({ class: 'col-2' }, FIELD({ name: 'type', label: 'Тип', type: 'select', lst: 'pp~doc_type' })),
                 IF(docType == 'passport', () => [
                   DIV(
                     { class: 'col-4' },

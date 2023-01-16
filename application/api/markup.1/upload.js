@@ -5,9 +5,16 @@ async ({ streamId, name, form, code }) => {
     if (!processForm) return { result: 'error', msg: `Form (form=${form}) not found` };
     const field = processForm.fields[code];
     if (!field) return { result: 'error', msg: `Field (code=${code}) not found` };
-    const parent = processForm.fields[field.parentCode];
-    const parentData = processForm.data[field.parentCode];
-    const fileDir = `upload/${parent.col}/${parentData._id.toString()}/`;
+
+    let fileDir;
+    if (field.type === 'complex' || field.type === 'form') {
+      fileDir = `upload/${field.col}/addnew/`;
+    } else {
+      const parent = processForm.fields[field.parentCode];
+      const parentData = processForm.data[field.parentCode];
+      fileDir = `upload/${parent.col}/${parentData._id.toString()}/`;
+    }
+
     const fileName = Date.now() + Math.random() + '.' + name.split('.').pop();
     const pathPrefix = './application/static/';
     await node.fsp.mkdir(pathPrefix + fileDir, { recursive: true });

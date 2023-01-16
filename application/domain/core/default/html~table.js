@@ -136,10 +136,9 @@
               {},
               TR(
                 {},
-                ...table.cols
-                  .filter(({ label }) => label)
-                  .map((col) => TH({ text: col.label }))
-                  .concat(table.addRowLink ? [TH()] : []),
+                table.addRowLink ? TH() : undefined,
+                ...table.cols.filter(({ label }) => label).map((col) => TH({ text: col.label })),
+                //.concat(table.addRowLink ? [TH()] : []),
               ),
             ),
             COMPLEX(
@@ -158,45 +157,46 @@
               },
               ({ data, custom }) => {
                 const { cols } = custom;
-                return cols
-                  .filter(({ label }) => label)
-                  .map((col) =>
-                    TD(
-                      { class: col.class || '' },
-                      ...[]
-                        .concat(col.f ? [FIELD(col.f)] : [])
-                        .concat(
-                          col.c
-                            ? [
-                                COMPLEX({ name: col.c.name, item: { custom: { content: col.c.f } } }, ({ custom }) => {
-                                  const { content } = custom;
-                                  return [FIELD(content)];
-                                }),
-                              ]
-                            : [],
-                        )
-                        .concat(col.html ? [HTML(col.html, { test: true })] : []),
+                return [
+                  custom.addRowLink
+                    ? TD(
+                        {},
+                        A(
+                          {
+                            href: `#${JSON.stringify({
+                              form: `${custom.col}~main`,
+                              container: 'formContent',
+                              _id: data._id,
+                            })}`,
+                          },
+                          I({ class: 'bx bx-link-alt me-1' }),
+                        ),
+                      )
+                    : undefined,
+                  ...cols
+                    .filter(({ label }) => label)
+                    .map((col) =>
+                      TD(
+                        { class: col.class || '' },
+                        ...[]
+                          .concat(col.f ? [FIELD(col.f)] : [])
+                          .concat(
+                            col.c
+                              ? [
+                                  COMPLEX(
+                                    { name: col.c.name, item: { custom: { content: col.c.f } } },
+                                    ({ custom }) => {
+                                      const { content } = custom;
+                                      return [FIELD(content)];
+                                    },
+                                  ),
+                                ]
+                              : [],
+                          )
+                          .concat(col.html ? [HTML(col.html, { test: true })] : []),
+                      ),
                     ),
-                  )
-                  .concat(
-                    custom.addRowLink
-                      ? [
-                          TD(
-                            {},
-                            A(
-                              {
-                                href: `#${JSON.stringify({
-                                  form: `${custom.col}~main`,
-                                  container: 'formContent',
-                                  _id: data._id,
-                                })}`,
-                              },
-                              I({ class: 'bx bx-link-alt me-1' }),
-                            ),
-                          ),
-                        ]
-                      : [],
-                  );
+                ];
                 //   .concat(
                 //     item.c
                 //       ? [
