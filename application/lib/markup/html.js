@@ -7,7 +7,10 @@
       if (typeof tplFunc === 'function') {
         const proxyData = { user, form, data, parent, handlers };
         try {
-          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)({ data }, config);
+          result = lib.markup.helpers.addProxifiedContextToTplFunc(tplFunc, proxyData)(
+            { data, form, parent, user },
+            config || {},
+          );
         } catch (err) {
           result = [['div', { class: 'inline-error', error: err.message }]];
         }
@@ -37,7 +40,7 @@
           data: {},
           parent,
           blockName,
-        })({ data: {} }, config);
+        })({ data: {}, form, parent }, config || {});
       } catch (err) {}
     }
   },

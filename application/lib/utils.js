@@ -50,4 +50,34 @@
 
   //   schema[pList[len - 1]] = value;
   // },
+  convertArrowFunction(stringifiedArrowFunc) {
+    // Check if the input is a stringified arrow function
+    let arrowIndex = stringifiedArrowFunc.indexOf('=>');
+    if (arrowIndex === -1) {
+      // throw new Error('Input is not a stringified arrow function');
+      return stringifiedArrowFunc;
+    }
+    let async = false;
+    if (stringifiedArrowFunc.startsWith('async')) {
+      async = true;
+      stringifiedArrowFunc = stringifiedArrowFunc.slice(6).trim();
+      arrowIndex = stringifiedArrowFunc.indexOf('=>');
+    }
+    // Extract the function arguments
+    let argsStart = stringifiedArrowFunc.slice(0, arrowIndex).trim();
+    let args = argsStart;
+    // Check if the arguments are wrapped and wrap them
+    if (!(argsStart.startsWith('(') && argsStart.endsWith(')')) && argsStart.indexOf('=') === -1) {
+      args = '(' + argsStart + ')';
+    }
+    // Extract the function body
+    let body = stringifiedArrowFunc.slice(arrowIndex + 2).trim();
+    // Check if the body is wrapped and wrap it
+    if (!(body.startsWith('{') && body.endsWith('}'))) {
+      body = '{ return ' + body + '; }';
+    }
+    // Create the classic function
+    let classicFunc = (async ? "async " : "") + "function " + args + " " + body;
+    return classicFunc;
+  },
 });

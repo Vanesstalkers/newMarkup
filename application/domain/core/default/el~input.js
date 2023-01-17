@@ -32,7 +32,7 @@
             {
               class: 'form-text error-text',
               for: 'input-' + data.code,
-              text: config.errorComment || 'Поле заполнено с ошибкой',
+              msg: config.errorMsg || 'Поле заполнено с ошибкой',
             },
           ],
         ],
@@ -51,6 +51,7 @@
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
           if (result === 'error') {
             event.target.setCustomValidity(msg);
+            $el.querySelector('.error-text').setAttribute('msg', msg);
             console.error({ msg, stack });
           }
         });
@@ -73,6 +74,9 @@
         display: block;
         color: #ff3e1d;
         z-index: 1;
+      }
+      input.el-value:invalid ~ .error-text:after {
+        content: attr(msg);
       }
     `,
   },

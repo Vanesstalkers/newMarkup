@@ -4,12 +4,17 @@
       customType: 'html',
     },
     tpl: function (data) {
-      let text = data.value;
-      if (typeof data.value == 'object') {
-        if (Array.isArray(data.value)) {
-          text = data.value.map(({ label }) => label).join(', ');
-        } else {
-          text = data.value.label;
+      let text;
+      if (typeof window[data.on?.prepareValue] === 'function') {
+        text = window[data.on.prepareValue](data);
+      } else {
+        text = data.value;
+        if (typeof data.value == 'object') {
+          if (Array.isArray(data.value)) {
+            text = data.value.map(({ label }) => label).join(', ');
+          } else {
+            text = data.value.label;
+          }
         }
       }
       return [

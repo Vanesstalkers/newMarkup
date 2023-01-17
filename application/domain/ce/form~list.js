@@ -6,11 +6,13 @@
     },
   },
   col: 'user',
-  id: ({ user }) => [user._id],
+  id: function ({ user, query }) {
+    return [this.db.mongo.ObjectID(user._id)];
+  },
   item: { controls: { reload: true, config: { simple: true } } },
   tpl: ({ data }) => [
     HTML('core/default~table', {
-      col: 'lvl11',
+      col: 'ce',
       filter: {
         items: [
           { class: 'col-3', f: { name: 'filter.find_text', label: 'Название', config: { float: true } } },
@@ -21,6 +23,7 @@
         ],
       },
       table: {
+        addRowLink: true,
         id: async ({ user, complex, query = {} }) => {
           const find = {};
           if (query['filter.find_text']) find.add_time = { $regex: query['filter.find_text'] || '' };
@@ -49,7 +52,7 @@
       },
       add: {
         modal: true,
-        items: [{ f: { name: 'name', label: 'Название' } }, { html: (_, d) => [_.html('ce/fields~inn', _, d)] }],
+        items: [{ f: { name: 'name', label: 'Название' } }, { html: (_, d) => [HTML('ce/fields~inn')] }],
       },
     }),
   ],

@@ -14,9 +14,7 @@
     if (!user.forms) user.forms = {};
     user.forms[form] = processForm;
 
-    // if (_id !== true) _id = db.mongo.ObjectID(_id);
     let { col, id, on = {}, item = {}, config } = processForm.markup[`__${form}`];
-    // if (!id) id = () => [_id];
     const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
     const result = lib.markup.complex.get(
       { user, form: processForm, parent: { code: 0 }, handlers },
@@ -69,6 +67,8 @@
     );
 
     const cacheList = [];
+    cacheList.push(['name', `"${form}"`]);
+
     const tplEntries = [];
     for (const [key, value] of Object.entries(prepared.markup)) {
       if (value.parent) {
@@ -151,16 +151,7 @@
         new RegExp(stringifiedScript.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
         '"f_' + scriptCode + '"',
       );
-
-      const splitedScript = stringifiedScript.split('{');
-      if (splitedScript[0].includes('=>')) {
-        splitedScript[0] = splitedScript[0].replace(
-          /([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\)) => /,
-          'function $1',
-        );
-        stringifiedScript = splitedScript.join('{');
-      }
-
+      stringifiedScript = lib.utils.convertArrowFunction(stringifiedScript);
       prepared.funcList.push(`window.f_${scriptCode} = ${stringifiedScript}`);
     }
 

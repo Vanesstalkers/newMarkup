@@ -2,7 +2,6 @@
   check: {
     tpl: function (data) {
       const checked = data.value ? { checked: 'checked' } : {};
-
       const content = {};
       if (!data.config) data.config = {};
       if (data.config.content === undefined) data.config.content = 'Нет|Да'; // может прийти false (без content)
@@ -15,7 +14,7 @@
         'div',
         { code: data.code, class: 'form-group ' + data.class },
         [
-          ['label', { class: 'form-label', text: data.label || '' }],
+          data.label === false ? [] : ['label', { class: 'form-label', text: data.label || '' }],
           [
             'div',
             { class: 'form-check' + (data.config.switch ? ' form-switch' : '') },

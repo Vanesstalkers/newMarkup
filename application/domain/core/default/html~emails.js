@@ -2,13 +2,13 @@
   tpl: ({ data }, { links, name } = {}) => [
     COMPLEX(
       {
+        label: 'Электронные адреса',
         name: name || 'email',
         col: 'email',
-        label: 'Электронные адреса',
-        config: { inline: true },
-        links,
+        config: { inline: true, disableCardView: true },
         add: { label: 'Добавить адрес' },
         item: { controls: { delete: true, config: { simple: true } } },
+        links,
       },
       () => [
         FIELD({

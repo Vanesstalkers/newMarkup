@@ -60,11 +60,6 @@
                   const $item = $modal.querySelector('.modal-body > .complex-block .complex-item');
                   const $card = event.target.closest('.card');
                   const $table = $card.querySelector('table > .complex-block');
-                  const $tableReloadBtn = $table.querySelector(
-                    `.card-header[parent-code="${$table.getAttribute('code')}"] .btn-reload`,
-                  );
-                  if ($tableReloadBtn) $tableReloadBtn.click();
-
                   return { tmpObjCode: $item.getAttribute('code'), tableCode: $table.getAttribute('code') };
                 },
                 afterHandler: (event, data) => {

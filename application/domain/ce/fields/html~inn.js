@@ -6,7 +6,7 @@
       config: {
         ...(config || {}),
         mask: '000000000000',
-        errorComment:
+        errorMsg:
           'ИНН указан неправильно, значение должно содержать 10 или 12 цифр. Для удаления текущего значения оставьте поле пустым.',
       },
       handler: async ({ form, field, parent, user, value }) => {

@@ -29,22 +29,32 @@
       domain,
       [...block.split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
     );
-    if (handler) await handler({ form, field, parent, user, value });
+    const $set = { [field.name]: value };
+    if (handler) await handler({ form, field, parent, user, value, $set });
+    await db.mongo.updateOne(parent.col, parentId, { $set });
     processForm.data[field.parentCode][field.name] = value; // !!! доделать setDeep
-    await db.mongo.updateOne(parent.col, parentId, { $set: { [field.name]: value } });
   },
   addComplex: async ({ form, code, user, data = {}, returnId = false }) => {
     const [block, name] = form.split('~');
     const processForm = user.forms[form];
     const complex = processForm.fields[code];
-    const { _id: parentId } = processForm.data[complex.parent.code];
+    const parentData = processForm.data[complex.parent.code];
     const handlers =
       lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data });
-    const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentId } });
+    if (!data.add_time) data.add_time = new Date().toISOString();
+    const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentData._id } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
+
     processForm.data[itemCode] = { ...newItem, ...data };
+    if (complex.links?.[complex.parent.name]) {
+      if (!parentData[complex.links[complex.parent.name]])
+        parentData[complex.links[complex.parent.name]] = { l: [], c: 0 };
+      parentData[complex.links[complex.parent.name]].l.push(newItem._id);
+      parentData[complex.links[complex.parent.name]].c++;
+    }
+
     if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, complex, user, data, newItem });
     return returnId // !!! переделать защиту от form.fields[item.code] в showComplexItem
       ? newItem._id

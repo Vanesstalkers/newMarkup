@@ -85,7 +85,7 @@
         //     },
         //   },
         // }),
-        FIELD({ name: 'date', label: 'datetime-local', type: 'input', config: { inputType: 'date' } }),
+        FIELD({ name: 'date', label: 'datetime-local', type: 'input', config: { inputType: 'datetime-local' } }),
         FIELD({ name: 'text666', type: 'textarea', label: 'Textarea', config: { rows: 1 }, disabled: true }),
         FIELD({ name: 'text777', type: 'textarea', label: 'Textarea' }),
         FIELD({

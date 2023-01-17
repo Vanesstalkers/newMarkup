@@ -1,7 +1,6 @@
 ({
   block: {
     tpl: function (data) {
-
       // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
       // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
 
@@ -35,6 +34,7 @@
           hasControls ? 'has-controls' : undefined,
           data.controls.config?.simple ? 'simple-controls' : undefined,
           data.config?.inline ? 'inline-style' : undefined,
+          data.controls.add?.singleItem ? 'single-item' : undefined,
         ]
           .filter((item) => item)
           .join(' ');
@@ -53,7 +53,7 @@
                     class: 'card-header header-elements p-0 ' + (data.controls.config?.hide ? ' d-none' : ''),
                   },
                   [
-                    data.label ? ['h5', { class: 'm-3', text: data.label }] : [],
+                    data.label === false ? [] : ['h5', { class: 'm-3', text: data.label }],
                     [
                       'div',
                       { class: 'card-title-elements m-3 ms-auto' },
@@ -85,7 +85,7 @@
                               {
                                 type: 'button',
                                 class: 'btn btn-sm btn-primary me-4 btn-add',
-                                text: add.label || 'Добавить',
+                                text: data.controls.add.label || 'Добавить',
                               },
                               [['span', { class: 'tf-icons bx bx-plus ms-1' }]],
                             ],
@@ -227,8 +227,7 @@
       },
     },
     script: () => {
-
-/*       window.moreComplex = function (e, filter, replace) {
+      /*       window.moreComplex = function (e, filter, replace) {
         try {
           var $e = $(e);
           var $block = $e.closest('.complex-block');
@@ -295,6 +294,11 @@
 		});*/
     },
     style: `
+
+      .complex-block.single-item:not([data-itemcount="0"]) > .card-header {
+        display: none!important;
+      }
+
       .complex-block.simple-controls {
         position: relative;
       }
@@ -311,6 +315,10 @@
         padding: 0px;
       }
       .complex-block.inline-style .card-body.collapse:not(.show) {
+        display: none;
+      }
+
+      .complex-block .card-header.collapsed .btn-add {
         display: none;
       }
 

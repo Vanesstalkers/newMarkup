@@ -6,11 +6,10 @@
     },
   },
   item: { controls: { reload: true, config: { simple: true } } },
-  //   col: 'ce',
-  col: 'user',
+  col: 'ce',
   id: function ({ user, query }) {
-    // return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
-    return [this.db.mongo.ObjectID(user._id)];
+    if (!query._id) query._id = '63c69b477562e67ed0f515d3';
+    return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
   },
   tpl: () => [
     DIV(
@@ -21,12 +20,12 @@
           title: 'Контакты',
           html: [
             HTML('core/default~phones', {
-              name: 'user_phone',
-              links: { user_phone: { 'ce~main': '__user' }, 'ce~main': '__phone' },
+              name: 'ce_phone',
+              links: { ce_phone: { 'ce~main': '__ce' }, 'ce~main': '__phone' },
             }),
             HTML('core/default~emails', {
-              name: 'user_email',
-              links: { user_email: { 'ce~main': '__user' }, 'ce~main': '__email' },
+              name: 'ce_email',
+              links: { ce_email: { 'ce~main': '__ce' }, 'ce~main': '__email' },
             }),
             HTML('core/default~card', {
               title: 'Реквизиты',

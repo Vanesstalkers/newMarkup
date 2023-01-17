@@ -1,14 +1,14 @@
 ({
-  tpl: ({ data }, { links, name } = {}) => [
+  tpl: ({ data, parent }, { links, name } = {}) => [
     COMPLEX(
       {
+        label: 'Телефоны',
         name: name || 'phone',
         col: 'phone',
-        label: 'Телефоны',
-        config: { inline: true },
-        links,
+        config: { inline: true, disableCardView: true },
         add: { label: 'Добавить телефон' },
         item: { controls: { delete: true, config: { simple: true } } },
+        links,
       },
       () => [
         FIELD({

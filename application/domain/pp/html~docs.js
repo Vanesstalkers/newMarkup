@@ -2,14 +2,14 @@
   tpl: ({ data }) => [
     DIV(
       { class: 'form-group' },
-      LABEL({}, SPAN({ text: 'Документы' })),
-
       DIV(
         {},
         COMPLEX(
           {
+            label: 'Документы',
             name: 'pp_doc',
             add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
+            config: { disableCardView: true },
             item: { controls: { delete: true, config: { simple: true } } },
           },
           ({ data }) => {
@@ -21,10 +21,10 @@
               DIV(
                 { class: 'row' },
 
-                DIV({ class: 'col-2' }, FIELD({ name: 'type', label: 'Тип', type: 'select', lst: 'pp~doc_type' })),
+                DIV({ class: 'col-3' }, FIELD({ name: 'type', label: 'Тип', type: 'select', lst: 'pp~doc_type' })),
                 IF(docType == 'passport', () => [
                   DIV(
-                    { class: 'col-4' },
+                    { class: 'col-3' },
 
                     FIELD({
                       name: 'num',
