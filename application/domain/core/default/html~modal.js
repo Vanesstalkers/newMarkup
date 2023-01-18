@@ -31,24 +31,19 @@
               { type: 'button', class: 'btn btn-label-secondary', 'data-bs-dismiss': 'modal' },
               SPAN({ text: 'Close' }),
             ),
-            //BUTTON({ type: 'button', class: 'btn btn-primary' }, SPAN({ text: 'Save changes' })),
             FIELD({
               name: 'create',
               type: 'button',
               label: 'Добавить объект',
               handler: async ({ form, field, user, data }) => {
-                // const table = form.fields[data.tableCode];
-                const tmpObj = form.fields[data.tmpObjCode];
                 const tmpObjData = form.data[data.tmpObjCode];
-                // const complex = form.fields[tmpObj.complexCode];
-
                 const formName = form.name;
                 const newItem = await lib.markup.actions.addComplex({
                   form: formName,
                   code: data.tableCode,
                   user,
                   returnId: true,
-                  data: { ...tmpObjData, _id: undefined },
+                  data: tmpObjData,
                 });
                 await lib.markup.actions.deleteComplex({ form: formName, code: data.tmpObjCode, user });
 

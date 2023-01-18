@@ -57,10 +57,15 @@
         items: [
           {
             html: () => [
-              COMPLEX({ name: 'pp', add: { auto: true }, config: { disableCardView: true } }, () => [
-                FIELD({ label: 'Фамилия', name: 'second_name' }),
-                FIELD({ label: 'Имя', name: 'first_name' }),
-              ]),
+              COMPLEX(
+                {
+                  name: 'pp',
+                  add: { auto: true },
+                  config: { disableCardView: true },
+                  links: { pp: { tmp_obj_worker: '__worker' }, tmp_obj_worker: '__pp' },
+                },
+                () => [FIELD({ label: 'Фамилия', name: 'second_name' }), FIELD({ label: 'Имя', name: 'first_name' })],
+              ),
             ],
           },
           { f: { label: 'Тип должности', name: 'type', type: 'select', lst: 'worker~type' } },

@@ -7,6 +7,7 @@
         add: { label: 'Добавить роль пользователя' },
         name: 'user_role',
         config: { disableCardView: true },
+        item: { controls: { delete: true, config: { simple: true } } },
       },
       ({ data }) => [
         DIV(
@@ -15,7 +16,7 @@
           IF(user.current.v === 'admin', () => [
             DIV(
               { class: 'col-6' },
-              FIELD({ label: 'Партнер', name: 'link', type: 'select2', lst: { action: 'ce~search' } }),
+              FIELD({ label: 'Партнер', name: 'link', type: 'select2', lst: { action: 'fabricator~search' } }),
             ),
             DIV({ class: 'col-6' }, FIELD({ label: 'Тип доступа', name: 'role', type: 'select', lst: 'user~roles' })),
           ]),

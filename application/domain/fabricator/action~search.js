@@ -1,6 +1,6 @@
 async ({ query }) => {
   const result = await db.mongo.find(
-    'ce',
+    'fabricator',
     { name: { $regex: query, $options: 'i' } },
     { projection: { _id: 1, name: 1 } },
   );

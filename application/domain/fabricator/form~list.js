@@ -30,7 +30,21 @@
         cols: [
           { label: 'Добавлена', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
           { label: 'Название', f: { name: 'name', type: 'label' } },
-          { label: 'ИНН', с: { name: 'ce', f: { name: 'inn', type: 'label' } } },
+          { label: 'ИНН', c: { name: 'ce', f: { name: 'inn', type: 'label' }, config: { disableCardView: true } } },
+          // {
+          //   label: 'ce',
+          //   html: () => [
+          //     COMPLEX(
+          //       {
+          //         name: 'ce',
+          //         add: { auto: true },
+          //         // links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
+          //         // config: { disableCardView: true },
+          //       },
+          //       () => [FIELD({ name: 'inn' })],
+          //     ),
+          //   ],
+          // },
         ],
       },
       add: {
@@ -38,8 +52,20 @@
         items: [
           { f: { label: 'Название производителя', name: 'name' } },
           { f: { label: 'Тип производителя', name: 'type', type: 'select', lst: 'fabricator~type' } },
-          { html: () => [ COMPLEX({ name: 'ce', add: { auto: true }, config: { disableCardView: true } }, () => [HTML('ce~info')]) ] },
-        ], // prettier-ignore
+          {
+            html: () => [
+              COMPLEX(
+                {
+                  name: 'ce',
+                  add: { auto: true },
+                  links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
+                  config: { disableCardView: true },
+                },
+                () => [HTML('ce~info')],
+              ),
+            ],
+          },
+        ],
       },
     }),
   ],

@@ -22,35 +22,74 @@
             ),
           ),
         ),
+        FUNC(() => {
+          window.initReloadRolesList = ($el) => {
+            $el.addEventListener('shown.bs.dropdown', function () {
+              $el.querySelector(`.complex-block .btn-reload`).click();
+            });
+          };
+          window.initChangeRoleLink = ($el) => {
+            $el.addEventListener('click', async function (event) {
+              event.preventDefault();
+              await api.auth.changeRole({ roleId: $el.dataset._id });
+              location.reload();
+            });
+          };
+        }),
         UL(
           { class: 'navbar-nav flex-row align-items-center ms-auto' },
           LI(
-            { class: 'nav-item dropdown-language dropdown me-2 me-xl-0' },
+            {
+              class: 'nav-item dropdown-language dropdown me-2 me-xl-0',
+              on: { load: 'initReloadRolesList' },
+            },
             A(
               {
                 class: 'nav-link dropdown-toggle hide-arrow',
                 href: 'javascript:void(0);',
                 'data-bs-toggle': 'dropdown',
+                'data-bs-auto-close': 'false',
               },
               I({ class: 'bx bx-universal-access bx-sm me-1' }),
             ),
             UL(
               { class: 'dropdown-menu dropdown-menu-end' },
-              ...user.roles.map(({ _id, role }) => [
-                LI(
-                  {},
-                  A(
-                    {
-                      class: 'dropdown-item',
-                      href: 'javascript:void(0);',
-                      'data-_id': _id,
-                      on: { load: 'initChangeRoleLink' },
-                    },
-                    I({ class: 'bx bx-universal-access bx-sm me-1' }),
-                    SPAN({ class: 'align-middle' }, SPAN({ text: role[0].label })),
+              COMPLEX(
+                {
+                  name: 'user_role',
+                  add: false,
+                  config: { disableCardView: true },
+                  controls: { reload: true, config: { hide: true } },
+                  id: async ({ user, query = {}, parentData, complex }) => {
+                    const findData = await db.mongo.aggregate('user', [
+                      { $match: { _id: db.mongo.ObjectID(user._id) } },
+                      { $lookup: { from: 'user_role', localField: '__user_role.l', foreignField: '_id', as: 'roles' } },
+                    ]);
+                    return findData[0]?.roles.map(({ _id }) => _id) || [];
+                  },
+                },
+                ({ data }) => [
+                  LI(
+                    {},
+                    A(
+                      {
+                        class: 'dropdown-item',
+                        href: 'javascript:void(0);',
+                        'data-_id': data._id,
+                        on: { load: 'initChangeRoleLink' },
+                      },
+                      I({ class: 'bx bx-universal-access bx-sm me-1' }),
+                      FIELD({ name: 'role', type: 'json' }),
+                      FIELD({ name: 'link', type: 'json' }),
+                      SPAN(
+                        { class: 'align-middle' },
+                        SPAN({ text: data.role?.[0].label }),
+                        data.link?.[0] ? SPAN({ text: ` (${data.link?.[0].label})` }) : [],
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
           ),
           LI(
@@ -640,14 +679,5 @@
       ),
     ),
   ],
-  func: () => {
-    window.initChangeRoleLink = ($el) => {
-      $el.addEventListener('click', async function (event) {
-        event.preventDefault();
-        await api.auth.changeRole({ roleId: $el.dataset._id });
-        location.reload();
-      });
-    };
-  },
   style: ``,
 });

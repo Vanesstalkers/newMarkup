@@ -103,7 +103,7 @@
                             ),
                           ];
                         },
-                      )
+                      ),
                     ],
                   },
                   button: {
@@ -184,7 +184,7 @@
                             col.c
                               ? [
                                   COMPLEX(
-                                    { name: col.c.name, item: { custom: { content: col.c.f } } },
+                                    { name: col.c.name, config: col.c.config, item: { custom: { content: col.c.f } } },
                                     ({ custom }) => {
                                       const { content } = custom;
                                       return [FIELD(content)];
