@@ -1,8 +1,5 @@
 ({
   label: {
-    config: {
-      customType: 'html',
-    },
     tpl: function (data) {
       let text;
       if (typeof window[data.on?.prepareValue] === 'function') {
@@ -29,6 +26,9 @@
           ],
         ],
       ];
+    },
+    func: () => {
+      window.toLocaleString = (data) => (data.value ? new Date(data.value).toLocaleString() : '');
     },
   },
   'label+': {

@@ -42,7 +42,7 @@
                 const tmpObjData = form.data[data.tmpObjCode];
                 // const complex = form.fields[tmpObj.complexCode];
 
-                const formName = form.fields[[1, form.codeSfx].join('_')]?.name;
+                const formName = form.name;
                 const newItem = await lib.markup.actions.addComplex({
                   form: formName,
                   code: data.tableCode,
@@ -63,13 +63,19 @@
                   return { tmpObjCode: $item.getAttribute('code'), tableCode: $table.getAttribute('code') };
                 },
                 afterHandler: (event, data) => {
+                  const $modal = event.target.closest('.modal');
                   const $card = event.target.closest('.card');
                   const $table = $card.querySelector('table > .complex-block');
                   const $tableReloadBtn = $table.querySelector(
                     `.card-header[parent-code="${$table.getAttribute('code')}"] .btn-reload`,
                   );
                   if ($tableReloadBtn) $tableReloadBtn.click();
-                  $(event.target).closest('.modal').modal('hide');
+                  const $tmpObj = $modal.querySelector('.complex-block');
+                  const $tmpObjReloadBtn = $tmpObj.querySelector(
+                    `.card-header[parent-code="${$tmpObj.getAttribute('code')}"] .btn-reload`,
+                  );
+                  if ($tmpObjReloadBtn) $tmpObjReloadBtn.click();
+                  $($modal).modal('hide');
                 },
               },
             }),

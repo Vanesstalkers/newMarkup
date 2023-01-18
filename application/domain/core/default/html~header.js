@@ -32,42 +32,25 @@
                 href: 'javascript:void(0);',
                 'data-bs-toggle': 'dropdown',
               },
-              I({ class: 'fi fi-us fis rounded-circle fs-3 me-1' }),
+              I({ class: 'bx bx-universal-access bx-sm me-1' }),
             ),
             UL(
               { class: 'dropdown-menu dropdown-menu-end' },
-              LI(
-                {},
-                A(
-                  { class: 'dropdown-item', href: 'javascript:void(0);', 'data-language': 'en' },
-                  I({ class: 'fi fi-us fis rounded-circle fs-4 me-1' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'English' })),
+              ...user.roles.map(({ _id, role }) => [
+                LI(
+                  {},
+                  A(
+                    {
+                      class: 'dropdown-item',
+                      href: 'javascript:void(0);',
+                      'data-_id': _id,
+                      on: { load: 'initChangeRoleLink' },
+                    },
+                    I({ class: 'bx bx-universal-access bx-sm me-1' }),
+                    SPAN({ class: 'align-middle' }, SPAN({ text: role[0].label })),
+                  ),
                 ),
-              ),
-              LI(
-                {},
-                A(
-                  { class: 'dropdown-item', href: 'javascript:void(0);', 'data-language': 'fr' },
-                  I({ class: 'fi fi-fr fis rounded-circle fs-4 me-1' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'France' })),
-                ),
-              ),
-              LI(
-                {},
-                A(
-                  { class: 'dropdown-item', href: 'javascript:void(0);', 'data-language': 'de' },
-                  I({ class: 'fi fi-de fis rounded-circle fs-4 me-1' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'German' })),
-                ),
-              ),
-              LI(
-                {},
-                A(
-                  { class: 'dropdown-item', href: 'javascript:void(0);', 'data-language': 'pt' },
-                  I({ class: 'fi fi-pt fis rounded-circle fs-4 me-1' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Portuguese' })),
-                ),
-              ),
+              ]),
             ),
           ),
           LI(
@@ -657,6 +640,14 @@
       ),
     ),
   ],
-  func: () => {},
+  func: () => {
+    window.initChangeRoleLink = ($el) => {
+      $el.addEventListener('click', async function (event) {
+        event.preventDefault();
+        await api.auth.changeRole({ roleId: $el.dataset._id });
+        location.reload();
+      });
+    };
+  },
   style: ``,
 });

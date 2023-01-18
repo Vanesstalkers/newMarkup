@@ -1,7 +1,8 @@
 ({
-  tpl: ({ data }, { hideFilters } = {}) => [
+  tpl: ({ data }, { hideFilters, tableId, links } = {}) => [
     HTML('core/default~table', {
       col: 'worker',
+      links: links,
       filter: {
         items: hideFilters
           ? []
@@ -16,23 +17,10 @@
       },
       table: {
         addRowLink: true,
-        id: async ({ user, query = {}, parentData, find, complex }) => {
-          if (query['filter.find_text']) find.second_name = { $regex: query['filter.find_text'] || '' };
-          const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
-          return findData.map(({ _id }) => _id);
-        },
+        id: tableId,
         cols: [
-          {
-            label: 'Добавлен',
-            f: {name: 'add_time', type: 'label', on: {
-                prepareValue: (data) => (data.value ? new Date(data.value).toLocaleString() : ''),
-              },
-            }, // prettier-ignore
-          },
-          {
-            label: 'Должность',
-            f: { name: 'position', type: 'label', label: false },
-          },
+          { label: 'Добавлен', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Должность', f: { name: 'position', type: 'label', label: false } },
           {
             label: 'ФИО',
             html: ({ data }) => [

@@ -38,68 +38,19 @@
         { class: 'col-12 col-lg-6' },
         HTML('core/default~card', {
           title: 'Сотрудники',
-          html: [HTML('worker~table', { hideFilters: false })],
+          html: [
+            HTML('worker~table', {
+              hideFilters: true,
+              tableId: async ({ user, query = {}, parentData, complex }) => {
+                const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
+                const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+                return findData.map(({ _id }) => _id);
+              },
+              links: { worker: { 'ce~main': '__ce' }, 'ce~main': '__worker' },
+            }),
+          ],
         }),
       ),
     ),
   ],
 });
-/* 
-exports.access = (__, data, callback)=>SYS.requireFile('func', 'user~access').f(__, {
-	allow: ['ce']
-}, callback);
-*/
-// exports.tpl = (_, d) => {
-//   return [
-//     DIV(
-//       { class: 'row' },
-//       /* ["div",{"class": "col-xs-8"},[
-// 				["div",{"class": "row"},[
-// 					["div",{"class": "col-xs-12"},[
-// 						_.html('__tpl~ibox', _, d, {title: 'Контактные лица и сотрудники', content: (_,d)=>
-// 						[
-// 							["div",{class:`css
-// 								.*css* .bPageFilters {
-// 									margin-top: -40px;
-// 									margin-right: 20px;
-// 								}
-// 							`},[
-// 								_.html('worker~table', _, d, {filter: {}}),
-// 							]]
-// 						]}),
-// 					]],
-// 					["div",{"class": "col-xs-12"},[
-// 						_.c({name: 'client', add: false, process: {
-// 							tpl: (_, d)=>[
-// 								_.html('__tpl~ibox', _, d, {title: 'Анкеты клиента', hide: true, content: (_,d)=>
-// 								[
-// 									_.html('app~list', _, d, {parent: _.__.pre || d._id}),
-// 								]}),
-// 							],
-// 						}}),
-// 					]],
-// 				]],
-// 			]] */
-//     ),
-//   ];
-// };
-/*
-exports.func = ()=>{
-
-}
-
-exports.script = ()=>{
-
-	window.updateMenuCustom = function (info)
-	{
-		if (!window.breadcrumb.length)
-			window.breadcrumb.push({text: "Юридические лица", query: { form: "ce~list", container: "formContent" } });
-
-		let $nameField = $("#formContent .el-name:not(.no-breadcrumb) .el-value");
-		
-		window.breadcrumb.push({
-			text: $nameField.text() || $nameField.val(),
-			query: history.state.subform, active: true,
-		});
-	};
-} */

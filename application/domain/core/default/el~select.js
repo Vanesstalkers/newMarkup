@@ -42,7 +42,8 @@
         const $select = $el.querySelector('select');
         if (typeof data.config.element === 'function') {
           for (const l of window.LST[data.lst]) {
-            if (!l.hide) nativeTplToHTML([data.config.element(l)], $select);
+            // if (!l.hide) nativeTplToHTML([data.config.element(l)], $select);
+            nativeTplToHTML([data.config.element(l)], $select);
           }
         }
 

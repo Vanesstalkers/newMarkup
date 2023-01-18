@@ -1,6 +1,9 @@
 ({
   config: {
-    menu: { label: 'Юридические лица', icon: 'bx bx-building' },
+    menu: {
+      label: 'Производители',
+      icon: 'bx bx-building',
+    },
   },
   col: 'user',
   id: function ({ user, query }) {
@@ -9,7 +12,7 @@
   item: { controls: { reload: true, config: { simple: true } } },
   tpl: ({ data }) => [
     HTML('core/default~table', {
-      col: 'ce',
+      col: 'fabricator',
       filter: {
         items: [
           { class: 'col-3', f: { label: 'Название', name: 'filter.find_text', config: { float: true } } },
@@ -25,16 +28,17 @@
           return findData.map(({ _id }) => _id);
         },
         cols: [
-          { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
-          { label: 'Название', f: { name: 'name', type: 'input' } },
-          { label: 'ИНН', f: { name: 'inn', type: 'input' } },
+          { label: 'Добавлена', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Название', f: { name: 'name', type: 'label' } },
+          { label: 'ИНН', с: { name: 'ce', f: { name: 'inn', type: 'label' } } },
         ],
       },
       add: {
         modal: true,
         items: [
-          { f: { name: 'name', label: 'Название' } }, 
-          { html: (_, d) => [HTML('ce/fields~inn')] }
+          { f: { label: 'Название производителя', name: 'name' } },
+          { f: { label: 'Тип производителя', name: 'type', type: 'select', lst: 'fabricator~type' } },
+          { html: () => [ COMPLEX({ name: 'ce', add: { auto: true }, config: { disableCardView: true } }, () => [HTML('ce~info')]) ] },
         ], // prettier-ignore
       },
     }),

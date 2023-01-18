@@ -32,30 +32,7 @@
         }), // prettier-ignore
           DIV({ class: 'col-6' }, HTML('user/fields~login')),
           DIV({ class: 'col-6' }, HTML('user/fields~pswd', { showGenBtn: true })),
-          DIV(
-            { class: 'col-12' },
-            COMPLEX(
-              {
-                label: 'Роли пользователя',
-                add: { label: 'Добавить роль пользователя' },
-                name: 'user_roles',
-                config: { disableCardView: true },
-              },
-              ({ data }) => [
-                DIV(
-                  { class: 'row' },
-                  DIV(
-                    { class: 'col-6' },
-                    FIELD({ label: 'Партнер', name: 'link', type: 'select', lst: 'partner~list' }),
-                  ),
-                  DIV(
-                    { class: 'col-6' },
-                    FIELD({ label: 'Тип доступа', name: 'role', type: 'select', lst: 'user~roles' }),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          DIV({ class: 'col-12' }, HTML('user~roles')),
         ),
       ],
     ),

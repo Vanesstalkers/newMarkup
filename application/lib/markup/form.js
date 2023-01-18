@@ -145,14 +145,16 @@
 
     let cacheFile = cacheList.map(([key, value]) => `${key}:${value}`).join(',');
     for (const script of prepared.scriptList) {
-      let stringifiedScript = script.toString();
-      const scriptCode = node.crypto.createHash('md5').update(stringifiedScript).digest('hex');
-      cacheFile = cacheFile.replace(
-        new RegExp(stringifiedScript.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
-        '"f_' + scriptCode + '"',
-      );
-      stringifiedScript = lib.utils.convertArrowFunction(stringifiedScript);
-      prepared.funcList.push(`window.f_${scriptCode} = ${stringifiedScript}`);
+      if (typeof script === 'function') {
+        let stringifiedScript = script.toString();
+        const scriptCode = node.crypto.createHash('md5').update(stringifiedScript).digest('hex');
+        cacheFile = cacheFile.replace(
+          new RegExp(stringifiedScript.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'), 'g'),
+          '"f_' + scriptCode + '"',
+        );
+        stringifiedScript = lib.utils.convertArrowFunction(stringifiedScript);
+        prepared.funcList.push(`window.f_${scriptCode} = ${stringifiedScript}`);
+      }
     }
 
     const formCachePath = `application/static/cache/${form}`;

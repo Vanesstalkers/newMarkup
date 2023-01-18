@@ -3,7 +3,6 @@
   col: 'user',
   id: ({ user }) => [user._id],
   tpl: () => {
-    const userRoleConfig = domain.user['lst~roles'].find(({ v }) => v === user.current.role) || {};
     return [
       DIV(
         { class: 'layout-wrapper layout-content-navbar' },
@@ -18,7 +17,7 @@
               DIV({
                 class: 'container-xxl flex-grow-1 container-p-y',
                 id: 'formContent',
-                on: { load: ['initForm', userRoleConfig.baseForm] },
+                on: { load: ['initForm', user.current.baseForm] },
               }),
 
               HTML('core/default~footer'),

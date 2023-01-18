@@ -1,5 +1,5 @@
 async (col, query, update, options) => {
-  console.warn('db updateOne col=', col);
+  // console.warn('db updateOne col=', col, query);
   if (typeof query === 'string') query = { _id: db.mongo.ObjectID(query) };
   else if (lib.utils.isObjectID(query)) query = { _id: query };
   else if (query._id && typeof query._id === 'string') query._id = db.mongo.ObjectID(query._id);

@@ -21,20 +21,16 @@
             user,
             returnId: true,
           });
-          if (!form.data[parent.code][complex.links[parent.name]])
-            form.data[parent.code][complex.links[parent.name]] = { c: 1, l: [] };
-          form.data[parent.code][complex.links[parent.name]].l.push(_id);
           ids = [_id];
         }
         return ids;
       };
     const tplFunc = form.markup[linecode].tpl;
     handlers.ids.push(async () => {
-      const parentData = form.data[complex.parent.code];
-      const find = {};
-      if (parentData && complex.links?.[complex.parent.name])
-        find._id = { $in: parentData[complex.links[complex.parent.name]]?.l || [] };
-      const ids = await idFunc.call({ db }, { user, query: custom?.query, form, complex, parentData, find });
+      const ids = await idFunc.call(
+        { db },
+        { user, query: custom?.query, form, complex, parentData: form.data[complex.parent.code] },
+      );
       const findIds = [];
       for (const id of ids) {
         if (id === true) {

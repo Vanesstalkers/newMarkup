@@ -43,7 +43,12 @@
       lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data });
+
     if (!data.add_time) data.add_time = new Date().toISOString();
+    if (complex.links?.[complex.name]?.[complex.parent.name]) {
+      data[complex.links?.[complex.name]?.[complex.parent.name]] = { l: [parentData._id], c: 1 };
+    }
+
     const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentData._id } });
     const itemCode = lib.markup.helpers.nextCode(processForm);
 
@@ -65,20 +70,26 @@
     const item = processForm.fields[code];
     const { _id: itemId } = processForm.data[code];
     const complex = processForm.fields[item.complexCode];
-    const { _id: parentId } = processForm.data[complex.parent.code];
+    const parentData = processForm.data[complex.parent.code];
 
     await db.mongo.deleteOne(item.col, itemId);
     const itemLink = complex.links[complex.parent.name];
     const updateData = { $pull: { [`${itemLink}.l`]: itemId }, $inc: { [`${itemLink}.c`]: -1 } };
-    await db.mongo.updateOne(complex.parent.col, parentId, updateData);
+    await db.mongo.updateOne(complex.parent.col, parentData._id, updateData);
+
+    if (complex.links?.[complex.parent.name]) {
+      if (parentData[complex.links[complex.parent.name]]) {
+        parentData[complex.links[complex.parent.name]].l = parentData[complex.links[complex.parent.name]].l.filter(
+          (_id) => _id.toString() !== itemId.toString(),
+        );
+        parentData[complex.links[complex.parent.name]].c--;
+      }
+    }
   },
   showComplex: async ({ form, code, user, query }) => {
     const processForm = user.forms[form];
     const item = processForm.fields[code];
     if (item.type === 'complex') {
-      // if (_id !== true) _id = db.mongo.ObjectID(_id);
-      // let { col, id, on = {} } = processForm.markup[`__${form}`];
-      // if (!id) id = () => [_id];
       const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
       const result = lib.markup.complex.get(
         { user, form: processForm, data: processForm.data, parent: item.parent, handlers },
