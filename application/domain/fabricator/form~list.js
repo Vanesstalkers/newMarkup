@@ -1,9 +1,7 @@
 ({
   config: {
-    menu: {
-      label: 'Производители',
-      icon: 'bx bx-building',
-    },
+    menu: { label: 'Производители', icon: 'fas fa-person-digging' },
+    disableCardView: true,
   },
   col: 'user',
   id: function ({ user, query }) {
@@ -11,6 +9,56 @@
   },
   item: { controls: { reload: true, config: { simple: true } } },
   tpl: ({ data }) => [
+    // DIV(
+    //   { class: 'row g-4 mb-4' },
+    COMPLEX(
+      {
+        name: 'stats',
+        add: false,
+        config: { disableCardView: true },
+        controls: { reload: true, config: { hide: true } },
+        class: 'row g-4 mb-4',
+        item: { class: 'col-sm-6 col-xl-3' },
+        id: () => [true],
+        handlers: {
+          customData: async ({ parentData }) => {
+            const count = await db.mongo.client.collection('fabricator').count();
+            return [
+              { count, icon: 'fas fa-person-digging' },
+              { count: count - 1, icon: 'fa-regular fa-handshake' },
+              { count: count - 2, icon: 'fa-regular fa-handshake' },
+            ];
+          },
+        },
+      },
+      ({ data }) => [
+        // DIV(
+        //   { class: 'col-sm-6 col-xl-3' },
+        DIV(
+          { class: 'card' },
+          DIV(
+            { class: 'card-body' },
+            DIV(
+              { class: 'd-flex align-items-start justify-content-between' },
+              DIV(
+                { class: 'content-left', text: 'Производителей' },
+
+                DIV(
+                  { class: 'd-flex align-items-end mt-2' },
+                  H4({ class: 'mb-0 me-2' }, SPAN({ text: data.count })),
+                  SMALL({ class: 'text-success' }, SPAN({ text: '(+29%)' })),
+                ),
+                SPAN({ text: 'Всего' }),
+              ),
+              SPAN({ class: 'badge bg-label-primary rounded p-2' }, I({ class: data.icon + ' fa-2x' })),
+            ),
+          ),
+        ),
+        // ),
+      ],
+    ),
+    // ), // prettier-ignore
+
     HTML('core/default~table', {
       col: 'fabricator',
       filter: {
@@ -48,7 +96,7 @@
         ],
       },
       add: {
-        modal: true,
+        modal: { toggleButton: { label: 'Добавить производителя' } },
         items: [
           { f: { label: 'Название производителя', name: 'name' } },
           { f: { label: 'Тип производителя', name: 'type', type: 'select', lst: 'fabricator~type' } },

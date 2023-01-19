@@ -4,6 +4,7 @@
       label: 'Форма компании',
       icon: 'bx bx-building',
     },
+    disableCardView: true,
   },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
@@ -12,6 +13,9 @@
     return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
   },
   tpl: () => [
+    HTML('core/default~breadcrumbs', { items: ['Компании', data.name] }),
+    FIELD({ name: 'name', type: 'json' }),
+
     DIV(
       { class: 'row' },
       DIV(
@@ -47,6 +51,7 @@
                 return findData.map(({ _id }) => _id);
               },
               links: { worker: { 'ce~main': '__ce' }, 'ce~main': '__worker' },
+              add: { modal: { toggleButton: { simple: true } } },
             }),
           ],
         }),

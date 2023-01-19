@@ -43,9 +43,11 @@
       id,
       on,
       item = {},
+      links,
       func,
       style,
     } = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `form~${name}`);
+    console.log("links=", links, form);
     const prepared = await lib.markup.complex.prepare(
       {
         user,
@@ -62,7 +64,7 @@
         },
         parent: { root: true },
       },
-      { name: form, col, config, id, on, item },
+      { name: form, col, config, id, on, item, links },
       tpl,
     );
 

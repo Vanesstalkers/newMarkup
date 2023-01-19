@@ -1,6 +1,8 @@
 ({
   label: {
     tpl: function (data) {
+      if (data.label !== false) data.label = {};
+      if (typeof data.label === 'string') data.label = { text: data.label };
       let text;
       if (typeof window[data.on?.prepareValue] === 'function') {
         text = window[data.on.prepareValue](data);
@@ -15,13 +17,15 @@
         }
       }
       return [
-        'div',
-        { code: data.code, class: 'form-group ' + data.class },
+        data.config?.tag || 'div',
+        { code: data.code, class: ['form-group', data.config?.inline ? 'd-inline' : '', data.class || ''].join(' ') },
         [
-          data.label === false ? [] : ['label', { class: 'form-label', text: data.label || '' }],
+          data.label === false
+            ? []
+            : ['label', { class: 'form-label ' + data.label.class, text: data.label.text || '' }],
           [
             'div',
-            { class: 'el-value' },
+            { class: ['el-value', data.config?.inline ? 'd-inline ms-2' : ''].join(' ') },
             [data.config?.callto ? ['a', { href: `callto:${text}`, text }] : ['span', { text }]],
           ],
         ],

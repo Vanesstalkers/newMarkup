@@ -2,7 +2,7 @@
   config: {
     menu: {
       label: 'Сотрудники',
-      icon: 'bx bx-user-badge',
+      icon: 'fa-solid fa-address-card',
     },
   },
   col: 'user',
@@ -30,7 +30,7 @@
                 localField: 'from_ce.__worker.l',
                 foreignField: '_id',
                 as: 'from_worker',
-                pipeline: [{ $skip: 0 }, { $limit: 1 }],
+                pipeline: [{ $skip: 0 }, { $limit: 100 }],
               },
             },
             // { $limit: 1 },

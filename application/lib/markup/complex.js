@@ -32,24 +32,36 @@
         { user, query: custom?.query, form, complex, parentData: form.data[complex.parent.code] },
       );
       const findIds = [];
-      for (const id of ids) {
-        if (id === true) {
+      if (typeof complex.handlers?.customData === 'function') {
+        const customItems = await complex.handlers.customData.call(
+          { db },
+          { user, query: custom?.query, form, complex, parentData: form.data[complex.parent.code] },
+        );
+        for (const item of customItems) {
           const itemCode = lib.markup.helpers.nextCode(form);
-          form.data[itemCode] = {};
-          complex.items[itemCode] = {};
-        } else {
-          findIds.push(id);
-        }
-      }
-      if (findIds.length) {
-        for (const id of findIds) {
-          const itemCode = lib.markup.helpers.nextCode(form);
-          form.data[`${linecode}-${id}`] = itemCode;
+          form.data[itemCode] = item;
           complex.items[itemCode] = {};
         }
-        if (!handlers.db[complex.name]) handlers.db[complex.name] = {};
-        if (!handlers.db[complex.name][linecode]) handlers.db[complex.name][linecode] = { col: complex.col, ids: [] };
-        handlers.db[complex.name][linecode].ids.push(...findIds);
+      } else {
+        for (const id of ids) {
+          if (id === true) {
+            const itemCode = lib.markup.helpers.nextCode(form);
+            form.data[itemCode] = {};
+            complex.items[itemCode] = {};
+          } else {
+            findIds.push(id);
+          }
+        }
+        if (findIds.length) {
+          for (const id of findIds) {
+            const itemCode = lib.markup.helpers.nextCode(form);
+            form.data[`${linecode}-${id}`] = itemCode;
+            complex.items[itemCode] = {};
+          }
+          if (!handlers.db[complex.name]) handlers.db[complex.name] = {};
+          if (!handlers.db[complex.name][linecode]) handlers.db[complex.name][linecode] = { col: complex.col, ids: [] };
+          handlers.db[complex.name][linecode].ids.push(...findIds);
+        }
       }
     });
     handlers.tpl.push(async () => {
@@ -83,7 +95,7 @@
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
   prepare: ({ user, form, parent = {}, blockName }, data, tplFunc) => {
-    const { name, col, config, item, filter } = data;
+    const { name, col, config, item, filter, queryFields = {} } = data;
     let links = data.links;
     if (!parent.linecode) parent.linecode = ''; // самый верхний уровень
     if (!data.on) data.on = {};
@@ -99,7 +111,7 @@
     form.markup[linecode] = {
       parent: parent.root ? null : JSON.stringify(parent.linecode),
       usedHtml: [],
-      queryFields: { _id: 1 }, // без этого не воспринимает slice и забирает весь объект
+      queryFields: { _id: 1, ...queryFields }, // без этого не воспринимает slice и забирает весь объект
       tpl: tplFunc.toString(),
       col: JSON.stringify(col),
       config: JSON.stringify(config),
@@ -114,6 +126,7 @@
     complex.parentDataNotRequired = data.config?.parentDataNotRequired;
     if (!complex.parentDataNotRequired && form.markup[parent.linecode]) {
       const childLink = links[parent.name];
+      console.log('childLink=', childLink, complex.name, links, data.links);
       form.markup[parent.linecode].queryFields[childLink + '.l'] =
         filter?.l !== undefined ? { $slice: filter.l < 0 ? [filter.l, -1 * filter.l] : [0, filter.l] } : 1;
       form.markup[parent.linecode].queryFields[childLink + '.c'] = true;

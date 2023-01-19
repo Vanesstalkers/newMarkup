@@ -271,6 +271,7 @@ document.addEventListener('click', async (event) => {
     else if (result === 'success') $item.remove();
   }
   if ($el.closest('.btn-reload')) {
+    console.log({ $el });
     const form = $el.closest('[type="form"]').dataset.name;
     const $itemToReload = document.querySelector(
       `[code="${$el.closest('[parent-code]').getAttribute('parent-code')}"]`,

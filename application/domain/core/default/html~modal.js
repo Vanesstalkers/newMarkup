@@ -1,6 +1,6 @@
 ({
-  tpl: ({ data }, { id, title, html: { body: bodyHTML } = {}, button = {} }) => [
-    button.html ||
+  tpl: ({ data }, { id, title, html: { body: bodyHtml, footer: footerHtml } = {}, toggleButton = {} }) => [
+    toggleButton.html ||
       BUTTON({
         class: `btn btn-${button.type} ` + button.cls,
         'data-bs-toggle': 'modal',
@@ -24,56 +24,15 @@
             H5({ class: 'modal-title', id: 'exampleModalLabel1' }, SPAN({ text: title || 'Modal title' })),
             BUTTON({ type: 'button', class: 'btn-close', 'data-bs-dismiss': 'modal', 'aria-label': 'Close' }),
           ),
-          DIV({ class: 'modal-body' }, bodyHTML),
+          DIV({ class: 'modal-body' }, bodyHtml),
           DIV(
             { class: 'modal-footer' },
-            BUTTON(
-              { type: 'button', class: 'btn btn-label-secondary', 'data-bs-dismiss': 'modal' },
-              SPAN({ text: 'Close' }),
-            ),
-            FIELD({
-              name: 'create',
-              type: 'button',
-              label: 'Добавить объект',
-              handler: async ({ form, field, user, data }) => {
-                const tmpObjData = form.data[data.tmpObjCode];
-                const formName = form.name;
-                const newItem = await lib.markup.actions.addComplex({
-                  form: formName,
-                  code: data.tableCode,
-                  user,
-                  returnId: true,
-                  data: tmpObjData,
-                });
-                await lib.markup.actions.deleteComplex({ form: formName, code: data.tmpObjCode, user });
-
-                return newItem;
-              },
-              on: {
-                beforeHandler: (event) => {
-                  const $modal = event.target.closest('.modal');
-                  const $item = $modal.querySelector('.modal-body > .complex-block .complex-item');
-                  const $card = event.target.closest('.card');
-                  const $table = $card.querySelector('table > .complex-block');
-                  return { tmpObjCode: $item.getAttribute('code'), tableCode: $table.getAttribute('code') };
-                },
-                afterHandler: (event, data) => {
-                  const $modal = event.target.closest('.modal');
-                  const $card = event.target.closest('.card');
-                  const $table = $card.querySelector('table > .complex-block');
-                  const $tableReloadBtn = $table.querySelector(
-                    `.card-header[parent-code="${$table.getAttribute('code')}"] .btn-reload`,
-                  );
-                  if ($tableReloadBtn) $tableReloadBtn.click();
-                  const $tmpObj = $modal.querySelector('.complex-block');
-                  const $tmpObjReloadBtn = $tmpObj.querySelector(
-                    `.card-header[parent-code="${$tmpObj.getAttribute('code')}"] .btn-reload`,
-                  );
-                  if ($tmpObjReloadBtn) $tmpObjReloadBtn.click();
-                  $($modal).modal('hide');
-                },
-              },
-            }),
+            footerHtml || [
+              BUTTON(
+                { type: 'button', class: 'btn btn-label-secondary', 'data-bs-dismiss': 'modal' },
+                SPAN({ text: 'Close' }),
+              ),
+            ],
           ),
         ),
       ),

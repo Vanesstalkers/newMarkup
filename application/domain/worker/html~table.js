@@ -1,5 +1,5 @@
 ({
-  tpl: ({ data }, { hideFilters, tableId, links } = {}) => [
+  tpl: ({ data }, { hideFilters, tableId, links, add = {} } = {}) => [
     HTML('core/default~table', {
       col: 'worker',
       links: links,
@@ -8,11 +8,11 @@
           ? []
           : [
               {
-                class: 'col-3 col-sm-6',
+                class: 'col-6 col-sm-3',
                 f: { label: 'Должность', name: 'find_type', type: 'select', lst: 'worker~type' },
               },
-              { class: 'col-3 col-sm-6', f: { label: 'Имя/Фамилия', name: 'find_text' } },
-              { class: 'col-3 col-sm-6', f: { name: 'is_delete', type: 'check+', label: 'Показывать\x0aуволенных' } },
+              { class: 'col-6 col-sm-3', f: { label: 'Имя/Фамилия', name: 'find_text' } },
+              { class: 'col-6 col-sm-3', f: { name: 'is_delete', type: 'check+', label: 'Показывать\x0aуволенных' } },
             ],
       },
       table: {
@@ -53,7 +53,7 @@
         ],
       },
       add: {
-        modal: true,
+        modal: add.modal || { toggleButton: { label: 'Добавить сотрудника' } },
         items: [
           {
             html: () => [

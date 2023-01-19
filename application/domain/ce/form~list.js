@@ -1,6 +1,7 @@
 ({
   config: {
-    menu: { label: 'Юридические лица', icon: 'bx bx-building' },
+    menu: { label: 'Юридические лица', icon: 'fa-solid fa-city' },
+    disableCardView: true,
   },
   col: 'user',
   id: function ({ user, query }) {
@@ -31,7 +32,7 @@
         ],
       },
       add: {
-        modal: true,
+        modal: { toggleButton: { label: 'Добавить юр.лицо' } },
         items: [
           { f: { name: 'name', label: 'Название' } }, 
           { html: (_, d) => [HTML('ce/fields~inn')] }

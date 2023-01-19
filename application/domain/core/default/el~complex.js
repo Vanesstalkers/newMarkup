@@ -3,7 +3,6 @@
     tpl: function (data) {
       // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
       // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
-
       const disableCardView = data.config?.disableCardView;
 
       if (!data.controls) data.controls = {};
@@ -28,7 +27,7 @@
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card card-action shadow-none' : 'content-holder',
+          !disableCardView ? 'card shadow-none' : 'content-holder',
           'complex-block',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
