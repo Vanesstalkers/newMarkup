@@ -114,10 +114,11 @@ window.loadRes = function (src, config = {}) {
 
 window.showForm = async ({ form, container, _id }) => {
   const $container = container
-    ? container instanceof HTMLElement
-      ? container
-      : document.getElementById(container)
-    : document.body;
+  ? container instanceof HTMLElement
+  ? container
+  : document.getElementById(container)
+  : document.body;
+  console.log("window.showForm", {form, $container});
   const $parentForm = $container.closest(`[type="form"]`);
   const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
@@ -256,7 +257,7 @@ window.addEventListener('load', async () => {
     attributeOldValue: true,
   });
 
-  await showForm({ form: BASE_FORM });
+  await showForm({ form: INIT_FORM });
 });
 
 document.addEventListener('click', async (event) => {

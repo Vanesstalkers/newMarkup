@@ -1,7 +1,9 @@
 ({
   config: { disableCardView: true },
   col: 'user',
-  id: ({ user }) => [user._id],
+  id: function ({ user, query }) {
+    return [this.db.mongo.ObjectID(user._id)];
+  },
   tpl: () => {
     return [
       DIV(

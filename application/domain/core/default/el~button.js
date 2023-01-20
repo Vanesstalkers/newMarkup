@@ -6,9 +6,8 @@
       let btnStyle = '';
       if (config.outline) btnStyle = 'outline-';
       if (config.label) btnStyle = 'label-';
-      data.class += ['btn', `btn-${btnStyle}${config.btnType || ''}`, config.size ? `btn-${config.size}` : ''].join(
-        ' ',
-      );
+      data.class +=
+        ' ' + ['btn', `btn-${btnStyle}${config.btnType || ''}`, config.size ? `btn-${config.size}` : ''].join(' ');
       return [['button', data]];
     },
     front: {

@@ -126,7 +126,6 @@
     complex.parentDataNotRequired = data.config?.parentDataNotRequired;
     if (!complex.parentDataNotRequired && form.markup[parent.linecode]) {
       const childLink = links[parent.name];
-      console.log('childLink=', childLink, complex.name, links, data.links);
       form.markup[parent.linecode].queryFields[childLink + '.l'] =
         filter?.l !== undefined ? { $slice: filter.l < 0 ? [filter.l, -1 * filter.l] : [0, filter.l] } : 1;
       form.markup[parent.linecode].queryFields[childLink + '.c'] = true;

@@ -1,45 +1,125 @@
 [
-	DIV({class: "nav-align-top mb-4"},
-		UL({class: "nav nav-pills mb-3",role: "tablist"},
-			LI({class: "nav-item",role: "presentation"},
-				BUTTON({type: "button",class: "nav-link active",role: "tab","data-bs-toggle": "tab","data-bs-target": "#navs-pills-top-home","aria-controls": "navs-pills-top-home","aria-selected": "true"},
-					SPAN({text: "Home"})
-				)
-			),
-			LI({class: "nav-item",role: "presentation"},
-				BUTTON({type: "button",class: "nav-link",role: "tab","data-bs-toggle": "tab","data-bs-target": "#navs-pills-top-profile","aria-controls": "navs-pills-top-profile","aria-selected": "false",tabindex: "-1"},
-					SPAN({text: "Profile"})
-				)
-			),
-			LI({class: "nav-item",role: "presentation"},
-				BUTTON({type: "button",class: "nav-link",role: "tab","data-bs-toggle": "tab","data-bs-target": "#navs-pills-top-messages","aria-controls": "navs-pills-top-messages","aria-selected": "false",tabindex: "-1"},
-					SPAN({text: "Messages"})
-				)
-			)
-		),
-		DIV({class: "tab-content"},
-			DIV({class: "tab-pane fade show active",id: "navs-pills-top-home",role: "tabpanel"},
-				P({},
-					SPAN({text: "Icing pastry pudding oat cake. Lemon drops cotton candy caramels cake caramels sesame snaps powder. Bear\r\n        claw\r\n        candy topping."})
-				),
-				P({class: "mb-0"},
-					SPAN({text: "Tootsie roll fruitcake cookie. Dessert topping pie. Jujubes wafer carrot cake jelly. Bonbon jelly-o\r\n        jelly-o ice\r\n        cream jelly beans candy canes cake bonbon. Cookie jelly beans marshmallow jujubes sweet."})
-				)
-			),
-			DIV({class: "tab-pane fade",id: "navs-pills-top-profile",role: "tabpanel"},
-				P({},
-					SPAN({text: "Donut dragée jelly pie halvah. Danish gingerbread bonbon cookie wafer candy oat cake ice cream. Gummies\r\n        halvah\r\n        tootsie roll muffin biscuit icing dessert gingerbread. Pastry ice cream cheesecake fruitcake."})
-				),
-				P({class: "mb-0"},
-					SPAN({text: "Jelly-o jelly beans icing pastry cake cake lemon drops. Muffin muffin pie tiramisu halvah cotton candy\r\n        liquorice caramels."})
-				)
-			),
-			DIV({class: "tab-pane fade",id: "navs-pills-top-messages",role: "tabpanel"},
-				P({},
-					SPAN({text: "Oat cake chupa chups dragée donut toffee. Sweet cotton candy jelly beans macaroon gummies cupcake gummi\r\n        bears\r\n        cake chocolate."})
-				),
-				P({class: "mb-0"},
-					SPAN({text: "Cake chocolate bar cotton candy apple pie tootsie roll ice cream apple pie brownie cake. Sweet roll icing\r\n        sesame snaps caramels danish toffee. Brownie biscuit dessert dessert. Pudding jelly jelly-o tart brownie\r\n        jelly."})
+	DIV({class: "container-xxl"},
+		DIV({class: "authentication-wrapper authentication-basic container-p-y"},
+			DIV({class: "authentication-inner"},
+				DIV({class: "card"},
+					DIV({class: "card-body"},
+						DIV({class: "app-brand justify-content-center"},
+							A({href: "index.html",class: "app-brand-link gap-2"},
+								SPAN({class: "app-brand-logo demo"},
+									SVG({width: "25",viewBox: "0 0 25 42",version: "1.1",xmlns: "http://www.w3.org/2000/svg","xmlns:xlink": "http://www.w3.org/1999/xlink"},
+										DEFS({},
+											PATH({d: "M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z",id: "path-1"}),
+											PATH({d: "M5.47320593,6.00457225 C4.05321814,8.216144 4.36334763,10.0722806 6.40359441,11.5729822 C8.61520715,12.571656 10.0999176,13.2171421 10.8577257,13.5094407 L15.5088241,14.433041 L18.6192054,7.984237 C15.5364148,3.11535317 13.9273018,0.573395879 13.7918663,0.358365126 C13.5790555,0.511491653 10.8061687,2.3935607 5.47320593,6.00457225 Z",id: "path-3"}),
+											PATH({d: "M7.50063644,21.2294429 L12.3234468,23.3159332 C14.1688022,24.7579751 14.397098,26.4880487 13.008334,28.506154 C11.6195701,30.5242593 10.3099883,31.790241 9.07958868,32.3040991 C5.78142938,33.4346997 4.13234973,34 4.13234973,34 C4.13234973,34 2.75489982,33.0538207 2.37032616e-14,31.1614621 C-0.55822714,27.8186216 -0.55822714,26.0572515 -4.05231404e-15,25.8773518 C0.83734071,25.6075023 2.77988457,22.8248993 3.3049379,22.52991 C3.65497346,22.3332504 5.05353963,21.8997614 7.50063644,21.2294429 Z",id: "path-4"}),
+											PATH({d: "M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.8538077,16.8596443 24.4327404,17 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z",id: "path-5"})
+										),
+										G({id: "g-app-brand",stroke: "none","stroke-width": "1",fill: "none","fill-rule": "evenodd"},
+											G({id: "Brand-Logo",transform: "translate(-27.000000, -15.000000)"},
+												G({id: "Icon",transform: "translate(27.000000, 15.000000)"},
+													G({id: "Mask",transform: "translate(0.000000, 8.000000)"},
+														MASK({id: "mask-2",fill: "white"},
+															USE({"xlink:href": "#path-1"})
+														),
+														USE({fill: "#696cff","xlink:href": "#path-1"}),
+														G({id: "Path-3",mask: "url(#mask-2)"},
+															USE({fill: "#696cff","xlink:href": "#path-3"}),
+															USE({"fill-opacity": "0.2",fill: "#FFFFFF","xlink:href": "#path-3"})
+														),
+														G({id: "Path-4",mask: "url(#mask-2)"},
+															USE({fill: "#696cff","xlink:href": "#path-4"}),
+															USE({"fill-opacity": "0.2",fill: "#FFFFFF","xlink:href": "#path-4"})
+														)
+													),
+													G({id: "Triangle",transform: "translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) "},
+														USE({fill: "#696cff","xlink:href": "#path-5"}),
+														USE({"fill-opacity": "0.2",fill: "#FFFFFF","xlink:href": "#path-5"})
+													)
+												)
+											)
+										)
+									)
+								),
+								SPAN({class: "app-brand-text demo text-body fw-bolder"},
+									SPAN({text: "Sneat"})
+								)
+							)
+						),
+						H4({class: "mb-2"},
+							SPAN({text: "Welcome to Sneat! 👋"})
+						),
+						P({class: "mb-4"},
+							SPAN({text: "Please sign-in to your account and start the adventure"})
+						),
+						FORM({id: "formAuthentication",class: "mb-3 fv-plugins-bootstrap5 fv-plugins-framework",action: "index.html",method: "POST",novalidate: "novalidate"},
+							DIV({class: "mb-3 fv-plugins-icon-container"},
+								LABEL({for: "email",class: "form-label"},
+									SPAN({text: "Email or Username"})
+								),
+								INPUT({type: "text",class: "form-control",id: "email",name: "email-username",placeholder: "Enter your email or username",autofocus: ""}),
+								DIV({class: "fv-plugins-message-container invalid-feedback"})
+							),
+							DIV({class: "mb-3 form-password-toggle fv-plugins-icon-container"},
+								DIV({class: "d-flex justify-content-between"},
+									LABEL({class: "form-label",for: "password"},
+										SPAN({text: "Password"})
+									),
+									A({href: "auth-forgot-password-basic.html"},
+										SMALL({},
+											SPAN({text: "Forgot Password?"})
+										)
+									)
+								),
+								DIV({class: "input-group input-group-merge has-validation"},
+									INPUT({type: "password",id: "password",class: "form-control",name: "password",placeholder: "············","aria-describedby": "password"}),
+									SPAN({class: "input-group-text cursor-pointer"},
+										I({class: "bx bx-hide"})
+									)
+								),
+								DIV({class: "fv-plugins-message-container invalid-feedback"})
+							),
+							DIV({class: "mb-3"},
+								DIV({class: "form-check"},
+									INPUT({class: "form-check-input",type: "checkbox",id: "remember-me"}),
+									LABEL({class: "form-check-label",for: "remember-me"},
+										SPAN({text: "Remember Me"})
+									)
+								)
+							),
+							DIV({class: "mb-3"},
+								BUTTON({class: "btn btn-primary d-grid w-100",type: "submit"},
+									SPAN({text: "Sign in"})
+								)
+							),
+							INPUT({type: "hidden"})
+						),
+						P({class: "text-center"},
+							SPAN({},
+								SPAN({text: "New on our platform?"})
+							),
+							A({href: "auth-register-basic.html"},
+								SPAN({},
+									SPAN({text: "Create an account"})
+								)
+							)
+						),
+						DIV({class: "divider my-4"},
+							DIV({class: "divider-text"},
+								SPAN({text: "or"})
+							)
+						),
+						DIV({class: "d-flex justify-content-center"},
+							A({href: "javascript:;",class: "btn btn-icon btn-label-facebook me-3"},
+								I({class: "tf-icons bx bxl-facebook"})
+							),
+							A({href: "javascript:;",class: "btn btn-icon btn-label-google-plus me-3"},
+								I({class: "tf-icons bx bxl-google-plus"})
+							),
+							A({href: "javascript:;",class: "btn btn-icon btn-label-twitter"},
+								I({class: "tf-icons bx bxl-twitter"})
+							)
+						)
+					)
 				)
 			)
 		)
