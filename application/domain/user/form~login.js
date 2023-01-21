@@ -148,13 +148,12 @@
                   { class: 'mb-3' },
                   //BUTTON({ class: 'btn btn-primary d-grid w-100', type: 'submit' }, SPAN({ text: 'Sign in' })),
                   FIELD({
-                    label: 'Зарегистрироваться',
+                    label: 'Войти в систему',
                     name: 'register',
                     type: 'button',
                     class: 'btn btn-primary btn-hover w-100',
                     on: {
                       click: async (event) => {
-                        console.log(event);
                         const data = Array.from(event.target.closest('form').querySelectorAll('input')).reduce(
                           (obj, { name, value, type, checked }) => {
                             obj[name] = type === 'checkbox' ? checked : value;
@@ -162,10 +161,7 @@
                           },
                           {},
                         );
-                        console.log(data);
-
                         const res = await api.auth.signin({ login: data['email-username'], password: data.password });
-                        console.log({ res });
                         if (res.token) {
                           localStorage.setItem('xaoc.session.token', res.token);
                         }

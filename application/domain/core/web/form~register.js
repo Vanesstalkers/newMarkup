@@ -10,54 +10,86 @@
       name: 'register',
       type: 'button',
       class: 'btn btn-primary btn-hover w-100',
+      config: {
+        popover: {
+          trigger: 'manual',
+          placement: 'bottom',
+          'custom-class': 'popover-danger',
+          content: '-',
+          'original-title': 'Error',
+        },
+      },
       handler: async ({ form, field, user: sessionUser, data }) => {
-        try {
-          // const formName = form.name;
-          const login = Math.random().toString().slice(-5);
-          const hash = await metarhia.metautil.hashPassword(data.password);
-          const roles = ['guest', 'admin'];
-          const user = await db.mongo.insertOne('user', { login, password: hash });
-          const pp = await db.addComplex({
-            name: 'pp',
+        const existCompany = await db.mongo.findOne('ce', { inn: data.inn });
+        if (existCompany !== null) throw new Error(`Company with INN='${data.inn}' already exists.`);
+
+        const ce = await db.mongo.insertOne('ce', { inn: data.inn });
+        await db.addComplex({
+          name: 'company',
+          col: data.type,
+          data: { title: data.title },
+          parent: { name: 'ce', _id: ce._id },
+          links: { company: { ce: '__ce' }, ce: `__${data.type}` },
+        });
+        await db.addComplex({
+          name: 'reg_request',
+          parent: { name: 'ce', _id: ce._id },
+          links: { reg_request: { ce: '__ce' }, ce: `__reg_request` },
+          data: { status: [domain.reg_request['lst~status'].find(({ v }) => v === 'draft')], registration: false },
+        });
+
+        // const formName = form.name;
+        const login = Math.random().toString().slice(-5);
+        const hash = await metarhia.metautil.hashPassword(data.password);
+        const roles = [{ role: data.type + '_manager', link: [{ label: data.title, value: ce._id.toString() }] }];
+
+        const user = await db.mongo.insertOne('user', { login, password: hash });
+        const pp = await db.addComplex({
+          name: 'pp',
+          parent: { name: 'user', _id: user._id },
+          links: { pp: { user: '__user' }, user: '__pp' },
+        });
+        for (const { role, link, initial } of roles) {
+          const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
+          await db.addComplex({
+            name: 'user_role',
             parent: { name: 'user', _id: user._id },
-            links: { pp: { user: '__user' }, user: '__pp' },
+            links: { user_role: { user: '__user' }, user: '__user_role' },
+            data: { role: [{ label, value }], link, initial },
           });
-          for (const role of roles) {
-            const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
-            await db.addComplex({
-              name: 'user_role',
-              parent: { name: 'user', _id: user._id },
-              links: { user_role: { user: '__user' }, user: '__user_role' },
-              data: { role: [{ label, value }] },
-            });
-          }
-          if (data.email) {
-            await db.addComplex({
-              name: 'email',
-              parent: { name: 'pp', _id: pp._id },
-              links: { email: { pp: '__pp' }, pp: '__email' },
-              data: { mail: data.email },
-            });
-          }
-          return { login, user };
-        } catch (err) {
-          console.log({ err });
-          throw err;
         }
+        if (data.email) {
+          await db.addComplex({
+            name: 'email',
+            parent: { name: 'pp', _id: pp._id },
+            links: { email: { pp: '__pp' }, pp: '__email' },
+            data: { mail: data.email },
+          });
+        }
+        return { login, user };
       },
       on: {
         beforeHandler: async (event) => {
           const data = Array.from(event.target.closest('form').querySelectorAll('input')).reduce(
             (obj, { name, value, type, checked }) => {
-              obj[name] = type === 'checkbox' ? checked : value;
+              if (type === 'checkbox' || type === 'radio') {
+                if (type === 'checkbox') obj[name] = checked;
+                if (type === 'radio' && checked) obj[name] = value;
+              } else {
+                obj[name] = value;
+              }
               return obj;
             },
             {},
           );
+
+          if (!data.title) throw new Error('Company name must be specified');
+          if (!data.inn) throw new Error('Company inn must be specified');
+          if (!data.type) throw new Error('Company type must be specified');
+
           return data;
         },
         afterHandler: (event, data) => {
-          console.log('afterHandler', data);
           if (data.login) alert(data.login);
         },
       },
@@ -161,6 +193,60 @@
                                   placeholder: 'Enter your password',
                                   required: '',
                                 }),
+                              ),
+                              DIV(
+                                { class: 'mb-3' },
+                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Company name' })),
+                                INPUT({
+                                  name: 'title',
+                                  class: 'form-control',
+                                  id: 'titleInput2',
+                                  placeholder: 'Enter company name',
+                                  required: '',
+                                }),
+                              ),
+                              DIV(
+                                { class: 'mb-3' },
+                                LABEL({ for: 'innInput2', class: 'form-label' }, SPAN({ text: 'Company Inn' })),
+                                INPUT({
+                                  name: 'inn',
+                                  class: 'form-control',
+                                  id: 'innInput2',
+                                  placeholder: 'Enter company INN',
+                                  required: '',
+                                }),
+                              ),
+                              DIV(
+                                { class: 'mb-3' },
+                                DIV(
+                                  { class: 'form-check form-check-inline' },
+                                  INPUT({
+                                    name: 'type',
+                                    class: 'form-check-input',
+                                    type: 'radio',
+                                    id: 'radioCheck21',
+                                    required: '',
+                                    value: 'fabricator',
+                                  }),
+                                  LABEL(
+                                    { class: 'form-check-label text-white-50 fs-15', for: 'radioCheck21' },
+                                    SPAN({ text: 'Производитель' }),
+                                  ),
+                                ),
+                                DIV(
+                                  { class: 'form-check form-check-inline' },
+                                  INPUT({
+                                    name: 'type',
+                                    class: 'form-check-input',
+                                    type: 'radio',
+                                    id: 'radioCheck22',
+                                    value: 'customer',
+                                  }),
+                                  LABEL(
+                                    { class: 'form-check-label text-white-50 fs-15', for: 'radioCheck22' },
+                                    SPAN({ text: 'Покупатель' }),
+                                  ),
+                                ),
                               ),
                               DIV(
                                 { class: 'mb-2' },
@@ -3958,7 +4044,7 @@
                             { class: 'text-white-50 mb-0' },
                             SPAN({ text: 'Already have an account ?' }),
                             A(
-                              { href: 'sign-in.html', class: 'fw-medium text-success text-decoration-underline' },
+                              { href: 'login.html', class: 'fw-medium text-success text-decoration-underline' },
                               SPAN({ text: 'Sign In' }),
                             ),
                           ),

@@ -387,7 +387,7 @@
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card mb-3' : 'content-holder',
+          !disableCardView ? 'card' : 'content-holder',
           'complex-item',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,

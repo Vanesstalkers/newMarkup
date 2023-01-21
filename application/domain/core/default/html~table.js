@@ -131,6 +131,7 @@
                     ),
 
                     IF(config.add?.modal, () => {
+                      const addModal = config.add.modal || {};
                       return [
                         HTML('core/default~modal', {
                           title: `Новый объект '${config.col}'`,
@@ -248,10 +249,10 @@
                                 SPAN(
                                   {},
                                   I({ class: 'bx bx-plus me-0 me-sm-1' }),
-                                  IF(config.add.modal.toggleButton?.simple !== true, () => [
+                                  IF(addModal.toggleButton?.simple !== true, () => [
                                     SPAN(
                                       { class: 'd-none d-sm-inline-block' },
-                                      SPAN({ text: config.add.modal.toggleButton?.label || 'Добавить' }),
+                                      SPAN({ text: addModal.toggleButton?.label || 'Добавить' }),
                                     ),
                                   ]),
                                 ),
@@ -309,6 +310,7 @@
                                         name: col.c.name,
                                         config: col.c.config,
                                         item: { custom: { content: col.c.f } },
+                                        config: { disableCardView: true },
                                       },
                                       ({ custom }) => {
                                         const { content } = custom;

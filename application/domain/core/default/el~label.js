@@ -1,7 +1,7 @@
 ({
   label: {
     tpl: function (data) {
-      if (data.label !== false) data.label = {};
+      if (!data.label && data.label !== false) data.label = {};
       if (typeof data.label === 'string') data.label = { text: data.label };
       let text;
       if (typeof window[data.on?.prepareValue] === 'function') {

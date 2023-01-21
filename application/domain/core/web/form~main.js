@@ -5,27 +5,6 @@
     return [this.db.mongo.ObjectID(user._id)];
   },
   tpl: () => [
-    // A(
-    //   {
-    //     href: '/index.html',
-    //     class:
-    //       'back-to-top d-flex align-items-center justify-content-center' +
-    //       `css
-    //   position: fixed;
-    //   top: 0px;
-    //   left: 0px;
-    //   font-size: 12px;
-    //   opacity: 1;
-    //   z-index: 12312312;
-    //   visibility: visible;
-    //   background: transparent;
-    //   width: 100%;
-    //   background: red;
-    // `,
-    //   },
-    //   SPAN({ text: 'ПЕРЕЙТИ К СРМ' }),
-    // ),
-
     DIV(
       {},
       MARQUEE(

@@ -12,6 +12,10 @@
     <link rel="stylesheet" href="./theme/web/choices.min.css" />
     <link rel="stylesheet" href="./theme/web/swiper-bundle.min.css" />
     <link href="./theme/web/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+
+    <!-- <link rel="stylesheet" type="text/css" href="theme/sneat/core.css" class="template-customizer-core-css" /> -->
+    <!-- <link rel="stylesheet" type="text/css" href="theme/sneat/theme-default.css" class="template-customizer-theme-css" /> -->
+
     <link href="./theme/web/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="./theme/web/app.min.css" id="app-style" rel="stylesheet" type="text/css" />
 
@@ -700,9 +704,112 @@
         width: 200%;
         height: 200%;
       }
+
+      .popover.popover-danger,
+      .popover .popover-danger > .popover,
+      .popover .ngb-popover-danger + ngb-popover-window {
+        border-color: rgba(0, 0, 0, 0);
+        background: #ff3e1d;
+        box-shadow: 0 0.125rem 0.25rem 0 rgba(255, 62, 29, 0.4);
+      }
+
+      .popover.popover-danger .popover-header,
+      .popover .popover-danger > .popover .popover-header,
+      .popover .ngb-popover-danger + ngb-popover-window .popover-header {
+        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0);
+        color: #fff;
+      }
+
+      .popover.popover-danger .popover-body,
+      .popover .popover-danger > .popover .popover-body,
+      .popover .ngb-popover-danger + ngb-popover-window .popover-body {
+        background: rgba(0, 0, 0, 0);
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .popover.popover-danger > .popover-arrow::before,
+      .popover .popover-danger > .popover > .popover-arrow::before,
+      .popover .ngb-popover-danger + ngb-popover-window > .popover-arrow::before {
+        border-color: rgba(0, 0, 0, 0);
+      }
+
+      .popover.popover-danger[data-popper-placement='top'] > .popover-arrow::after,
+      .popover .popover-danger > .popover[data-popper-placement='top'] > .popover-arrow::after,
+      .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='top']
+        > .popover-arrow::after {
+        border-top-color: #ff3e1d !important;
+      }
+
+      .popover.popover-danger[data-popper-placement='right'] > .popover-arrow::after,
+      .popover .popover-danger > .popover[data-popper-placement='right'] > .popover-arrow::after,
+      .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='right']
+        > .popover-arrow::after {
+        border-right-color: #ff3e1d !important;
+      }
+
+      [dir='rtl'] .popover.popover-danger[data-popper-placement='right'] > .popover-arrow::after,
+      [dir='rtl']
+        .popover
+        .popover-danger
+        > .popover[data-popper-placement='right']
+        > .popover-arrow::after,
+      [dir='rtl']
+        .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='right']
+        > .popover-arrow::after {
+        border-left-color: #ff3e1d !important;
+      }
+
+      .popover.popover-danger[data-popper-placement='bottom'] > .popover-arrow::after,
+      .popover .popover-danger > .popover[data-popper-placement='bottom'] > .popover-arrow::after,
+      .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='bottom']
+        > .popover-arrow::after {
+        border-bottom-color: #ff3e1d !important;
+      }
+
+      .popover.popover-danger[data-popper-placement='left'] > .popover-arrow::after,
+      .popover .popover-danger > .popover[data-popper-placement='left'] > .popover-arrow::after,
+      .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='left']
+        > .popover-arrow::after {
+        border-left-color: #ff3e1d !important;
+      }
+
+      [dir='rtl'] .popover.popover-danger[data-popper-placement='left'] > .popover-arrow::after,
+      [dir='rtl']
+        .popover
+        .popover-danger
+        > .popover[data-popper-placement='left']
+        > .popover-arrow::after,
+      [dir='rtl']
+        .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='left']
+        > .popover-arrow::after {
+        border-right-color: #ff3e1d !important;
+      }
+
+      .popover.popover-danger[data-popper-placement='bottom'] .popover-header::before,
+      .popover .popover-danger > .popover[data-popper-placement='bottom'] .popover-header::before,
+      .popover
+        .ngb-popover-danger
+        + ngb-popover-window[data-popper-placement='bottom']
+        .popover-header::before {
+        border-bottom: 1px solid rgba(0, 0, 0, 0) !important;
+      }
     </style>
   </head>
   <body data-topbar="light" data-footer="light">
+    <script src="theme/sneat/jquery.js"></script>
     <script src="./theme/web/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="./theme/web/choices.min.css" />
     <script src="./theme/web/swiper-bundle.min.js"></script>
