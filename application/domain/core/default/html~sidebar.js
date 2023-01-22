@@ -82,8 +82,10 @@
         { class: 'menu-inner py-1' },
         (() => {
           const items = [];
-          for (const [block, form] of Object.entries(domain)) {
-            for (const [name, { config }] of Object.entries(form)) {
+          const domainEntries = Object.entries(domain);
+          domainEntries.unshift(['core/default', domain.core.default]);
+          for (const [block, forms] of domainEntries) {
+            for (const [name, { config }] of Object.entries(forms)) {
               if (config?.menu) {
                 const { icon, label } = config.menu;
                 items.push([

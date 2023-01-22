@@ -1,7 +1,7 @@
 ({
   config: {
     menu: { label: 'Заявки на регистрацию', icon: 'fa-solid fa-file-signature' },
-    disableCardView: true,
+    disableCardStyle: true,
   },
   col: 'reg_request',
   id: function ({ user, query }) {

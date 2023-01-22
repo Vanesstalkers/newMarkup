@@ -1,5 +1,5 @@
 ({
-  config: { disableCardView: true },
+  config: { disableCardStyle: true },
   col: 'user',
   id: function ({ user, query }) {
     return [this.db.mongo.ObjectID(user._id)];

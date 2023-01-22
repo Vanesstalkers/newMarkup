@@ -4,7 +4,7 @@
       label: 'Форма компании',
       icon: 'bx bx-building',
     },
-    disableCardView: true,
+    disableCardStyle: true,
   },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
@@ -60,7 +60,7 @@
                     col: 'file',
                     label: 'Документы руководителей',
                     add: { type: 'file', placeholder: 'Добавить документ', field: 'file', multiple: true },
-                    config: { disableCardView: true },
+                    config: { disableCardStyle: true },
                     item: { controls: { delete: true, config: { simple: true } } },
                   },
                   () => [

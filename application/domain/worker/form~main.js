@@ -3,6 +3,7 @@
   id: function ({ user, query }) {
     return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
   },
+  config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
   tpl: ({ data }) => [
     DIV(
@@ -43,7 +44,7 @@
                     col: 'pp',
                     links: { 'worker~main': '__pp' },
                     add: false,
-                    config: { disableCardView: true },
+                    config: { disableCardStyle: true },
                   },
                   ({ data }) => [
                     HTML('pp~info', {
@@ -91,7 +92,7 @@
                 col: 'pp',
                 links: { 'worker~main': '__pp' },
                 add: false,
-                config: { disableCardView: true },
+                config: { disableCardStyle: true },
               },
               ({ data }) => [HTML('pp~user')],
             ),

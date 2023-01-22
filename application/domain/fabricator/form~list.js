@@ -1,7 +1,7 @@
 ({
   config: {
     menu: { label: 'Производители', icon: 'fas fa-person-digging' },
-    disableCardView: true,
+    disableCardStyle: true,
   },
   col: 'user',
   id: function ({ user, query }) {
@@ -15,10 +15,10 @@
       {
         name: 'stats',
         add: false,
-        config: { disableCardView: true },
+        config: { disableCardStyle: true, inline: true },
         controls: { reload: true, config: { hide: true } },
         class: 'row g-4 mb-4',
-        item: { class: 'col-sm-6 col-xl-3' },
+        item: { class: 'col-sm-4 col-xl-3', bodyClass: 'p-0' },
         id: () => [true],
         handlers: {
           customData: async ({ parentData }) => {
@@ -78,7 +78,7 @@
         cols: [
           { label: 'Добавлена', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
           { label: 'Название', f: { name: 'name', type: 'label' } },
-          { label: 'ИНН', c: { name: 'ce', f: { name: 'inn', type: 'label' }, config: { disableCardView: true } } },
+          { label: 'ИНН', c: { name: 'ce', f: { name: 'inn', type: 'label' }, config: { disableCardStyle: true } } },
           // {
           //   label: 'ce',
           //   html: () => [
@@ -87,7 +87,7 @@
           //         name: 'ce',
           //         add: { auto: true },
           //         // links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
-          //         // config: { disableCardView: true },
+          //         // config: { disableCardStyle: true },
           //       },
           //       () => [FIELD({ name: 'inn' })],
           //     ),
@@ -107,7 +107,7 @@
                   name: 'ce',
                   add: { auto: true },
                   links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
-                  config: { disableCardView: true },
+                  config: { disableCardStyle: true },
                 },
                 () => [HTML('ce~info')],
               ),

@@ -1,5 +1,5 @@
 ({
-  config: { disableCardView: true },
+  config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
   //links: { 'fabricator~main': { ce_workers: '__ce', ce: '__ce' } },
   col: 'fabricator',
@@ -57,7 +57,7 @@
               {
                 name: 'ce',
                 class: 'info-container',
-                config: { disableCardView: true },
+                config: { disableCardStyle: true },
                 item: { tag: 'ul', class: 'list-unstyled' },
                 queryFields: { name: 1 },
               },
@@ -75,7 +75,7 @@
                 LI(
                   { class: 'mb-3' },
                   SPAN({ class: 'fw-bold me-2' }, SPAN({ text: 'Телефоны:' })),
-                  COMPLEX({ name: 'phone', config: { inline: true, disableCardView: true } }, () => [
+                  COMPLEX({ name: 'phone', config: { inline: true, disableCardStyle: true } }, () => [
                     FIELD({ name: 'num', label: false, type: 'label' }),
                   ]),
                 ),
@@ -140,9 +140,19 @@
                 text: 'Токены',
               },
               content: [
-                COMPLEX({ name: 'token', label: false, add: { label: 'Выпустить токены' } }, ({ data }) => [
-                  DIV({ text: data._id }),
-                ]),
+                HTML('token~table', {
+                  hideFilters: true,
+                  tableId: async ({ user, query = {}, parentData, complex }) => {
+                    const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
+                    const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+                    return findData.map(({ _id }) => _id);
+                  },
+                  links: { token: { 'fabricator~main': '__fabricator' }, 'fabricator~main': '__token' },
+                  add: { modal: { toggleButton: { simple: true } } },
+                }),
+                // COMPLEX({ name: 'token', label: 'Выпуски токенов', add: { label: 'Выпустить токены' } }, ({ data }) => [
+                //   DIV({ text: data._id }),
+                // ]),
               ],
             },
             {
@@ -159,19 +169,22 @@
               },
               content: [
                 //links: { 'fabricator~main': { ce_workers: '__ce', ce: '__ce' } },
-                COMPLEX({ name: 'ce_workers', col: 'ce', label: false, add: false, links: {'fabricator~main': '__ce'} }, ({ data }) => [
-                  FIELD({ name: 'name' }),
-                  HTML('worker~table', {
-                    hideFilters: true,
-                    tableId: async ({ user, query = {}, parentData, complex }) => {
-                      const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
-                      const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
-                      return findData.map(({ _id }) => _id);
-                    },
-                    links: { worker: { ce_workers: '__ce' }, ce_workers: '__worker' },
-                    add: { modal: { toggleButton: { simple: true } } },
-                  }),
-                ]),
+                COMPLEX(
+                  { name: 'ce_workers', col: 'ce', label: false, add: false, links: { 'fabricator~main': '__ce' } },
+                  () => [
+                    FIELD({ name: 'name' }),
+                    HTML('worker~table', {
+                      hideFilters: true,
+                //       tableId: async ({ user, query = {}, parentData, complex }) => {
+                //         const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
+                //         const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+                //         return findData.map(({ _id }) => _id);
+                //       },
+                      links: { worker: { ce_workers: '__ce' }, ce_workers: '__worker' },
+                      // add: { modal: { toggleButton: { simple: true } } },
+                    }),
+                  ],
+                ),
               ],
             },
           ],

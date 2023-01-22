@@ -1,5 +1,5 @@
 ({
-  config: { disableCardView: true },
+  config: { disableCardStyle: true },
   col: 'user',
   id: function ({ user, query }) {
     return [this.db.mongo.ObjectID(user._id)];
@@ -4133,7 +4133,6 @@
       window.loadRes('/theme/web/intlTelInput.min.js');
       window.runAfterResLoaded('/theme/web/intlTelInput.min.js', () => {
         const input = document.querySelector('#phone');
-        console.log("window.runAfterResLoaded('/theme/web/intlTelInput.min.js', () => {", input);
         window.intlTelInput(input, {
           // allowDropdown: false,
           // autoHideDialCode: false,

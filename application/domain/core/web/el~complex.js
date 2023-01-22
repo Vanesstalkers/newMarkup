@@ -3,7 +3,7 @@
     tpl: function (data) {
       // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
       // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
-      const disableCardView = data.config?.disableCardView;
+      const disableCardStyle = data.config?.disableCardStyle;
 
       if (!data.controls) data.controls = {};
       if (data.add && !data.add.auto) {
@@ -27,7 +27,7 @@
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card shadow-none' : 'content-holder',
+          !disableCardStyle ? 'card shadow-none' : 'content-holder',
           'complex-block',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
@@ -105,7 +105,7 @@
                   ],
                 ],
               ],
-          !disableCardView ? ['div', { class: 'card-body collapse show p-0 content-holder' }] : [],
+          !disableCardStyle ? ['div', { class: 'card-body collapse show p-0 content-holder' }] : [],
         ],
 
         // !controls.show
@@ -380,14 +380,14 @@
 
   item: {
     tpl: function (data, config) {
-      const disableCardView = data.parent.config?.disableCardView;
+      const disableCardStyle = data.parent.config?.disableCardStyle;
       if (!data.controls) data.controls = {};
       const hasControls = Object.keys(data.controls).length;
       data.class =
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card mb-3' : 'content-holder',
+          !disableCardStyle ? 'card mb-3' : 'content-holder',
           'complex-item',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
@@ -447,7 +447,7 @@
                   ],
                 ],
               ],
-          !disableCardView ? ['div', { class: 'card-body collapse show content-holder' }] : [],
+          !disableCardStyle ? ['div', { class: 'card-body collapse show content-holder' }] : [],
         ],
       ];
     },

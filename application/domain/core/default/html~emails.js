@@ -5,9 +5,9 @@
         label: 'Электронные адреса',
         name: name || 'email',
         col: 'email',
-        config: { inline: true, disableCardView: true },
+        config: { inline: true },
         add: { label: 'Добавить адрес' },
-        item: { controls: { delete: true, config: { simple: true } } },
+        item: { bodyClass: 'p-0', controls: { delete: true, config: { simple: true } } },
         links,
       },
       () => [

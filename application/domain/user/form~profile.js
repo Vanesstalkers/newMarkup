@@ -1,6 +1,6 @@
 ({
   col: 'user',
-  config: { disableCardView: true },
+  config: { disableCardStyle: true },
   id: function ({ user, query }) {
     return [this.db.mongo.ObjectID(user._id)];
   },
@@ -131,7 +131,7 @@
                     col: 'pp',
                     links: { 'user~profile': '__pp' },
                     add: false,
-                    config: { disableCardView: true },
+                    config: { disableCardStyle: true },
                   },
                   ({ data }) => [
                     HTML('pp~info', {

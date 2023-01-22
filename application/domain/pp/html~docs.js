@@ -9,7 +9,7 @@
             label: 'Документы',
             name: 'pp_doc',
             add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
-            config: { disableCardView: true },
+            config: { disableCardStyle: true },
             item: { controls: { delete: true, config: { simple: true } } },
           },
           ({ data }) => {

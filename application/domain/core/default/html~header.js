@@ -58,7 +58,7 @@
                 {
                   name: 'user_role',
                   add: false,
-                  config: { disableCardView: true },
+                  config: { disableCardStyle: true },
                   controls: { reload: true, config: { hide: true } },
                   id: async ({ user, query = {}, parentData, complex }) => {
                     const findData = await db.mongo.aggregate('user', [

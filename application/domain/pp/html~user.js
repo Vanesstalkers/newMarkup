@@ -4,7 +4,7 @@
       {
         name: 'user',
         add: { label: 'Дать доступы для входа в систему', singleItem: true },
-        config: { disableCardView: true },
+        config: { disableCardStyle: false },
       },
       ({ data }) => [
         DIV(

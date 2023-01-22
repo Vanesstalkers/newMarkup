@@ -6,7 +6,7 @@
         label: 'Роли пользователя',
         add: { label: 'Добавить роль пользователя' },
         name: 'user_role',
-        config: { disableCardView: true },
+        config: { disableCardStyle: true },
         item: { controls: { delete: true, config: { simple: true } } },
       },
       ({ data }) => [

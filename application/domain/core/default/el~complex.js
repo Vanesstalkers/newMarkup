@@ -3,7 +3,8 @@
     tpl: function (data) {
       // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
       // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
-      const disableCardView = data.config?.disableCardView;
+      const disableCardStyle = data.config?.disableCardStyle;
+      const disableCardView = data.config?.disableCardStyle;
 
       if (!data.controls) data.controls = {};
       if (data.add && !data.add.auto) {
@@ -27,8 +28,9 @@
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card shadow-none' : 'content-holder',
           'complex-block',
+          disableCardView ? 'content-holder' : 'card shadow-none',
+          disableCardStyle ? 'bg-transparent' : '',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
           data.controls.config?.simple ? 'simple-controls' : undefined,
@@ -105,7 +107,7 @@
                   ],
                 ],
               ],
-          !disableCardView ? ['div', { class: 'card-body collapse show p-0 content-holder' }] : [],
+          disableCardView ? [] : ['div', { class: 'card-body collapse show p-0 content-holder' }],
         ],
 
         // !controls.show
@@ -308,17 +310,8 @@
         top: 0px;
         padding: 0;
       }
-      .complex-block.inline-style .card-body {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 0px;
-      }
-      .complex-block.inline-style .card-body.collapse:not(.show) {
-        display: none;
-      }
-
-      .complex-block .card-header.collapsed .btn-add {
-        display: none;
+      .complex-block.inline-style {
+        display: inline;
       }
 
       .complex-block.has-controls .el-complex-add .select2-selection {
@@ -380,15 +373,17 @@
 
   item: {
     tpl: function (data, config) {
-      const disableCardView = data.parent.config?.disableCardView;
+      const disableCardStyle = data.parent.config?.disableCardStyle;
+      const disableCardView = data.parent.config?.disableCardStyle;
       if (!data.controls) data.controls = {};
       const hasControls = Object.keys(data.controls).length;
       data.class =
         (data.class || '') +
         ' ' +
         [
-          !disableCardView ? 'card' : 'content-holder',
           'complex-item',
+          disableCardStyle ? 'shadow-none bg-transparent' : '',
+          disableCardView ? 'content-holder' : 'card',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
           data.controls.config?.simple ? 'simple-controls' : undefined,
@@ -396,7 +391,6 @@
         ]
           .filter((item) => item)
           .join(' ');
-
       return [
         data.config?.tag || 'div',
         { code: data.code, class: data.class },
@@ -408,7 +402,8 @@
                 {
                   'parent-code': data.code,
                   class:
-                    'card-header d-flex align-items-center justify-content-between complex-controls' +
+                    'card-header d-flex align-items-center justify-content-between complex-controls ' +
+                    (data.headerClass || '') +
                     (data.controls.config?.hide ? ' d-none' : ''),
                 },
                 [
@@ -447,7 +442,7 @@
                   ],
                 ],
               ],
-          !disableCardView ? ['div', { class: 'card-body collapse show content-holder' }] : [],
+          disableCardView ? [] : ['div', { class: 'card-body collapse show content-holder ' + (data.bodyClass || '') }],
         ],
       ];
     },
@@ -489,18 +484,9 @@
         padding: 0;
       }
       .complex-item.inline-style {
+        display: inline-block;
         margin-right: 1rem;
-      }
-      .complex-item.inline-style > .card-body {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-end;
-      }
-      .complex-item.inline-style > .card-body.collapse:not(.show) {
-        display: none;
-      }
-      .complex-item.inline-style > .card-body > .card-header, .complex-item.inline-style > .card-header {
-        padding: 0px;
+        margin-bottom: 0.5rem;
       }
     `,
   },

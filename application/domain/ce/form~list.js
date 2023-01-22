@@ -1,7 +1,7 @@
 ({
   config: {
     menu: { label: 'Юридические лица', icon: 'fa-solid fa-city' },
-    disableCardView: true,
+    disableCardStyle: true,
   },
   col: 'user',
   id: function ({ user, query }) {

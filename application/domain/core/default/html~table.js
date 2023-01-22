@@ -281,7 +281,7 @@
                   name: config.col,
                   add: false,
                   links: config.links,
-                  config: { tag: 'tbody', disableCardView: true },
+                  config: { tag: 'tbody', disableCardStyle: true, disableCardView: true },
                   controls: { reload: true, config: { hide: true } },
                   class: 'table-border-bottom-0',
                   item: {
@@ -310,7 +310,7 @@
                                         name: col.c.name,
                                         config: col.c.config,
                                         item: { custom: { content: col.c.f } },
-                                        config: { disableCardView: true },
+                                        config: { disableCardStyle: true },
                                       },
                                       ({ custom }) => {
                                         const { content } = custom;

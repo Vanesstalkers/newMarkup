@@ -5,9 +5,9 @@
         label: 'Телефоны',
         name: name || 'phone',
         col: 'phone',
-        config: { inline: true, disableCardView: true },
+        config: { inline: true },
         add: { label: 'Добавить телефон' },
-        item: { controls: { delete: true, config: { simple: true } } },
+        item: { bodyClass: 'p-0', controls: { delete: true, config: { simple: true } } },
         links,
       },
       () => [
