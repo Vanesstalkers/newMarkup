@@ -114,11 +114,11 @@ window.loadRes = function (src, config = {}) {
 
 window.showForm = async ({ form, container, _id }) => {
   const $container = container
-  ? container instanceof HTMLElement
-  ? container
-  : document.getElementById(container)
-  : document.body;
-  console.log("window.showForm", {form, $container});
+    ? container instanceof HTMLElement
+      ? container
+      : document.getElementById(container)
+    : document.body;
+  console.log('window.showForm', { form, $container });
   const $parentForm = $container.closest(`[type="form"]`);
   const getForm = await window.api.markup.getForm({ form, _id, codeSfx: $parentForm?.dataset.code });
   if (getForm.result === 'error') return console.error(getForm.msg, getForm.stack);
@@ -258,83 +258,4 @@ window.addEventListener('load', async () => {
   });
 
   await showForm({ form: INIT_FORM });
-});
-
-document.addEventListener('click', async (event) => {
-  const $el = event.target;
-  if ($el.closest('.btn-delete')) {
-    if (!confirm('Подтвердите удаление')) return false;
-    const form = $el.closest('[type="form"]').dataset.name;
-    const $item = $el.closest('.complex-item');
-    const code = $item.dataset.code;
-    const { result, msg, stack } = await api.markup.deleteComplex({ form, code });
-    if (result === 'error') console.error({ msg, stack });
-    else if (result === 'success') $item.remove();
-  }
-  if ($el.closest('.btn-reload')) {
-    console.log({ $el });
-    const form = $el.closest('[type="form"]').dataset.name;
-    const $itemToReload = document.querySelector(
-      `[code="${$el.closest('[parent-code]').getAttribute('parent-code')}"]`,
-    );
-    let $parent = $itemToReload.parentNode;
-    const code = $itemToReload.dataset.code;
-
-    if ($itemToReload.classList.contains('complex-block')) {
-      const { result, data, msg, stack } = await api.markup.showComplex({ form, code });
-      if (result === 'error') console.error({ msg, stack });
-      else if (result === 'success') {
-        data.class = (data.class || '') + ' reloaded';
-        const { tpl, prepare } = window.el[data.elPath] || {};
-        await nativeTplToHTML([tpl(data)], $parent);
-        const $newBlock = $parent.querySelector(`.reloaded.complex-block[code="${data.code}"]`);
-        if (prepare) prepare({ $el: $newBlock, data });
-        if (data.items) {
-          const $contentHolder = $newBlock.classList.contains('content-holder')
-            ? $newBlock
-            : $newBlock.querySelector(`.content-holder`);
-          for (const item of Object.values(data.items)) {
-            const { tpl, prepare } = window.el[item.elPath] || {};
-            if (typeof tpl === 'function') {
-              await nativeTplToHTML([tpl({ ...item, parent: data })], $contentHolder);
-              const $item = $contentHolder.querySelector(`.complex-item[code="${item.code}"]`);
-              if (prepare) prepare({ $el: $item, data: item, parent: { data: data, $el: $newBlock } });
-              const $itemContentHolder = $item.classList.contains('content-holder')
-                ? $item
-                : $item.querySelector(`.content-holder`);
-              await nativeTplToHTML(item.content, $itemContentHolder);
-            }
-          }
-        }
-        $newBlock.classList.remove('reloaded');
-        $itemToReload.replaceWith($newBlock);
-      }
-    } else {
-      $parent = $el.closest('.complex-block');
-      const parentData = Object.fromEntries(
-        Object.entries($parent.dataset).map(([key, value]) => [
-          key,
-          FIELD_JSON_KEYS.includes(key) ? JSON.parse(value) : value,
-        ]),
-      );
-      const { result, data, msg, stack } = await api.markup.showComplex({ form, code });
-      if (result === 'error') console.error({ msg, stack });
-      else if (result === 'success') {
-        data.class = (data.class || '') + ' reloaded';
-        const { tpl, prepare } = window.el[data.elPath] || {};
-        const $contentHolder = $parent.classList.contains('content-holder')
-          ? $parent
-          : $parent.querySelector(`.content-holder`);
-        await nativeTplToHTML([tpl({ ...data, parent: parentData })], $contentHolder);
-        const $newItem = $contentHolder.querySelector(`.reloaded.complex-item[code="${data.code}"]`);
-        if (prepare) prepare({ $el: $newItem, data, parent: { data: parentData, $el: $parent } });
-        const $itemContentHolder = $newItem.classList.contains('content-holder')
-          ? $newItem
-          : $newItem.querySelector(`.content-holder`);
-        await nativeTplToHTML(data.content, $itemContentHolder);
-        $newItem.classList.remove('reloaded');
-        $itemToReload.replaceWith($newItem);
-      }
-    }
-  }
 });

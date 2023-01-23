@@ -113,7 +113,7 @@
                     ),
                   ),
                   DIV(
-                    { class: 'dt-buttons btn-group flex-wrap' },
+                    { class: 'dt-buttons btn-group' },
                     DIV(
                       { class: 'btn-group' },
                       BUTTON(
@@ -301,21 +301,17 @@
                         TD(
                           { class: col.class || '' },
                           ...[]
-                            .concat(col.f ? [FIELD({ label: false, ...col.f })] : [])
+                            .concat(col.f ? [FIELD({ type: 'label', label: false, ...col.f })] : [])
                             .concat(
                               col.c
                                 ? [
                                     COMPLEX(
                                       {
-                                        name: col.c.name,
-                                        config: col.c.config,
-                                        item: { custom: { content: col.c.f } },
                                         config: { disableCardStyle: true },
+                                        item: { custom: { content: col.c.f } },
+                                        ...col.c,
                                       },
-                                      ({ custom }) => {
-                                        const { content } = custom;
-                                        return [FIELD(content)];
-                                      },
+                                      ({ custom: { content } }) => [FIELD({ type: 'label', label: false, ...content })],
                                     ),
                                   ]
                                 : [],
@@ -355,6 +351,28 @@
                 },
               ),
             ),
+            // NAV(
+            //   { class: 'row mx-2', 'aria-label': 'Page navigation' },
+            //   UL(
+            //     { class: 'pagination justify-content-end' },
+            //     LI(
+            //       { class: 'page-item first' },
+            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevrons-left' })),
+            //     ),
+            //     LI(
+            //       { class: 'page-item prev' },
+            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevron-left' })),
+            //     ),
+            //     LI(
+            //       { class: 'page-item next' },
+            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevron-right' })),
+            //     ),
+            //     LI(
+            //       { class: 'page-item last' },
+            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevrons-right' })),
+            //     ),
+            //   ),
+            // ),
           ),
         ),
       ),

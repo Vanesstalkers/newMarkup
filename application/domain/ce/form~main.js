@@ -38,7 +38,7 @@
                   window.hideAfterTimeout = ($el) => {
                     console.log($el);
                     // setTimeout(() => {
-                      $el.closest('.reg-block').classList.add('d-none');
+                    $el.closest('.reg-block').classList.add('d-none');
                     // }, 0);
                   };
                 }),
@@ -109,9 +109,15 @@
               hideFilters: true,
               tableId: async ({ user, query = {}, parentData, complex }) => {
                 const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
-                const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+                const findData = await db.mongo.find(
+                  complex.col,
+                  find,
+                  { projection: { _id: 1 } },
+                  { ...complex.filter, ...(query.filter || {}) },
+                );
                 return findData.map(({ _id }) => _id);
               },
+              tableFilter: { /* reverse: true,  */ limit: 2 },
               links: { worker: { 'ce~main': '__ce' }, 'ce~main': '__worker' },
               add: { modal: { toggleButton: { simple: true } } },
             }),

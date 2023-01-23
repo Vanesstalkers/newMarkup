@@ -87,6 +87,7 @@
     }
   },
   showComplex: async ({ form, code, user, query }) => {
+    console.log('showComplex', {query});
     const processForm = user.forms[form];
     const item = processForm.fields[code];
     if (item.type === 'complex') {

@@ -4,7 +4,7 @@
       // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
       // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
       const disableCardStyle = data.config?.disableCardStyle;
-      const disableCardView = data.config?.disableCardStyle;
+      const disableCardView = data.config?.disableCardView;
 
       if (!data.controls) data.controls = {};
       if (data.add && !data.add.auto) {
@@ -107,7 +107,51 @@
                   ],
                 ],
               ],
-          disableCardView ? [] : ['div', { class: 'card-body collapse show p-0 content-holder' }],
+          disableCardView
+            ? [
+                data.filter
+                  ? [
+                      'ul',
+                      { class: 'pagination' },
+                      [
+                        [
+                          'li',
+                          { class: 'page-item prev p-0' },
+                          [
+                            [
+                              'a',
+                              { class: 'page-link', href: 'javascript:void(0);' },
+                              [['i', { class: 'tf-icon bx bx-chevron-left' }]],
+                            ],
+                          ],
+                        ],
+                        [
+                          'li',
+                          { class: 'page-item active p-0' },
+                          [
+                            [
+                              'a',
+                              { class: 'page-link', href: 'javascript:void(0);' },
+                              [['span', { class: 'current-page', text: '0' }]],
+                            ],
+                          ],
+                        ],
+                        [
+                          'li',
+                          { class: 'page-item next p-0' },
+                          [
+                            [
+                              'a',
+                              { class: 'page-link', href: 'javascript:void(0);' },
+                              [['i', { class: 'tf-icon bx bx-chevron-right' }]],
+                            ],
+                          ],
+                        ],
+                      ],
+                    ]
+                  : [],
+              ]
+            : ['div', { class: 'card-body collapse show p-0 content-holder' }],
         ],
 
         // !controls.show
@@ -123,15 +167,31 @@
     },
     front: {
       prepare: function ({ $el, data }) {
-        $el.setAttribute('markup-code', data.code);
-        if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
         for (const [key, value] of Object.entries(data)) {
           $el.dataset[key] = FIELD_JSON_KEYS.includes(key) ? JSON.stringify(value) : value;
         }
         $el.dataset.itemcount = 0;
-        if (data.l) {
-          $el.dataset.l = data.l;
-          $el.dataset.o = 0;
+        $el.dataset.offset = data.custom?.query?.filter?.offset || data.filter?.offset || 0;
+
+        // выполняем позже инициации dataset, потому что в markup-обработчиках эти могут использоваться data-атрибуты
+        $el.setAttribute('markup-code', data.code);
+        if (data.on?.load) $el.setAttribute('markup-onload', data.on.load);
+
+        if (data.controls.reload) {
+          $el.querySelector('.btn-reload').addEventListener('click', async (event) => {
+            window.reloadComplexBlock($el);
+          });
+        }
+
+        if (data.filter) {
+          $el.querySelector('.page-item.next').addEventListener('click', async (event) => {
+            const newOffset = +$el.dataset.offset + data.filter.limit;
+            window.reloadComplexBlock($el, { offset: newOffset });
+          });
+          $el.querySelector('.page-item.prev').addEventListener('click', async (event) => {
+            const newOffset = +$el.dataset.offset - data.filter.limit;
+            window.reloadComplexBlock($el, { offset: newOffset });
+          });
         }
 
         for (const $toggle of $el.querySelectorAll('.card-collapsible')) {
@@ -215,6 +275,7 @@
                     : $el.querySelector(`.content-holder`);
                   await nativeTplToHTML([tpl({ ...item, parent: data })], $contentHolder);
                   const $item = $contentHolder.querySelector(`.complex-item[code='${item.code}']`);
+                  // $contentHolder.prepend($item); // добавляем в начало
                   const $itemContentHolder = $item.classList.contains('content-holder')
                     ? $item
                     : $item.querySelector(`.content-holder`);
@@ -227,7 +288,71 @@
         }
       },
     },
-    script: () => {
+    func: () => {
+      window.reloadComplexBlock = async ($itemToReload, filter) => {
+        const code = $itemToReload.dataset.code;
+        const form = $itemToReload.closest('[type="form"]').dataset.name;
+        const $parent = $itemToReload.parentNode;
+
+        const { result, data, msg, stack } = await api.markup.showComplex({ form, code, query: { filter } });
+        if (result === 'error') console.error({ msg, stack });
+        else if (result === 'success') {
+          data.class = (data.class || '') + ' reloaded';
+          const { tpl, prepare } = window.el[data.elPath] || {};
+          await nativeTplToHTML([tpl(data)], $parent);
+          const $newBlock = $parent.querySelector(`.reloaded.complex-block[code="${data.code}"]`);
+          if (prepare) prepare({ $el: $newBlock, data });
+          if (data.items) {
+            const $contentHolder = $newBlock.classList.contains('content-holder')
+              ? $newBlock
+              : $newBlock.querySelector(`.content-holder`);
+            for (const item of Object.values(data.items)) {
+              const { tpl, prepare } = window.el[item.elPath] || {};
+              if (typeof tpl === 'function') {
+                await nativeTplToHTML([tpl({ ...item, parent: data })], $contentHolder);
+                const $item = $contentHolder.querySelector(`.complex-item[code="${item.code}"]`);
+                if (prepare) prepare({ $el: $item, data: item, parent: { data: data, $el: $newBlock } });
+                const $itemContentHolder = $item.classList.contains('content-holder')
+                  ? $item
+                  : $item.querySelector(`.content-holder`);
+                await nativeTplToHTML(item.content, $itemContentHolder);
+              }
+            }
+          }
+          $newBlock.classList.remove('reloaded');
+          $itemToReload.replaceWith($newBlock);
+        }
+      };
+      window.reloadComplexItem = async ($itemToReload) => {
+        const code = $itemToReload.dataset.code;
+        const form = $itemToReload.closest('[type="form"]').dataset.name;
+        const $parent = $itemToReload.closest('.complex-block');
+
+        const parentData = Object.fromEntries(
+          Object.entries($parent.dataset).map(([key, value]) => [
+            key,
+            FIELD_JSON_KEYS.includes(key) ? JSON.parse(value) : value,
+          ]),
+        );
+        const { result, data, msg, stack } = await api.markup.showComplex({ form, code });
+        if (result === 'error') console.error({ msg, stack });
+        else if (result === 'success') {
+          data.class = (data.class || '') + ' reloaded';
+          const { tpl, prepare } = window.el[data.elPath] || {};
+          const $contentHolder = $parent.classList.contains('content-holder')
+            ? $parent
+            : $parent.querySelector(`.content-holder`);
+          await nativeTplToHTML([tpl({ ...data, parent: parentData })], $contentHolder);
+          const $newItem = $contentHolder.querySelector(`.reloaded.complex-item[code="${data.code}"]`);
+          if (prepare) prepare({ $el: $newItem, data, parent: { data: parentData, $el: $parent } });
+          const $itemContentHolder = $newItem.classList.contains('content-holder')
+            ? $newItem
+            : $newItem.querySelector(`.content-holder`);
+          await nativeTplToHTML(data.content, $itemContentHolder);
+          $newItem.classList.remove('reloaded');
+          $itemToReload.replaceWith($newItem);
+        }
+      };
       /*       window.moreComplex = function (e, filter, replace) {
         try {
           var $e = $(e);
@@ -295,6 +420,12 @@
 		});*/
     },
     style: `
+
+      .complex-block .pagination {
+        position: absolute;
+        top: calc(100% - 10px);
+        left: calc(100% - 130px);
+      }
 
       .complex-block.single-item:not([data-itemcount="0"]) > .card-header {
         display: none!important;
@@ -374,9 +505,10 @@
   item: {
     tpl: function (data, config) {
       const disableCardStyle = data.parent.config?.disableCardStyle;
-      const disableCardView = data.parent.config?.disableCardStyle;
-      if (!data.controls) data.controls = {};
-      const hasControls = Object.keys(data.controls).length;
+      const disableCardView = data.parent.config?.disableCardView;
+      const controls = data.controls || {};
+
+      const hasControls = Object.keys(controls).length;
       data.class =
         (data.class || '') +
         ' ' +
@@ -386,7 +518,7 @@
           disableCardView ? 'content-holder' : 'card',
           data.name ? 'complex-' + data.name : undefined,
           hasControls ? 'has-controls' : undefined,
-          data.controls.config?.simple ? 'simple-controls' : undefined,
+          controls.config?.simple ? 'simple-controls' : undefined,
           data.parent.config?.inline ? 'inline-style' : undefined,
         ]
           .filter((item) => item)
@@ -398,13 +530,13 @@
           !hasControls
             ? []
             : [
-                data.controls.config?.tag || 'div',
+                controls.config?.tag || 'div',
                 {
                   'parent-code': data.code,
                   class:
                     'card-header d-flex align-items-center justify-content-between complex-controls ' +
                     (data.headerClass || '') +
-                    (data.controls.config?.hide ? ' d-none' : ''),
+                    (controls.config?.hide ? ' d-none' : ''),
                 },
                 [
                   [
@@ -427,13 +559,13 @@
                         'div',
                         { class: 'dropdown-menu dropdown-menu-end' },
                         [
-                          data.controls.reload
+                          controls.reload
                             ? [
                                 'a',
                                 { class: 'dropdown-item btn-reload', href: 'javascript:void(0);', text: 'Обновить' },
                               ]
                             : [],
-                          data.controls.delete
+                          controls.delete
                             ? ['a', { class: 'dropdown-item btn-delete', href: 'javascript:void(0);', text: 'Удалить' }]
                             : [],
                         ],
@@ -448,13 +580,31 @@
     },
     front: {
       prepare: function ({ $el, data, parent: { $el: $parentEl, data: parentData } }) {
-        $el.setAttribute('markup-code', data.code);
-        if (parentData.on?.itemLoad) $el.setAttribute('markup-onload', parentData.on.itemLoad);
         for (const [key, value] of Object.entries(data)) {
           $el.dataset[key] = FIELD_JSON_KEYS.includes(key) ? JSON.stringify(value) : value;
         }
         $parentEl.dataset.itemcount = $parentEl.dataset.itemcount * 1 + 1;
-        $parentEl.dataset.o = ($parentEl.dataset.o || 0) * 1 + 1;
+        // $parentEl.dataset.o = ($parentEl.dataset.o || 0) * 1 + 1;
+
+        // выполняем позже инициации dataset, потому что в markup-обработчиках эти могут использоваться data-атрибуты
+        $el.setAttribute('markup-code', data.code);
+        if (parentData.on?.itemLoad) $el.setAttribute('markup-onload', parentData.on.itemLoad);
+
+        if (data.controls?.delete) {
+          $el.querySelector('.btn-delete').addEventListener('click', async (event) => {
+            if (!confirm('Подтвердите удаление')) return false;
+            const form = $el.closest('[type="form"]').dataset.name;
+            const { result, msg, stack } = await api.markup.deleteComplex({ form, code: data.code });
+            if (result === 'error') console.error({ msg, stack });
+            else if (result === 'success') $el.remove();
+          });
+        }
+
+        if (data.controls?.reload) {
+          $el.querySelector('.btn-reload').addEventListener('click', async (event) => {
+            window.reloadComplexItem($el);
+          });
+        }
 
         for (const $toggle of $el.querySelectorAll('.card-collapsible')) {
           $toggle.addEventListener('click', async (event) => {

@@ -1,5 +1,5 @@
 ({
-  tpl: ({ data }, { hideFilters, tableId, links, add = {} } = {}) => [
+  tpl: ({ data }, { hideFilters, tableId, tableFilter, links, add = {} } = {}) => [
     HTML('core/default~table', {
       col: 'worker',
       links: links,
@@ -18,6 +18,7 @@
       table: {
         addRowLink: true,
         id: tableId,
+        filter: tableFilter,
         cols: [
           { label: 'Добавлен', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
           { label: 'Должность', f: { name: 'position', type: 'label', label: false } },

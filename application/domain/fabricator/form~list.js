@@ -22,18 +22,22 @@
         id: () => [true],
         handlers: {
           customData: async ({ parentData }) => {
-            const count = await db.mongo.client.collection('fabricator').count();
+            const findData = await db.mongo.aggregate('fabricator', [
+              { $lookup: { from: 'token', localField: '__token.l', foreignField: '_id', as: 'from_token' } },
+            ]);
+            const count = findData.length;
+            const tokenCount = findData.reduce(
+              (sum, item) => sum + item.from_token.reduce((sum, item) => sum + (item.count || 0) * 1, 0),
+              0,
+            );
             return [
-              { count, icon: 'fas fa-person-digging' },
-              { count: count - 1, icon: 'fa-regular fa-handshake' },
-              { count: count - 2, icon: 'fa-regular fa-handshake' },
+              { label: 'Производителей', desc: 'Всего', num: count, icon: 'fas fa-person-digging' },
+              { label: 'Выпущено токенов', desc: 'Всего', num: tokenCount, icon: 'fa-solid fa-coins' },
             ];
           },
         },
       },
       ({ data }) => [
-        // DIV(
-        //   { class: 'col-sm-6 col-xl-3' },
         DIV(
           { class: 'card' },
           DIV(
@@ -41,20 +45,19 @@
             DIV(
               { class: 'd-flex align-items-start justify-content-between' },
               DIV(
-                { class: 'content-left', text: 'Производителей' },
+                { class: 'content-left', text: data.label },
 
                 DIV(
                   { class: 'd-flex align-items-end mt-2' },
-                  H4({ class: 'mb-0 me-2' }, SPAN({ text: data.count })),
+                  H4({ class: 'mb-0 me-2' }, SPAN({ text: data.num })),
                   SMALL({ class: 'text-success' }, SPAN({ text: '(+29%)' })),
                 ),
-                SPAN({ text: 'Всего' }),
+                SPAN({ text: data.desc }),
               ),
               SPAN({ class: 'badge bg-label-primary rounded p-2' }, I({ class: data.icon + ' fa-2x' })),
             ),
           ),
         ),
-        // ),
       ],
     ),
     // ), // prettier-ignore
@@ -70,29 +73,24 @@
       table: {
         addRowLink: true,
         id: async ({ user, complex, query = {} }) => {
+          console.log("filter=", complex.filter);
           const find = {};
           if (query['filter.find_text']) find.add_time = { $regex: query['filter.find_text'] || '' };
-          const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+          const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } }, {offset: 0, limit: complex.filter.limit, reverse: false});
           return findData.map(({ _id }) => _id);
         },
+        filter: {limit: 10},
         cols: [
           { label: 'Добавлена', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
-          { label: 'Название', f: { name: 'name', type: 'label' } },
-          { label: 'ИНН', c: { name: 'ce', f: { name: 'inn', type: 'label' }, config: { disableCardStyle: true } } },
-          // {
-          //   label: 'ce',
-          //   html: () => [
-          //     COMPLEX(
-          //       {
-          //         name: 'ce',
-          //         add: { auto: true },
-          //         // links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
-          //         // config: { disableCardStyle: true },
-          //       },
-          //       () => [FIELD({ name: 'inn' })],
-          //     ),
-          //   ],
-          // },
+          { label: 'Название', f: { name: 'title', type: 'label' } },
+          {
+            label: 'ИНН',
+            c: { name: 'ce_inn', col: 'ce', f: { name: 'inn', type: 'label' }, links: { fabricator: '__ce' } },
+          },
+          {
+            label: 'Юр.лицо',
+            c: { name: 'ce_name', col: 'ce', f: { name: 'name', type: 'label' }, links: { fabricator: '__ce' } },
+          },
         ],
       },
       add: {
