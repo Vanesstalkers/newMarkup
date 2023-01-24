@@ -1,5 +1,5 @@
 ({
-  config: { disableCardStyle: true },
+  config: { disableCardView: true },
   col: 'user',
   id: function ({ user, query }) {
     return [this.db.mongo.ObjectID(user._id)];
@@ -28,12 +28,12 @@
           name: 'company',
           col: data.type,
           data: { title: data.title },
-          parent: { name: 'ce', _id: ce._id },
+          parents: [{ name: 'ce', _id: ce._id }],
           links: { company: { ce: '__ce' }, ce: `__${data.type}` },
         });
         await db.addComplex({
           name: 'reg_request',
-          parent: { name: 'ce', _id: ce._id },
+          parents: [{ name: 'ce', _id: ce._id }],
           links: { reg_request: { ce: '__ce' }, ce: `__reg_request` },
           data: { status: [domain.reg_request['lst~status'].find(({ v }) => v === 'draft')], registration: false },
         });
@@ -46,14 +46,14 @@
         const user = await db.mongo.insertOne('user', { login, password: hash });
         const pp = await db.addComplex({
           name: 'pp',
-          parent: { name: 'user', _id: user._id },
+          parents: [{ name: 'user', _id: user._id }],
           links: { pp: { user: '__user' }, user: '__pp' },
         });
         for (const { role, link, initial } of roles) {
           const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
           await db.addComplex({
             name: 'user_role',
-            parent: { name: 'user', _id: user._id },
+            parents: [{ name: 'user', _id: user._id }],
             links: { user_role: { user: '__user' }, user: '__user_role' },
             data: { role: [{ label, value }], link, initial },
           });
@@ -61,7 +61,7 @@
         if (data.email) {
           await db.addComplex({
             name: 'email',
-            parent: { name: 'pp', _id: pp._id },
+            parents: [{ name: 'pp', _id: pp._id }],
             links: { email: { pp: '__pp' }, pp: '__email' },
             data: { mail: data.email },
           });

@@ -28,7 +28,7 @@
               COMPLEX({ name: 'pp', add: false, config: { disableCardView: true } }, () => [
                 FIELD({ name: 'second_name', type: 'json' }),
                 FIELD({ name: 'first_name', type: 'json' }),
-                SPAN({ text: `${data.second_name} ${data.first_name}` }),
+                SPAN({ text: [data.second_name || '', data.first_name || ''].join(' ').trim() }),
               ]),
             ],
           },
@@ -56,6 +56,7 @@
       add: {
         modal: add.modal || { toggleButton: { label: 'Добавить сотрудника' } },
         items: [
+          { f: { label: 'Компания', name: 'company', type: 'select2', lst: { action: 'ce~search' } } },
           {
             html: () => [
               COMPLEX(

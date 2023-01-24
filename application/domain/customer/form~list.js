@@ -1,6 +1,6 @@
 ({
   config: {
-    menu: { label: 'Производители', icon: 'fas fa-person-digging' },
+    menu: { label: 'Покупатели', icon: 'fa-solid fa-cart-shopping' },
     disableCardStyle: true,
   },
   col: 'user',
@@ -19,7 +19,7 @@
         id: () => [true],
         handlers: {
           customData: async ({ parentData }) => {
-            const findData = await db.mongo.aggregate('fabricator', [
+            const findData = await db.mongo.aggregate('customer', [
               { $lookup: { from: 'token', localField: '__token.l', foreignField: '_id', as: 'from_token' } },
             ]);
             const count = findData.length;
@@ -28,7 +28,7 @@
               0,
             );
             return [
-              { label: 'Производителей', desc: 'Всего', num: count, icon: 'fas fa-person-digging' },
+              { label: 'Покупателей', desc: 'Всего', num: count, icon: 'fa-solid fa-cart-shopping' },
               { label: 'Выпущено токенов', desc: 'Всего', num: tokenCount, icon: 'fa-solid fa-coins' },
             ];
           },
@@ -59,7 +59,7 @@
     ),
 
     HTML('core/default~table', {
-      col: 'fabricator',
+      col: 'customer',
       filter: {
         items: [
           { class: 'col-3', f: { label: 'Название', name: 'filter.find_text', config: { float: true } } },
@@ -85,26 +85,26 @@
           { label: 'Название', f: { name: 'name', type: 'label' } },
           {
             label: 'ИНН',
-            c: { name: 'ce_inn', col: 'ce', f: { name: 'inn', type: 'label' }, links: { fabricator: '__ce' } },
+            c: { name: 'ce_inn', col: 'ce', f: { name: 'inn', type: 'label' }, links: { customer: '__ce' } },
           },
           {
             label: 'Юр.лицо',
-            c: { name: 'ce_name', col: 'ce', f: { name: 'name', type: 'label' }, links: { fabricator: '__ce' } },
+            c: { name: 'ce_name', col: 'ce', f: { name: 'name', type: 'label' }, links: { customer: '__ce' } },
           },
         ],
       },
       add: {
-        modal: { toggleButton: { label: 'Добавить производителя' } },
+        modal: { toggleButton: { label: 'Добавить покупателя' } },
         items: [
-          { f: { label: 'Название производителя', name: 'name' } },
-          { f: { label: 'Тип производителя', name: 'type', type: 'select', lst: 'fabricator~type' } },
+          { f: { label: 'Название покупателя', name: 'name' } },
+          { f: { label: 'Тип покупателя', name: 'type', type: 'select', lst: 'customer~type' } },
           {
             html: () => [
               COMPLEX(
                 {
                   name: 'ce',
                   add: { auto: true },
-                  links: { ce: { tmp_obj_fabricator: '__fabricator' }, tmp_obj_fabricator: '__ce' },
+                  links: { ce: { tmp_obj_customer: '__customer' }, tmp_obj_customer: '__ce' },
                   config: { disableCardStyle: true },
                 },
                 () => [HTML('ce~info')],

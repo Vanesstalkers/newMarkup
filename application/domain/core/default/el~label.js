@@ -7,7 +7,7 @@
       if (typeof window[data.on?.prepareValue] === 'function') {
         text = window[data.on.prepareValue](data);
       } else {
-        text = data.value;
+        text = data.value || '';
         if (typeof data.value == 'object') {
           if (Array.isArray(data.value)) {
             text = data.value.map(({ label }) => label).join(', ');

@@ -11,7 +11,6 @@
       {
         class: 'modal fade',
         id: `${id || ''}-modal`,
-        tabindex: '-1',
         'aria-hidden': 'true',
         on: { load: 'prepareModal' },
       },

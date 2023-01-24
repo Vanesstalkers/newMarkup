@@ -17,7 +17,7 @@
         id: tableId,
         cols: [
           { label: 'Добавлен', f: { name: 'add_time', on: { prepareValue: 'toLocaleString' } } },
-          { label: 'Кем выпущен', c: { name: 'fabricator', f: { name: 'title', label: false } } },
+          { label: 'Кем выпущен', c: { name: 'fabricator', f: { name: 'name', label: false } } },
           { label: 'Качество', f: { name: 'type', lst: 'token~quality' } },
           { label: 'Цена', f: { name: 'price' } },
           { label: 'Количество', f: { name: 'count' } },

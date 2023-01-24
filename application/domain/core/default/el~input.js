@@ -18,7 +18,7 @@
               {
                 type: config.inputType || 'text',
                 class: 'form-control el-value',
-                value: data.value,
+                value: data.value || '',
                 id: 'input-' + data.code,
                 placeholder: data.placeholder || ' ',
                 ...(data.disabled ? { disabled: '' } : {}),
@@ -42,6 +42,7 @@
       prepare: function ({ $el, data }) {
         const $input = $el.querySelector('input');
         const beforeSave = data.on?.beforeSave && window[data.on.beforeSave];
+        const afterSave = data.on?.afterSave && window[data.on.afterSave];
         $input.addEventListener('change', async (event) => {
           const form = $input.closest('[type="form"]').dataset.name;
           const code = $input.closest('.el').dataset.code;
@@ -49,6 +50,7 @@
           event.target.setCustomValidity('');
           if (typeof beforeSave === 'function' && (await beforeSave({ value, event })) !== true) return;
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
+          if (typeof afterSave === 'function') await afterSave({ event });
           if (result === 'error') {
             event.target.setCustomValidity(msg);
             $el.querySelector('.error-text').setAttribute('msg', msg);

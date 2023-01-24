@@ -1,8 +1,6 @@
 ({
   block: {
     tpl: function (data) {
-      // add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
-      // add: { type: 'file', multiple: true, placeholder: 'Добавить документ', field: 'file' },
       const disableCardStyle = data.config?.disableCardStyle;
       const disableCardView = data.config?.disableCardView;
 
@@ -39,6 +37,61 @@
         ]
           .filter((item) => item)
           .join(' ');
+      const queryFilter = data.custom?.query?.filter || {};
+      const filterLimit = queryFilter.limit || data.filter?.limit;
+      const filterHtml = data.filter
+        ? [
+            'ul',
+            { class: 'pagination' },
+            [
+              [
+                'li',
+                { class: 'page-item prev p-0 ' + (!queryFilter.offset ? 'disabled' : '') },
+                [
+                  [
+                    'a',
+                    { class: 'page-link', href: 'javascript:void(0);' },
+                    [['i', { class: 'tf-icon bx bx-chevron-left' }]],
+                  ],
+                ],
+              ],
+              [
+                'li',
+                { class: 'page-item active p-0' },
+                [
+                  [
+                    'a',
+                    { class: 'page-link', href: 'javascript:void(0);' },
+                    [
+                      [
+                        'span',
+                        {
+                          class: 'current-page',
+                          text: filterLimit ? 1 + (queryFilter.offset || 0) / filterLimit : '-',
+                        },
+                      ],
+                    ],
+                  ],
+                ],
+              ],
+              [
+                'li',
+                {
+                  class:
+                    'page-item next p-0 ' +
+                    (filterLimit && Object.keys(data.items||{}).length < filterLimit ? 'disabled' : ''),
+                },
+                [
+                  [
+                    'a',
+                    { class: 'page-link', href: 'javascript:void(0);' },
+                    [['i', { class: 'tf-icon bx bx-chevron-right' }]],
+                  ],
+                ],
+              ],
+            ],
+          ]
+        : [];
 
       return [
         data.config?.tag || 'div',
@@ -107,51 +160,7 @@
                   ],
                 ],
               ],
-          disableCardView
-            ? [
-                data.filter
-                  ? [
-                      'ul',
-                      { class: 'pagination' },
-                      [
-                        [
-                          'li',
-                          { class: 'page-item prev p-0' },
-                          [
-                            [
-                              'a',
-                              { class: 'page-link', href: 'javascript:void(0);' },
-                              [['i', { class: 'tf-icon bx bx-chevron-left' }]],
-                            ],
-                          ],
-                        ],
-                        [
-                          'li',
-                          { class: 'page-item active p-0' },
-                          [
-                            [
-                              'a',
-                              { class: 'page-link', href: 'javascript:void(0);' },
-                              [['span', { class: 'current-page', text: '0' }]],
-                            ],
-                          ],
-                        ],
-                        [
-                          'li',
-                          { class: 'page-item next p-0' },
-                          [
-                            [
-                              'a',
-                              { class: 'page-link', href: 'javascript:void(0);' },
-                              [['i', { class: 'tf-icon bx bx-chevron-right' }]],
-                            ],
-                          ],
-                        ],
-                      ],
-                    ]
-                  : [],
-              ]
-            : ['div', { class: 'card-body collapse show p-0 content-holder' }],
+          disableCardView ? [filterHtml] : ['div', { class: 'card-body collapse show p-0 content-holder' }, filterHtml],
         ],
 
         // !controls.show
@@ -184,13 +193,16 @@
         }
 
         if (data.filter) {
+          const filterLimit = data.custom?.query?.filter?.limit || data.filter.limit;
           $el.querySelector('.page-item.next').addEventListener('click', async (event) => {
-            const newOffset = +$el.dataset.offset + data.filter.limit;
-            window.reloadComplexBlock($el, { offset: newOffset });
+            if (event.target.classList.contains('disabled')) return;
+            const newOffset = +$el.dataset.offset + filterLimit;
+            window.reloadComplexBlock($el, { limit: filterLimit, offset: newOffset });
           });
           $el.querySelector('.page-item.prev').addEventListener('click', async (event) => {
-            const newOffset = +$el.dataset.offset - data.filter.limit;
-            window.reloadComplexBlock($el, { offset: newOffset });
+            if (event.target.classList.contains('disabled')) return;
+            const newOffset = +$el.dataset.offset - filterLimit;
+            window.reloadComplexBlock($el, { limit: filterLimit, offset: newOffset });
           });
         }
 
@@ -639,33 +651,5 @@
         margin-bottom: 0.5rem;
       }
     `,
-  },
-
-  addobj: {
-    config: {
-      customType: 'action',
-    },
-    api: {
-      alias: ['search_addobj'],
-    },
-    f: function (conn, data, callback) {
-      try {
-        if (!data.msg.q) {
-          callback({ status: 'err', err: 'Строка поиска не может быть пустой.' });
-        } else {
-          ROUTER.route(
-            conn,
-            { action: 'search_' + data.field.col, q: data.msg.q, addEmpty: data.field.add.addEmpty },
-            (res) => {
-              callback(res.answer);
-            },
-            true,
-          );
-        }
-      } catch (e) {
-        console.log(e);
-        callback({ status: 'err', err: 'Ошибка' });
-      }
-    },
   },
 });

@@ -34,7 +34,7 @@
     await db.mongo.updateOne(parent.col, parentId, { $set });
     processForm.data[field.parentCode][field.name] = value; // !!! доделать setDeep
   },
-  addComplex: async ({ form, code, user, data = {}, returnId = false }) => {
+  addComplex: async ({ form, code, user, data = {}, parents = [], returnId = false }) => {
     const [block, name] = form.split('~');
     const processForm = user.forms[form];
     const complex = processForm.fields[code];
@@ -49,7 +49,8 @@
       data[complex.links?.[complex.name]?.[complex.parent.name]] = { l: [parentData._id], c: 1 };
     }
 
-    const newItem = await db.addComplex({ ...complex, data, parent: { ...complex.parent, _id: parentData._id } });
+    parents.push({ ...complex.parent, _id: parentData._id });
+    const newItem = await db.addComplex({ ...complex, data, parents });
     const itemCode = lib.markup.helpers.nextCode(processForm);
 
     processForm.data[itemCode] = { ...newItem, ...data };
@@ -87,7 +88,6 @@
     }
   },
   showComplex: async ({ form, code, user, query }) => {
-    console.log('showComplex', {query});
     const processForm = user.forms[form];
     const item = processForm.fields[code];
     if (item.type === 'complex') {

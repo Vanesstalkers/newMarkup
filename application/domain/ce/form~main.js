@@ -1,11 +1,5 @@
 ({
-  config: {
-    menu: {
-      label: 'Форма компании',
-      icon: 'bx bx-building',
-    },
-    disableCardStyle: true,
-  },
+  config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
   id: function ({ user, query }) {
@@ -29,17 +23,10 @@
           ({ data }) => {
             const ready = data.status?.find(({ value }) => value === 'ready');
             return [
-              console.log('data.status=', data.status, 'ready=', ready),
-              /* HTML('core/default~card', {
-            title: 'Регистрация в системе',
-            html:  [*/
               IF(ready, () => [
                 FUNC(() => {
                   window.hideAfterTimeout = ($el) => {
-                    console.log($el);
-                    // setTimeout(() => {
                     $el.closest('.reg-block').classList.add('d-none');
-                    // }, 0);
                   };
                 }),
                 DIV({
@@ -117,7 +104,7 @@
                 );
                 return findData.map(({ _id }) => _id);
               },
-              tableFilter: { /* reverse: true,  */ limit: 2 },
+              tableFilter: { limit: 2 },
               links: { worker: { 'ce~main': '__ce' }, 'ce~main': '__worker' },
               add: { modal: { toggleButton: { simple: true } } },
             }),

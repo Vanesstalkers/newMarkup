@@ -1,12 +1,12 @@
 ({
   config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
-  col: 'fabricator',
+  col: 'customer',
   id: function ({ user, query }) {
     return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
   },
   tpl: () => [
-    HTML('core/default~breadcrumbs', { items: ['Производители', data.name] }),
+    HTML('core/default~breadcrumbs', { items: ['Покупатели', data.name] }),
     FIELD({ name: 'name', type: 'json' }),
 
     DIV(
@@ -97,7 +97,7 @@
                     const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
                     return findData.map(({ _id }) => _id);
                   },
-                  links: { token: { 'fabricator~main': '__fabricator' }, 'fabricator~main': '__token' },
+                  links: { token: { 'customer~main': '__customer' }, 'customer~main': '__token' },
                   add: { modal: { toggleButton: { simple: true } } },
                 }),
                 // COMPLEX({ name: 'token', label: 'Выпуски токенов', add: { label: 'Выпустить токены' } }, ({ data }) => [
@@ -114,12 +114,29 @@
             },
             {
               button: {
+                icon: 'fa-solid fa-folder-open',
+                text: 'Документы',
+              },
+              content: [
+                COMPLEX(
+                  {
+                    name: 'document',
+                    label: false,
+                    add: true,
+                    links: { document: { 'customer~main': '__customer' }, 'customer~main': '__document' },
+                  },
+                  ({ data }) => [DIV({ text: data._id })],
+                ),
+              ],
+            },
+            {
+              button: {
                 icon: 'fa-solid fa-address-card fa-fw',
                 text: 'Сотрудники',
               },
               content: [
                 COMPLEX(
-                  { name: 'ce_workers', col: 'ce', label: false, add: false, links: { 'fabricator~main': '__ce' } },
+                  { name: 'ce_workers', col: 'ce', label: false, add: false, links: { 'customer~main': '__ce' } },
                   () => [
                     HTML('worker~table', {
                       hideFilters: true,

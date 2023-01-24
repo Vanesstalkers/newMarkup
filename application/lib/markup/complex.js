@@ -55,7 +55,8 @@
         if (findIds.length) {
           for (const id of findIds) {
             const itemCode = lib.markup.helpers.nextCode(form);
-            form.data[`${linecode}-${id}`] = itemCode;
+            if(!form.data[`${linecode}-${id}`]) form.data[`${linecode}-${id}`] = [];
+            form.data[`${linecode}-${id}`].push(itemCode);
             complex.items[itemCode] = {};
           }
           if (!handlers.db[complex.name]) handlers.db[complex.name] = {};
@@ -91,7 +92,6 @@
         }
       }
     });
-
     return { ...complex, elPath: 'core/default/el~complex|block' };
   },
   prepare: ({ user, form, parent = {}, blockName }, data, tplFunc) => {

@@ -10,13 +10,18 @@
 
         const $select = $el.querySelector('select');
         const form = $select.closest('[type="form"]').dataset.name;
+        const $parentModal = $el.closest('.modal');
         const code = $select.closest('.el').dataset.code;
 
         const $$select = $($select);
         $$select.select2(
           !data.lst.action
-            ? { placeholder: data.placeholder || 'Искать по...' }
+            ? {
+                placeholder: data.placeholder || 'Искать по...',
+                ...($parentModal ? { dropdownParent: $($parentModal) } : {}),
+              }
             : {
+                ...($parentModal ? { dropdownParent: $($parentModal) } : {}),
                 ajax: {
                   transport: function ({ data: { q: query } }, success, failure) {
                     api.markup.search({ form, code, query }).then(({ result, data, msg, stack }) => {

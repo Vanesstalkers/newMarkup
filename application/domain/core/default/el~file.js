@@ -4,6 +4,9 @@
       if (!data.value) data.value = {};
       const inputConfig = {};
       if (data.multiple) inputConfig.multiple = true;
+
+      const img = data.config?.img ? (data.config?.img === true ? { class: 'w-100' } : data.config?.img) : null;
+
       return [
         data.label === false ? [] : ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
         [
@@ -11,19 +14,39 @@
           { code: data.code, class: 'input-group upload-file-input-group ' + data.class },
           [
             data.value.l
-              ? data.config?.img
+              ? img
                 ? [
                     ['input', { ...inputConfig, type: 'file', class: 'form-control d-none', id: 'input-' + data.code }],
-                    ['img', { src: data.value.l, class: 'w-100' }],
+                    ['img', { style: 'margin: auto', ...img, src: data.value.l }],
                     [
-                      'button',
-                      { class: 'btn btn-outline-primary edit-btn', type: 'button' },
-                      [['i', { class: 'bx bx-edit-alt' }]],
-                    ],
-                    [
-                      'button',
-                      { class: 'btn btn-outline-primary delete-btn', type: 'button' },
-                      [['i', { class: 'bx bx-trash' }]],
+                      'div',
+                      {
+                        class:
+                          'btn-group' +
+                          `css
+                            .*css* {
+                              position: absolute;
+                              bottom: 0px;
+                              width: 100%;
+                            }
+                            .*css*:before, .*css*:after {
+                              content: '';
+                              width: 100%;
+                            }
+                          `,
+                      },
+                      [
+                        [
+                          'button',
+                          { class: 'btn btn-outline-primary edit-btn', type: 'button' },
+                          [['i', { class: 'bx bx-edit-alt' }]],
+                        ],
+                        [
+                          'button',
+                          { class: 'btn btn-outline-primary delete-btn', type: 'button' },
+                          [['i', { class: 'bx bx-trash' }]],
+                        ],
+                      ],
                     ],
                   ]
                 : [

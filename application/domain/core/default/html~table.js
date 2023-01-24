@@ -2,6 +2,7 @@
   tpl: ({}, config) => {
     const filters = config.filter?.items || [];
     const table = config.table || {};
+    const [{ value: filterCount }] = data.tableConfig?.[config.col]?.filterCount || [{}];
     return [
       DIV(
         { class: 'card' },
@@ -10,7 +11,7 @@
             { class: 'card-header border-bottom' },
             H5({ class: 'card-title' }, SPAN({ text: 'Фильтры поиска' })),
             DIV(
-              { class: 'd-flex justify-content-start align-items-center row py-3 gap-3 gap-md-0' },
+              { class: 'd-flex justify-content-start align-items-center row gap-3 gap-md-0' },
               ...filters
                 .map((item) => DIV({ class: item.class }, FIELD(item.f)))
                 .concat([
@@ -78,17 +79,19 @@
                     { class: 'dataTables_length', id: 'DataTables_Table_0_length' },
                     LABEL(
                       {},
-                      SELECT(
-                        {
-                          name: 'DataTables_Table_0_length',
-                          'aria-controls': 'DataTables_Table_0',
-                          class: 'form-select',
+                      FIELD({
+                        name: ['tableConfig', config.col, 'filterCount'].join('.'),
+                        type: 'select',
+                        lst: 'core/default~filterCount',
+                        on: {
+                          afterSave: ({ event }) => {
+                            window.reloadComplexBlock(
+                              event.target.closest('.dataTables_wrapper').querySelector('table > .complex-block'),
+                              { limit: +event.target.value, offset: 0 },
+                            );
+                          },
                         },
-                        OPTION({ value: '10' }, SPAN({ text: '10' })),
-                        OPTION({ value: '25' }, SPAN({ text: '25' })),
-                        OPTION({ value: '50' }, SPAN({ text: '50' })),
-                        OPTION({ value: '100' }, SPAN({ text: '100' })),
-                      ),
+                      }),
                     ),
                   ),
                 ),
@@ -108,6 +111,7 @@
                         type: 'search',
                         class: 'form-control',
                         placeholder: 'Поиск..',
+                        disabled: true,
                         'aria-controls': 'DataTables_Table_0',
                       }),
                     ),
@@ -118,8 +122,8 @@
                       { class: 'btn-group' },
                       BUTTON(
                         {
-                          class: 'btn btn-secondary buttons-collection dropdown-toggle btn-outline-secondary mx-3',
-                          tabindex: '0',
+                          class:
+                            'btn btn-secondary buttons-collection dropdown-toggle btn-outline-secondary mx-3 disabled',
                           'aria-controls': 'DataTables_Table_0',
                           type: 'button',
                           'aria-haspopup': 'dialog',
@@ -177,12 +181,17 @@
                                 handler: async ({ form, field, user, data }) => {
                                   const tmpObjData = form.data[data.tmpObjCode];
                                   const formName = form.name;
+                                  const parents = [];
+                                  if (tmpObjData.company?.length)
+                                    parents.push({ name: 'ce', _id: tmpObjData.company[0].value });
+
                                   const newItem = await lib.markup.actions.addComplex({
                                     form: formName,
                                     code: data.tableCode,
                                     user,
                                     returnId: true,
                                     data: tmpObjData,
+                                    parents,
                                   });
                                   await lib.markup.actions.deleteComplex({
                                     form: formName,
@@ -247,12 +256,12 @@
                                   'data-bs-target': `#${config.col}-add-modal`,
                                 },
                                 SPAN(
-                                  {},
+                                  { class: 'd-flex' },
                                   I({ class: 'bx bx-plus me-0 me-sm-1' }),
                                   IF(addModal.toggleButton?.simple !== true, () => [
                                     SPAN(
                                       { class: 'd-none d-sm-inline-block' },
-                                      SPAN({ text: addModal.toggleButton?.label || 'Добавить' }),
+                                      SPAN({ class: 'text-nowrap', text: addModal.toggleButton?.label || 'Добавить' }),
                                     ),
                                   ]),
                                 ),
@@ -290,7 +299,7 @@
                     custom: { col: config.col, addRowLink: table.addRowLink, cols: table.cols },
                   },
                   id: table.id,
-                  filter: { ...(table.filter || {}) },
+                  filter: { ...(table.filter || {}), ...(filterCount ? { limit: +filterCount } : {}) },
                 },
                 ({ data, custom }) => {
                   const { cols } = custom;
@@ -351,28 +360,6 @@
                 },
               ),
             ),
-            // NAV(
-            //   { class: 'row mx-2', 'aria-label': 'Page navigation' },
-            //   UL(
-            //     { class: 'pagination justify-content-end' },
-            //     LI(
-            //       { class: 'page-item first' },
-            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevrons-left' })),
-            //     ),
-            //     LI(
-            //       { class: 'page-item prev' },
-            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevron-left' })),
-            //     ),
-            //     LI(
-            //       { class: 'page-item next' },
-            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevron-right' })),
-            //     ),
-            //     LI(
-            //       { class: 'page-item last' },
-            //       A({ class: 'page-link', href: 'javascript:void(0);' }, I({ class: 'tf-icon bx bx-chevrons-right' })),
-            //     ),
-            //   ),
-            // ),
           ),
         ),
       ),

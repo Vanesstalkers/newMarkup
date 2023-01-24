@@ -33,14 +33,14 @@
     const user = await db.mongo.insertOne('user', { login, password });
     await db.addComplex({
       name: 'pp',
-      parent: { name: 'user', _id: user._id },
+      parents: [{ name: 'user', _id: user._id }],
       links: { pp: { user: '__user' }, user: '__pp' },
     });
     for (const role of roles) {
       const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
       await db.addComplex({
         name: 'user_role',
-        parent: { name: 'user', _id: user._id },
+        parents: [{ name: 'user', _id: user._id }],
         links: { user_role: { user: '__user' }, user: '__user_role' },
         data: { role: [{ label, value }] },
       });

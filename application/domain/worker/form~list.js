@@ -19,27 +19,24 @@
           if (!user.current.link?.value) return [];
         }
         const collection = user.current.parentType || 'fabricator';
-        const findData = await db.mongo.aggregate(
-          collection,
-          [
-            { $match: { _id: db.mongo.ObjectID(user.current.link?.value) } },
-            { $lookup: { from: 'ce', localField: '__ce.l', foreignField: '_id', as: 'from_ce' } },
-            {
-              $lookup: {
-                from: 'worker',
-                localField: 'from_ce.__worker.l',
-                foreignField: '_id',
-                as: 'from_worker',
-                pipeline: [{ $skip: 0 }, { $limit: 100 }],
-              },
+        const findData = await db.mongo.aggregate('ce', [
+          { $match: { _id: db.mongo.ObjectID(user.current.link?.value) } },
+          // { $lookup: { from: 'ce', localField: '__ce.l', foreignField: '_id', as: 'from_ce' } },
+          {
+            $lookup: {
+              from: 'worker',
+              localField: '__worker.l',
+              foreignField: '_id',
+              as: 'from_worker',
+              pipeline: [{ $skip: 0 }, { $limit: 100 }],
             },
-            // { $limit: 1 },
-          ],
-        );
+          },
+          // { $limit: 1 },
+        ]);
         // if (query['filter.find_text']) find.second_name = { $regex: query['filter.find_text'] || '' };
         return findData[0]?.from_worker.map(({ _id }) => _id) || [];
       },
-      links: { worker: { 'ce~worker': false }, 'ce~worker': false },
+      links: { worker: { 'ce~worker': false, ce: '__ce' }, 'ce~worker': false, ce: '__worker' },
     }),
   ],
   func: () => {},

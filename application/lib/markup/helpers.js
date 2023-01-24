@@ -197,8 +197,7 @@
                 { projection: form.markup[linecode].queryFields },
               );
               for (const item of findData) {
-                const itemCode = form.data[`${linecode}-${item._id}`];
-                form.data[itemCode] = item;
+                for (const itemCode of form.data[`${linecode}-${item._id}`]) form.data[itemCode] = item;
                 delete form.data[`${linecode}-${item._id}`];
               }
             }

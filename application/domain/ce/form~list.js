@@ -21,10 +21,16 @@
         addRowLink: true,
         id: async ({ user, complex, query = {} }) => {
           const find = {};
-          if (query['filter.find_text']) find.add_time = { $regex: query['filter.find_text'] || '' };
-          const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+          if (query['filter.find_text']) find.name = { $regex: query['filter.find_text'] || '' };
+          const findData = await db.mongo.find(
+            complex.col,
+            find,
+            { projection: { _id: 1 } },
+            { ...complex.filter, ...(query.filter || {}) },
+          );
           return findData.map(({ _id }) => _id);
         },
+        filter: { limit: 5 },
         cols: [
           { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
           { label: 'Название', f: { name: 'name', type: 'input' } },

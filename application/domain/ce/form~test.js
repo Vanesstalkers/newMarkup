@@ -1,9 +1,9 @@
 ({
   config: {
-    menu: {
-      label: 'Тестовая форма',
-      icon: 'bx bx-building',
-    },
+    // menu: {
+    //   label: 'Тестовая форма',
+    //   icon: 'bx bx-building',
+    // },
   },
   col: 'user',
   id: function ({ user, query }) {
