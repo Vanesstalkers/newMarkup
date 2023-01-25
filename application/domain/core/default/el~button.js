@@ -31,6 +31,7 @@
           const afterHandler = data.on?.afterHandler;
           $el.addEventListener('click', async function (event) {
             try {
+              if (data.config?.popover) $(event.target).popover('dispose');
               event.target.setAttribute('disabled', '');
               const $btn = event.target;
               const form = $btn.closest('[type="form"]').dataset.name;
@@ -38,9 +39,9 @@
               let handlerData = {};
               if (typeof window[beforeHandler] === 'function') handlerData = await window[beforeHandler](event);
               const handleActionData = await api.markup.handleAction({ form, code, data: handlerData });
-              const { result, data, msg, stack } = handleActionData;
+              const { result, data: actionData, msg, stack } = handleActionData;
               if (result === 'error') throw new Error(msg);
-              if (typeof window[afterHandler] === 'function') await window[afterHandler](event, data);
+              if (typeof window[afterHandler] === 'function') await window[afterHandler](event, actionData);
               event.target.removeAttribute('disabled');
             } catch (err) {
               console.error({ err });

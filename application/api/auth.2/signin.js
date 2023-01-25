@@ -14,7 +14,7 @@
         roles: [
           {
             role: [{ value: roleCode }],
-            link: [link],
+            link: [link] = [],
           },
         ],
       } = user;
@@ -25,6 +25,7 @@
       api.auth.provider.startSession(token, data, { ip });
       return { status: 'logged', token };
     } catch (err) {
+      console.log(err);
       return { result: 'error', msg: err.message, stack: err.stack };
     }
   },

@@ -75,13 +75,7 @@
         { class: 'navbar navbar-expand-lg fixed-top sticky', id: 'navbar' },
         DIV(
           { class: 'container-fluid custom-container' },
-          A(
-            {
-              class: 'navbar-brand text-dark fw-bold me-auto',
-              href: 'https://preview.pichforest.com/cryptorex/layouts/index.html',
-            },
-            SPAN({ text: 'Cryptorex' }),
-          ),
+          A({ class: 'navbar-brand text-dark fw-bold me-auto', href: '/web.html' }, SPAN({ text: 'ИнертТокен' })),
           DIV(
             {},
             BUTTON(
@@ -406,11 +400,11 @@
               { class: 'header-item' },
               A(
                 {
-                  href: 'https://preview.pichforest.com/cryptorex/layouts/sign-in.html',
+                  href: 'login.html',
                   class: 'btn btn-primary btn-sm',
                 },
-                I({ class: 'uil uil-lock-alt' }),
-                SPAN({ class: 'd-none d-sm-inline-block' }, SPAN({ text: 'Login' })),
+                I({ class: 'uil uil-lock-alt me-2' }),
+                SPAN({ class: 'd-none d-sm-inline-block' }, SPAN({ text: 'Вход в систему' })),
               ),
             ),
             DIV(
@@ -425,7 +419,7 @@
                 },
                 IMG({
                   id: 'header-lang-img',
-                  src: './theme/web/us.jpg',
+                  src: './theme/web/russia.jpg',
                   alt: 'Header Language',
                   height: '16',
                 }),
@@ -515,11 +509,11 @@
                 { class: 'col-lg-8' },
                 DIV(
                   { class: 'text-center text-white' },
-                  H1({ class: 'mb-4' }, SPAN({ text: 'The Easiest Way To Buy & Sell Cryptocurrency' })),
+                  H1({ class: 'mb-4' }, SPAN({ text: 'Самый простой и безопасный способ покупки инертных материалов' })),
                   P(
                     { class: 'lead para-desc mx-auto text-white-50 mt-3' },
                     SPAN({
-                      text: 'Explore and learn more about everything from learning and global payments to scaling your team.',
+                      text: 'Начните использовать единственную в РФ инвестиционную платформу для строительного рынка прямо сейчас.',
                     }),
                   ),
                   DIV(
@@ -529,7 +523,7 @@
                         href: `#${JSON.stringify({ form: `core/web~register` })}`,
                         class: 'btn btn-success btn-hover',
                       },
-                      SPAN({ text: 'Buy & Sell' }),
+                      SPAN({ text: 'Подключиться к платформе' }),
                       I({ class: 'mdi mdi-arrow-right ms-1' }),
                     ),
                   ),
@@ -726,17 +720,21 @@
                               class:
                                 'avatar-sm d-flex justify-content-center align-items-center bg-soft-info text-info fs-20 rounded-circle',
                             },
-                            I({ class: 'cf cf-eth' }),
+                            // I({ class: 'cf cf-eth' }),
+                            IMG({src: "/icons/logo/stroitel-43.jpg", class: `css
+                              width: 200px;
+                              padding-left: 75px;
+                            `}),
                           ),
                           DIV(
                             { class: 'mt-4' },
-                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Ethereum (ETH)' })),
-                            P({ class: 'text-muted mb-2' }, SPAN({ text: 'Deposite now and win free Ethereum!' })),
+                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Щебень' })),
+                            P({ class: 'text-muted mb-2', style: 'height: 54px' }, SPAN({ text: `ОАО «Строитель-43»` })),
                             DIV(
                               {},
                               A(
                                 { href: 'javascript:void(0)', class: 'form-text text-primary fw-semibold' },
-                                SPAN({ text: 'Buy Now' }),
+                                SPAN({ text: 'Купить' }),
                                 I({ class: 'uil uil-angle-right-b ms-1' }),
                               ),
                             ),
@@ -761,17 +759,21 @@
                               class:
                                 'avatar-sm d-flex justify-content-center align-items-center bg-soft-warning text-warning fs-20 rounded-circle',
                             },
-                            I({ class: 'cf cf-btc' }),
+                            // I({ class: 'cf cf-btc' }),
+                            IMG({src: "/icons/logo/e-zavod.png", class: `css
+                              width: 200px;
+                              padding-left: 75px;
+                            `}),
                           ),
                           DIV(
                             { class: 'mt-4' },
-                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Bitcoin (BTC)' })),
-                            P({ class: 'text-muted mb-2' }, SPAN({ text: 'Deposite now and win free Bitcoin!' })),
+                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Кирпич' })),
+                            P({ class: 'text-muted mb-2' }, SPAN({ text: 'Энгельсский Кирпичный завод АО' })),
                             DIV(
                               {},
                               A(
                                 { href: 'javascript:void(0)', class: 'form-text text-primary fw-semibold' },
-                                SPAN({ text: 'Buy Now' }),
+                                SPAN({ text: 'Купить' }),
                                 I({ class: 'uil uil-angle-right-b ms-1' }),
                               ),
                             ),
@@ -796,17 +798,21 @@
                               class:
                                 'avatar-sm d-flex justify-content-center align-items-center bg-soft-success text-success fs-20 rounded-circle',
                             },
-                            I({ class: 'cf cf-ltc' }),
+                            // I({ class: 'cf cf-ltc' }),
+                            IMG({src: "/icons/logo/v-cement.png", class: `css
+                              width: 200px;
+                              padding-left: 75px;
+                            `}),
                           ),
                           DIV(
                             { class: 'mt-4' },
-                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Litecoin (LTC)' })),
-                            P({ class: 'text-muted mb-2' }, SPAN({ text: 'Deposite now and win free Litecoin!' })),
+                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Цемент' })),
+                            P({ class: 'text-muted mb-2', style: 'height: 54px; font-size: 16px' }, SPAN({ text: 'Производственная компания «Востокцемент»' })),
                             DIV(
                               {},
                               A(
                                 { href: 'javascript:void(0)', class: 'form-text text-primary fw-semibold' },
-                                SPAN({ text: 'Buy Now' }),
+                                SPAN({ text: 'Купить' }),
                                 I({ class: 'uil uil-angle-right-b ms-1' }),
                               ),
                             ),
@@ -831,17 +837,21 @@
                               class:
                                 'avatar-sm d-flex justify-content-center align-items-center bg-soft-orange text-orange fs-20 rounded-circle',
                             },
-                            I({ class: 'cf cf-xrp' }),
+                            // I({ class: 'cf cf-xrp' }),
+                            IMG({src: "/icons/logo/stroy-na-vek.jpg", class: `css
+                              width: 200px;
+                              padding-left: 75px;
+                            `}),
                           ),
                           DIV(
                             { class: 'mt-4' },
-                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Ripple  (XRP)' })),
-                            P({ class: 'text-muted mb-2' }, SPAN({ text: 'Deposite now and win fre e Ripple!' })),
+                            H6({ class: 'fw-semibold mb-1' }, SPAN({ text: 'Бетон' })),
+                            P({ class: 'text-muted mb-2', style: 'height: 54px' }, SPAN({ text: 'Бетонный завод «СтройНАвек»' })),
                             DIV(
                               {},
                               A(
                                 { href: 'javascript:void(0)', class: 'form-text text-primary fw-semibold' },
-                                SPAN({ text: 'Buy Now' }),
+                                SPAN({ text: 'Купить' }),
                                 I({ class: 'uil uil-angle-right-b ms-1' }),
                               ),
                             ),

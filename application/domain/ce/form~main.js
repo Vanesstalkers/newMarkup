@@ -3,7 +3,7 @@
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
   id: function ({ user, query }) {
-    const id = query._id || user.current.link.value;
+    const id = query._id || user.current.link?.value;
     return id ? [this.db.mongo.ObjectID(id)] : [];
   },
   tpl: () => [

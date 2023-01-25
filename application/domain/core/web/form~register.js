@@ -16,7 +16,7 @@
           placement: 'bottom',
           'custom-class': 'popover-danger',
           content: '-',
-          'original-title': 'Error',
+          'original-title': 'Ошибка заполнения формы',
         },
       },
       handler: async ({ form, field, user: sessionUser, data }) => {
@@ -83,14 +83,18 @@
             {},
           );
 
-          if (!data.title) throw new Error('Company name must be specified');
-          if (!data.inn) throw new Error('Company inn must be specified');
-          if (!data.type) throw new Error('Company type must be specified');
+          if (!data.title) throw new Error('Название компании должно быть указано');
+          if (!data.inn) throw new Error('ИНН компании должен быть указан');
+          if (!data.type) throw new Error('Тип компании должен быть указан');
 
           return data;
         },
         afterHandler: (event, data) => {
-          if (data.login) alert(data.login);
+          if (data.login){
+            const $userLogin = document.getElementById('userLogin');
+            $userLogin.innerHTML = data.login;
+            $userLogin.closest('.d-none').classList.remove('d-none');
+          }
         },
       },
     });
@@ -114,15 +118,18 @@
                   { class: 'row' },
                   DIV(
                     { class: 'col-lg-5' },
-                    DIV({ class: 'text-center mb-4 pb-1' }, H4({ class: 'text-white' }, SPAN({ text: 'Cryptorex' }))),
+                    DIV({ class: 'text-center mb-4 pb-1' }, H4({ class: 'text-white' }, SPAN({ text: 'ИнертТокен' }))),
                     DIV(
                       { class: 'card auth-form text-white' },
                       DIV(
                         { class: 'card-body p-4' },
                         DIV(
                           { class: 'text-center mb-4' },
-                          H4({ class: 'mb-1' }, SPAN({ text: 'Create Cryptorex Account' })),
-                          P({ class: 'text-white-50' }, SPAN({ text: 'Register with your email or mobile' })),
+                          H4({ class: 'mb-1' }, SPAN({ text: 'Подача заявки на регистрацию в\xa0платформе' })),
+                          P(
+                            { class: 'text-white-50' },
+                            SPAN({ text: 'Зарегистрируясь с помощью телефона или\xa0электронного\xa0адреса' }),
+                          ),
                         ),
                         UL(
                           { class: 'nav nav-pills mb-3', id: 'pills-tab', role: 'tablist' },
@@ -139,7 +146,7 @@
                                 'aria-controls': 'pills-home',
                                 'aria-selected': 'false',
                               },
-                              SPAN({ text: 'Email' }),
+                              SPAN({ text: 'Почта' }),
                             ),
                           ),
                           LI(
@@ -155,7 +162,7 @@
                                 'aria-controls': 'pills-profile',
                                 'aria-selected': 'true',
                               },
-                              SPAN({ text: 'Mobile' }),
+                              SPAN({ text: 'Телефон' }),
                             ),
                           ),
                         ),
@@ -172,52 +179,56 @@
                               { action: 'index.html' },
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'enailInput', class: 'form-label' }, SPAN({ text: 'Email' })),
+                                LABEL(
+                                  { for: 'enailInput', class: 'form-label' },
+                                  SPAN({ text: 'Адрес электронной почты' }),
+                                ),
                                 INPUT({
                                   name: 'email',
                                   type: 'email',
                                   class: 'form-control',
                                   id: 'enailInput',
-                                  placeholder: 'Enter your email',
+                                  placeholder: 'Введите адрес почты',
                                   required: '',
                                 }),
                               ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'passwordInput2', class: 'form-label' }, SPAN({ text: 'Password' })),
+                                LABEL({ for: 'passwordInput2', class: 'form-label' }, SPAN({ text: 'Пароль' })),
                                 INPUT({
                                   name: 'password',
                                   type: 'password',
                                   class: 'form-control',
                                   id: 'passwordInput2',
-                                  placeholder: 'Enter your password',
+                                  placeholder: 'Придумайте пароль',
                                   required: '',
                                 }),
                               ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Company name' })),
+                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
                                 INPUT({
                                   name: 'title',
                                   class: 'form-control',
                                   id: 'titleInput2',
-                                  placeholder: 'Enter company name',
+                                  placeholder: 'Введите название компании',
                                   required: '',
                                 }),
                               ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'innInput2', class: 'form-label' }, SPAN({ text: 'Company Inn' })),
+                                LABEL({ for: 'innInput2', class: 'form-label' }, SPAN({ text: 'ИНН компании' })),
                                 INPUT({
                                   name: 'inn',
                                   class: 'form-control',
                                   id: 'innInput2',
-                                  placeholder: 'Enter company INN',
+                                  placeholder: 'Введите ИНН компании',
                                   required: '',
                                 }),
                               ),
                               DIV(
                                 { class: 'mb-3' },
+                                LABEL({}, SPAN({ text: 'Тип компании:\xa0\xa0' })),
                                 DIV(
                                   { class: 'form-check form-check-inline' },
                                   INPUT({
@@ -248,31 +259,31 @@
                                   ),
                                 ),
                               ),
-                              DIV(
-                                { class: 'mb-2' },
-                                A(
-                                  {
-                                    class: 'text-white form-label d-inline-block',
-                                    'data-bs-toggle': 'collapse',
-                                    href: '#referraleCode',
-                                    role: 'button',
-                                    'aria-expanded': 'true',
-                                    'aria-controls': 'referraleCode',
-                                  },
-                                  SPAN({ text: 'Referral ID (Optional)' }),
-                                  I({ class: 'uil uil-angle-down' }),
-                                ),
-                                DIV(
-                                  { class: 'collapse show', id: 'referraleCode', style: '' },
-                                  INPUT({
-                                    name: 'refcode',
-                                    type: 'text',
-                                    class: 'form-control',
-                                    id: 'referraleCode2',
-                                    placeholder: 'Enter referrale code',
-                                  }),
-                                ),
-                              ),
+                              // DIV(
+                              //   { class: 'mb-2' },
+                              //   A(
+                              //     {
+                              //       class: 'text-white form-label d-inline-block',
+                              //       'data-bs-toggle': 'collapse',
+                              //       href: '#referraleCode',
+                              //       role: 'button',
+                              //       'aria-expanded': 'true',
+                              //       'aria-controls': 'referraleCode',
+                              //     },
+                              //     SPAN({ text: 'Referral ID (Optional)' }),
+                              //     I({ class: 'uil uil-angle-down' }),
+                              //   ),
+                              //   DIV(
+                              //     { class: 'collapse show', id: 'referraleCode', style: '' },
+                              //     INPUT({
+                              //       name: 'refcode',
+                              //       type: 'text',
+                              //       class: 'form-control',
+                              //       id: 'referraleCode2',
+                              //       placeholder: 'Enter referrale code',
+                              //     }),
+                              //   ),
+                              // ),
                               DIV(
                                 { class: 'mb-4' },
                                 DIV(
@@ -285,11 +296,11 @@
                                     required: '',
                                   }),
                                   LABEL(
-                                    { class: 'form-check-label text-white-50 fs-15', for: 'conditionCheck' },
-                                    SPAN({ text: 'I have read and agree to' }),
+                                    { class: 'form-check-label text-white-50 fs-15', for: 'flexCheckDefault' },
+                                    SPAN({ text: 'Я ознакомился и согласен с\xa0' }),
                                     A(
                                       { href: 'javascript:void(0)', class: 'text-white' },
-                                      SPAN({ text: 'Terms of Service' }),
+                                      SPAN({ text: 'Условиями присоединения' }),
                                     ),
                                   ),
                                 ),
@@ -315,7 +326,7 @@
                               { action: 'index.html' },
                               DIV(
                                 { class: 'mb-3 text-black' },
-                                LABEL({ for: 'enailInput', class: 'form-label' }, SPAN({ text: 'Mobile' })),
+                                LABEL({ for: 'enailInput', class: 'form-label' }, SPAN({ text: 'Мобильный телефон' })),
                                 DIV(
                                   { class: 'iti iti--allow-dropdown' },
                                   DIV(
@@ -3965,45 +3976,108 @@
                                     required: '',
                                     autocomplete: 'off',
                                     'data-intl-tel-input-id': '0',
-                                    placeholder: '(201) 555-0123',
+                                    placeholder: '+7 (201) 555-01-23',
+                                    on: {
+                                      load: 'addPhoneMask',
+                                    },
+                                  }),
+                                  FUNC(() => {
+                                    window.addPhoneMask = function (el) {
+                                      $(el).mask('+7 (000) 000-00-00');
+                                    };
                                   }),
                                 ),
                               ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'passwordInput', class: 'form-label' }, SPAN({ text: 'Password' })),
+                                LABEL({ for: 'passwordInput', class: 'form-label' }, SPAN({ text: 'Пароль' })),
                                 INPUT({
                                   name: 'password',
                                   type: 'password',
                                   class: 'form-control',
                                   id: 'passwordInput',
-                                  placeholder: 'Enter your password',
+                                  placeholder: 'Придумайте пароль',
+                                  required: '',
+                                }),
+                              ),
+                              // DIV(
+                              //   { class: 'mb-2' },
+                              //   A(
+                              //     {
+                              //       class: 'text-white form-label d-inline-block',
+                              //       'data-bs-toggle': 'collapse',
+                              //       href: '#codeInput',
+                              //       role: 'button',
+                              //       'aria-expanded': 'true',
+                              //       'aria-controls': 'codeInput',
+                              //     },
+                              //     SPAN({ text: 'Referral ID (Optional)' }),
+                              //     I({ class: 'uil uil-angle-down' }),
+                              //   ),
+                              //   DIV(
+                              //     { class: 'collapse show', id: 'codeInput', style: '' },
+                              //     INPUT({
+                              //       name: 'refcode',
+                              //       type: 'text',
+                              //       class: 'form-control',
+                              //       id: 'referraleInput',
+                              //       placeholder: 'Enter referrale code',
+                              //     }),
+                              //   ),
+                              // ),
+                              DIV(
+                                { class: 'mb-3' },
+                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
+                                INPUT({
+                                  name: 'title',
+                                  class: 'form-control',
+                                  id: 'titleInput2',
+                                  placeholder: 'Введите название компании',
                                   required: '',
                                 }),
                               ),
                               DIV(
-                                { class: 'mb-2' },
-                                A(
-                                  {
-                                    class: 'text-white form-label d-inline-block',
-                                    'data-bs-toggle': 'collapse',
-                                    href: '#codeInput',
-                                    role: 'button',
-                                    'aria-expanded': 'true',
-                                    'aria-controls': 'codeInput',
-                                  },
-                                  SPAN({ text: 'Referral ID (Optional)' }),
-                                  I({ class: 'uil uil-angle-down' }),
+                                { class: 'mb-3' },
+                                LABEL({ for: 'innInput2', class: 'form-label' }, SPAN({ text: 'ИНН компании' })),
+                                INPUT({
+                                  name: 'inn',
+                                  class: 'form-control',
+                                  id: 'innInput2',
+                                  placeholder: 'Введите ИНН компании',
+                                  required: '',
+                                }),
+                              ),
+                              DIV(
+                                { class: 'mb-3' },
+                                LABEL({}, SPAN({ text: 'Тип компании:\xa0\xa0' })),
+                                DIV(
+                                  { class: 'form-check form-check-inline' },
+                                  INPUT({
+                                    name: 'type',
+                                    class: 'form-check-input',
+                                    type: 'radio',
+                                    id: 'radioCheck21',
+                                    required: '',
+                                    value: 'fabricator',
+                                  }),
+                                  LABEL(
+                                    { class: 'form-check-label text-white-50 fs-15', for: 'radioCheck21' },
+                                    SPAN({ text: 'Производитель' }),
+                                  ),
                                 ),
                                 DIV(
-                                  { class: 'collapse show', id: 'codeInput', style: '' },
+                                  { class: 'form-check form-check-inline' },
                                   INPUT({
-                                    name: 'refcode',
-                                    type: 'text',
-                                    class: 'form-control',
-                                    id: 'referraleInput',
-                                    placeholder: 'Enter referrale code',
+                                    name: 'type',
+                                    class: 'form-check-input',
+                                    type: 'radio',
+                                    id: 'radioCheck22',
+                                    value: 'customer',
                                   }),
+                                  LABEL(
+                                    { class: 'form-check-label text-white-50 fs-15', for: 'radioCheck22' },
+                                    SPAN({ text: 'Покупатель' }),
+                                  ),
                                 ),
                               ),
                               DIV(
@@ -4019,10 +4093,10 @@
                                   }),
                                   LABEL(
                                     { class: 'form-check-label text-white-50 fs-15', for: 'flexCheckDefault' },
-                                    SPAN({ text: 'I have read and agree to' }),
+                                    SPAN({ text: 'Я ознакомился и согласен с\xa0' }),
                                     A(
                                       { href: 'javascript:void(0)', class: 'text-white' },
-                                      SPAN({ text: 'Terms of Service' }),
+                                      SPAN({ text: 'Условиями присоединения' }),
                                     ),
                                   ),
                                 ),
@@ -4039,13 +4113,21 @@
                           ),
                         ),
                         DIV(
-                          { class: 'mt-4 text-center' },
+                          { class: 'mt-4 text-center d-none' },
                           P(
                             { class: 'text-white-50 mb-0' },
-                            SPAN({ text: 'Already have an account ?' }),
+                            SPAN({ text: 'Регистрация пользователя завершена. Логин для авторизации:'}),
+                            DIV({ id: 'userLogin', class: 'ms-2 me-2'+`css
+                              .*css* {
+                                background-color: grey;
+                                color: white;
+                                border-radius: 5px;
+                                padding: 2px 10px;
+                              }
+                            ` }),
                             A(
                               { href: 'login.html', class: 'fw-medium text-success text-decoration-underline' },
-                              SPAN({ text: 'Sign In' }),
+                              SPAN({ text: 'Вход в систему' }),
                             ),
                           ),
                         ),
