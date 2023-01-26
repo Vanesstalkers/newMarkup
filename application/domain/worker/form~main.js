@@ -86,6 +86,7 @@
         HTML('core/default~card', {
           title: 'Доступы к системе',
           html: [
+            FIELD({ name: 'company', type: 'json' }),
             COMPLEX(
               {
                 name: 'pp_user',
@@ -93,8 +94,9 @@
                 links: { 'worker~main': '__pp' },
                 add: false,
                 config: { disableCardStyle: true },
+                item: { custom: { userLink: data.company } },
               },
-              ({ data }) => [HTML('pp~user')],
+              ({ data, custom }) => [HTML('pp~user', { custom })],
             ),
           ],
         }),

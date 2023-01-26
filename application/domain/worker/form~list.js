@@ -14,29 +14,22 @@
     HTML('worker~table', {
       tableId: async ({ user, query = {}, parentData, complex }) => {
         const admin = user.current.v === 'admin';
+        const find = {};
         if (!admin) {
           if (!user.current.parentType) return [];
           if (!user.current.link?.value) return [];
+          find['__ce.l'] = { $elemMatch: { $eq: db.mongo.ObjectID(user.current.link?.value) } };
         }
-        const collection = user.current.parentType || 'fabricator';
-        const findData = await db.mongo.aggregate('ce', [
-          { $match: { _id: db.mongo.ObjectID(user.current.link?.value) } },
-          // { $lookup: { from: 'ce', localField: '__ce.l', foreignField: '_id', as: 'from_ce' } },
-          {
-            $lookup: {
-              from: 'worker',
-              localField: '__worker.l',
-              foreignField: '_id',
-              as: 'from_worker',
-              pipeline: [{ $skip: 0 }, { $limit: 100 }],
-            },
-          },
-          // { $limit: 1 },
-        ]);
-        // if (query['filter.find_text']) find.second_name = { $regex: query['filter.find_text'] || '' };
-        return findData[0]?.from_worker.map(({ _id }) => _id) || [];
+        const findData = await db.mongo.find(
+          'worker',
+          find,
+          { projection: { _id: 1 } },
+          { ...complex.filter, ...(query.filter || {}) },
+        );
+        return findData.map(({ _id }) => _id);
       },
       links: { worker: { 'ce~worker': false, ce: '__ce' }, 'ce~worker': false, ce: '__worker' },
+      tableFilter: { limit: 10 },
     }),
   ],
   func: () => {},

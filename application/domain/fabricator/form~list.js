@@ -1,6 +1,7 @@
 ({
   config: {
     menu: { label: 'Производители', icon: 'fas fa-person-digging' },
+    access: ['admin', 'fabricator_manager'],
     disableCardStyle: true,
   },
   col: 'user',

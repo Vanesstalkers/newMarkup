@@ -1,6 +1,7 @@
 ({
   config: {
     menu: { label: 'Заявки на регистрацию', icon: 'fa-solid fa-file-signature' },
+    access: ['admin'],
     disableCardStyle: true,
   },
   col: 'reg_request',

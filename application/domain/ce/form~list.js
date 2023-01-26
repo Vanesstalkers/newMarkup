@@ -1,6 +1,7 @@
 ({
   config: {
     menu: { label: 'Юридические лица', icon: 'fa-solid fa-city' },
+    access: ['admin'],
     disableCardStyle: true,
   },
   col: 'user',

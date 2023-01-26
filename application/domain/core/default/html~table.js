@@ -2,7 +2,8 @@
   tpl: ({}, config) => {
     const filters = config.filter?.items || [];
     const table = config.table || {};
-    const [{ value: filterCount }] = data.tableConfig?.[config.col]?.filterCount || [{}];
+    const [{ value: tableConfig }] = data.tableConfig?.[config.col]?.filterCount || [{}];
+    const filterCount = tableConfig ? { limit: +tableConfig } : {};
     return [
       DIV(
         { class: 'card' },
@@ -299,7 +300,7 @@
                     custom: { col: config.col, addRowLink: table.addRowLink, cols: table.cols },
                   },
                   id: table.id,
-                  filter: { ...(table.filter || {}), ...(filterCount ? { limit: +filterCount } : {}) },
+                  filter: { ...(table.filter || {}), ...filterCount },
                 },
                 ({ data, custom }) => {
                   const { cols } = custom;

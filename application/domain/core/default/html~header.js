@@ -18,7 +18,7 @@
             A(
               { class: 'nav-item nav-link search-toggler px-0', href: 'javascript:void(0);' },
               I({ class: 'bx bx-search bx-sm' }),
-              SPAN({ class: 'd-none d-md-inline-block text-muted px-1', text: 'Search (Ctrl+/)' }),
+              SPAN({ class: 'd-none d-md-inline-block text-muted px-1', text: 'Поиск (Ctrl+/)' }),
             ),
           ),
         ),
@@ -103,7 +103,7 @@
             { class: 'nav-item dropdown-shortcuts navbar-dropdown dropdown me-2 me-xl-0' },
             A(
               {
-                class: 'nav-link dropdown-toggle hide-arrow',
+                class: 'disabled nav-link dropdown-toggle hide-arrow',
                 href: 'javascript:void(0);',
                 'data-bs-toggle': 'dropdown',
                 'data-bs-auto-close': 'outside',
@@ -229,7 +229,7 @@
             { class: 'nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1' },
             A(
               {
-                class: 'nav-link dropdown-toggle hide-arrow',
+                class: 'disabled nav-link dropdown-toggle hide-arrow',
                 href: 'javascript:void(0);',
                 'data-bs-toggle': 'dropdown',
                 'data-bs-auto-close': 'outside',
@@ -588,8 +588,23 @@
                     ),
                     DIV(
                       { class: 'flex-grow-1' },
-                      SPAN({ class: 'fw-semibold d-block' }, SPAN({ text: 'John Doe' })),
-                      SMALL({ class: 'text-muted' }, SPAN({ text: 'Admin' })),
+                      COMPLEX(
+                        {
+                          name: 'pp',
+                          add: false,
+                          class: 'fw-semibold d-block',
+                          config: { tag: 'span', disableCardView: true },
+                        },
+                        () => [
+                          SPAN({ text: [data.second_name || '', data.first_name || ''].join(' ') }),
+                          FIELD({ name: 'first_name', type: 'json' }),
+                          FIELD({ name: 'second_name', type: 'json' }),
+                        ],
+                      ),
+                      SMALL(
+                        { class: 'text-muted' },
+                        SPAN({ text: domain.user['lst~roles'].find(({ v }) => v === user.current.v).l }),
+                      ),
                     ),
                   ),
                 ),
@@ -603,25 +618,25 @@
                     href: `#${JSON.stringify({ form: 'user~profile', container: 'formContent' })}`,
                   },
                   I({ class: 'bx bx-user me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'My Profile' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Профиль пользователя' })),
                 ),
               ),
               LI(
                 {},
                 A(
-                  { class: 'dropdown-item', href: 'pages-account-settings-account.html' },
+                  { class: 'dropdown-item disabled', href: 'pages-account-settings-account.html' },
                   I({ class: 'bx bx-cog me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Settings' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Настройки' })),
                 ),
               ),
               LI(
                 {},
                 A(
-                  { class: 'dropdown-item', href: 'pages-account-settings-billing.html' },
+                  { class: 'dropdown-item disabled', href: 'pages-account-settings-billing.html' },
                   SPAN(
                     { class: 'd-flex align-items-center align-middle' },
                     I({ class: 'flex-shrink-0 bx bx-credit-card me-2' }),
-                    SPAN({ class: 'flex-grow-1 align-middle' }, SPAN({ text: 'Billing' })),
+                    SPAN({ class: 'flex-grow-1 align-middle' }, SPAN({ text: 'Оплаты' })),
                     SPAN(
                       { class: 'flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20' },
                       SPAN({ text: '4' }),
@@ -633,25 +648,25 @@
               LI(
                 {},
                 A(
-                  { class: 'dropdown-item', href: 'pages-help-center-landing.html' },
+                  { class: 'dropdown-item disabled', href: 'pages-help-center-landing.html' },
                   I({ class: 'bx bx-support me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Help' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Помощь' })),
                 ),
               ),
               LI(
                 {},
                 A(
-                  { class: 'dropdown-item', href: 'pages-faq.html' },
+                  { class: 'dropdown-item disabled', href: 'pages-faq.html' },
                   I({ class: 'bx bx-help-circle me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'FAQ' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'База знаний' })),
                 ),
               ),
               LI(
                 {},
                 A(
-                  { class: 'dropdown-item', href: 'pages-pricing.html' },
+                  { class: 'dropdown-item disabled', href: 'pages-pricing.html' },
                   I({ class: 'bx bx-dollar me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Pricing' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Тарифы' })),
                 ),
               ),
               LI({}, DIV({ class: 'dropdown-divider' })),
@@ -660,7 +675,7 @@
                 A(
                   { class: 'dropdown-item', href: 'auth-login-cover.html', target: '_blank' },
                   I({ class: 'bx bx-power-off me-2' }),
-                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Log Out' })),
+                  SPAN({ class: 'align-middle' }, SPAN({ text: 'Выход из системы' })),
                 ),
               ),
             ),
@@ -672,8 +687,8 @@
         INPUT({
           type: 'text',
           class: 'form-control search-input container-xxl border-0',
-          placeholder: 'Search...',
-          'aria-label': 'Search...',
+          placeholder: 'Поиск...',
+          'aria-label': 'Поиск...',
         }),
         I({ class: 'bx bx-x bx-sm search-toggler cursor-pointer' }),
       ),

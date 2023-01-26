@@ -1,5 +1,9 @@
 ({
-  config: { disableCardStyle: true },
+  config: {
+    menu: { label: 'Карточка юр.лица', icon: 'fa-solid fa-city' },
+    access: ['fabricator_manager', 'customer_manager'],
+    disableCardStyle: true,
+  },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
   id: function ({ user, query }) {
@@ -95,7 +99,7 @@
             HTML('worker~table', {
               hideFilters: true,
               tableId: async ({ user, query = {}, parentData, complex }) => {
-                const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
+                const find = { '__ce.l': { $elemMatch: { $eq: parentData._id } } };
                 const findData = await db.mongo.find(
                   complex.col,
                   find,

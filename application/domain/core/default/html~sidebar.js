@@ -70,7 +70,10 @@
               ),
             ),
           ),
-          SPAN({ class: 'app-brand-text demo menu-text fw-bolder ms-2' }, SPAN({ text: 'Sneat' })),
+          SPAN({ class: 'app-brand-text demo menu-text fw-bolder ms-2' }, SPAN({ text: 'ИнертТокен', class: `css
+            text-transform: none;
+	          font-size: 20px;
+          ` })),
         ),
         A(
           { href: 'javascript:void(0);', class: 'layout-menu-toggle menu-link text-large ms-auto' },
@@ -87,6 +90,13 @@
           for (const [block, forms] of domainEntries) {
             for (const [name, { config }] of Object.entries(forms)) {
               if (config?.menu) {
+                if(config.access){
+                  if(typeof config.access === 'function'){
+                    if(!config.access()) continue;
+                  }else{
+                    if(!config.access.includes(user.current.v)) continue;
+                  }
+                }
                 const { icon, label } = config.menu;
                 items.push([
                   LI(

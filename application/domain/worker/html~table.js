@@ -21,6 +21,7 @@
         filter: tableFilter,
         cols: [
           { label: 'Добавлен', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Юр.лицо', c: { name: 'ce', add: false, f: { name: 'name', type: 'label', label: false } } },
           { label: 'Должность', f: { name: 'position', type: 'label', label: false } },
           {
             label: 'ФИО',
@@ -56,7 +57,14 @@
       add: {
         modal: add.modal || { toggleButton: { label: 'Добавить сотрудника' } },
         items: [
-          { f: { label: 'Компания', name: 'company', type: 'select2', lst: { action: 'ce~search' } } },
+          {
+            f: {
+              label: 'Компания',
+              name: 'company',
+              type: 'select2',
+              lst: user.current.link ? [user.current.link] : { action: 'ce~search' },
+            },
+          },
           {
             html: () => [
               COMPLEX(
