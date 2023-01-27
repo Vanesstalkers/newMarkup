@@ -224,15 +224,19 @@ window.addEventListener('load', async () => {
   }
 
   if (!logged) {
-    const demoUser = { login: Math.random(), password: 'guest', roles: ['guest', 'admin'] };
-    await api.auth.register({ ...demoUser });
-    //await api.auth.register({ login: 'marcus', password: 'marcus' });
-    const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
-    if (res.token) {
-      localStorage.setItem('xaoc.session.token', res.token);
+    // const demoUser = { login: Math.random(), password: 'guest', roles: ['guest', 'admin'] };
+    // await api.auth.register({ ...demoUser });
+    // const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
+    if (!location.href.includes('/login.html') && !location.href.includes('/web.html') ) {
+      location.href = '/login.html';
+      return;
     }
+    // if (res.token) {
+    //   localStorage.setItem('xaoc.session.token', res.token);
+    // }
+  } else {
+    document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
   }
-  document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
 
   new MutationObserver(async function (mutationsList, observer) {
     //console.log({ mutationsList });

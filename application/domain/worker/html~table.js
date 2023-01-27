@@ -1,5 +1,5 @@
 ({
-  tpl: ({ data }, { hideFilters, tableId, tableFilter, links, add = {} } = {}) => [
+  tpl: ({ data }, { hideFilters, hideCols = [], tableId, tableFilter, links, add = {} } = {}) => [
     HTML('core/default~table', {
       col: 'worker',
       links: links,
@@ -21,7 +21,9 @@
         filter: tableFilter,
         cols: [
           { label: 'Добавлен', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
-          { label: 'Юр.лицо', c: { name: 'ce', add: false, f: { name: 'name', type: 'label', label: false } } },
+          hideCols.includes('ce')
+            ? null
+            : { label: 'Юр.лицо', c: { name: 'ce', add: false, f: { name: 'name', type: 'label', label: false } } },
           { label: 'Должность', f: { name: 'position', type: 'label', label: false } },
           {
             label: 'ФИО',
@@ -52,9 +54,11 @@
               ),
             ],
           },
-        ],
+        ].filter((col) => col),
       },
       add: {
+        presetFields: add.presetFields,
+        beforeAdd: add.beforeAdd,
         modal: add.modal || { toggleButton: { label: 'Добавить сотрудника' } },
         items: [
           {
@@ -62,7 +66,8 @@
               label: 'Компания',
               name: 'company',
               type: 'select2',
-              lst: user.current.link ? [user.current.link] : { action: 'ce~search' },
+              lst: { action: 'ce~search' },
+              disabled: !!add.presetFields?.company,
             },
           },
           {

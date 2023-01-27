@@ -42,7 +42,7 @@
     const handlers =
       lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
-    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data });
+    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data, parentData });
 
     if (!data.add_time) data.add_time = new Date().toISOString();
     if (complex.links?.[complex.name]?.[complex.parent.name]) {
@@ -94,7 +94,7 @@
       const { handlers, execHandlers } = lib.markup.helpers.prepareMarkupHandlers({ form: processForm });
       const result = lib.markup.complex.get(
         { user, form: processForm, data: processForm.data, parent: item.parent, handlers },
-        { ...item, custom: { query } },
+        { ...item, custom: { ...(item.custom || {}), query } },
       );
       await execHandlers();
       return result;

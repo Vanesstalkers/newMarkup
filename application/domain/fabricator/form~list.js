@@ -23,6 +23,29 @@
             const findData = await db.mongo.aggregate('fabricator', [
               { $lookup: { from: 'token', localField: '__token.l', foreignField: '_id', as: 'from_token' } },
             ]);
+            // [
+            //   {
+            //     '$project': {
+            //       'keys': {
+            //         '$map': {
+            //           'input': {
+            //             '$objectToArray': '$__token.ids'
+            //           }, 
+            //           'in': {
+            //             '$toObjectId': '$$this.k'
+            //           }
+            //         }
+            //       }
+            //     }
+            //   }, {
+            //     '$lookup': {
+            //       'from': 'token', 
+            //       'localField': 'keys', 
+            //       'foreignField': '_id', 
+            //       'as': 'matchedIds'
+            //     }
+            //   }
+            // ]
             const count = findData.length;
             const tokenCount = findData.reduce(
               (sum, item) => sum + item.from_token.reduce((sum, item) => sum + (item.count || 0) * 1, 0),

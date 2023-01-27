@@ -31,6 +31,7 @@
       prepare: function ({ $el, data, addListener = true }) {
         if (!data.lst) return;
         if (typeof data.lst === 'object' && Array.isArray(data.lst)) {
+          data.lst = data.lst.map(({ value, label }) => ({ v: value, l: label }));
         } else if (!window.LST[data.lst] || data.lst === 'object') {
           window.LST[data.lst] = [];
           if ((data.value || []).length)

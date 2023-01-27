@@ -89,11 +89,13 @@
                       ),
                     ),
                   ),
-                  SPAN({ class: 'app-brand-text demo text-body fw-bolder' }, SPAN({ text: 'Sneat' })),
+                  SPAN({ class: 'app-brand-text demo text-body fw-bolder' }, SPAN({ text: 'ИнертТокен', class: `css
+                    text-transform: none;
+                  ` })),
                 ),
               ),
-              H4({ class: 'mb-2' }, SPAN({ text: 'Welcome to Sneat! 👋' })),
-              P({ class: 'mb-4' }, SPAN({ text: 'Please sign-in to your account and start the adventure' })),
+              H4({ class: 'mb-2' }, SPAN({ text: 'Добро пожаловать на платформу ИнертТокен!' })),
+              P({ class: 'mb-4' }, SPAN({ text: 'Пожалуйста, введите свои учетные данные, чтобы войти в систему' })),
               FORM(
                 {
                   id: 'formAuthentication',
@@ -104,13 +106,13 @@
                 },
                 DIV(
                   { class: 'mb-3 fv-plugins-icon-container' },
-                  LABEL({ for: 'email', class: 'form-label' }, SPAN({ text: 'Email or Username' })),
+                  LABEL({ for: 'email', class: 'form-label' }, SPAN({ text: 'Логин' })),
                   INPUT({
                     type: 'text',
                     class: 'form-control',
                     id: 'email',
                     name: 'email-username',
-                    placeholder: 'Enter your email or username',
+                    placeholder: 'Введите ваш логин',
                     autofocus: '',
                   }),
                   DIV({ class: 'fv-plugins-message-container invalid-feedback' }),
@@ -119,8 +121,8 @@
                   { class: 'mb-3 form-password-toggle fv-plugins-icon-container' },
                   DIV(
                     { class: 'd-flex justify-content-between' },
-                    LABEL({ class: 'form-label', for: 'password' }, SPAN({ text: 'Password' })),
-                    A({ href: 'auth-forgot-password-basic.html' }, SMALL({}, SPAN({ text: 'Forgot Password?' }))),
+                    LABEL({ class: 'form-label', for: 'password' }, SPAN({ text: 'Пароль' })),
+                    A({ href: 'auth-forgot-password-basic.html', class: 'disabled' }, SMALL({}, SPAN({ text: 'Забыли пароль?' }))),
                   ),
                   DIV(
                     { class: 'input-group input-group-merge has-validation' },
@@ -141,7 +143,7 @@
                   DIV(
                     { class: 'form-check' },
                     INPUT({ class: 'form-check-input', type: 'checkbox', id: 'remember-me' }),
-                    LABEL({ class: 'form-check-label', for: 'remember-me' }, SPAN({ text: 'Remember Me' })),
+                    LABEL({ class: 'form-check-label', for: 'remember-me' }, SPAN({ text: 'Запомнить меня' })),
                   ),
                 ),
                 DIV(
@@ -175,25 +177,25 @@
               ),
               P(
                 { class: 'text-center' },
-                SPAN({}, SPAN({ text: 'New on our platform?' })),
-                A({ href: 'auth-register-basic.html' }, SPAN({}, SPAN({ text: 'Create an account' }))),
+                SPAN({}, SPAN({ text: 'Впервые на платформе?' })),
+                A({ href: `/web.html#${JSON.stringify({ form: `core/web~register` })}`, class: 'ms-2' }, SPAN({}, SPAN({ text: 'Создать аккаунт' }))),
               ),
-              DIV({ class: 'divider my-4' }, DIV({ class: 'divider-text' }, SPAN({ text: 'or' }))),
-              DIV(
-                { class: 'd-flex justify-content-center' },
-                A(
-                  { href: 'javascript:;', class: 'btn btn-icon btn-label-facebook me-3' },
-                  I({ class: 'tf-icons bx bxl-facebook' }),
-                ),
-                A(
-                  { href: 'javascript:;', class: 'btn btn-icon btn-label-google-plus me-3' },
-                  I({ class: 'tf-icons bx bxl-google-plus' }),
-                ),
-                A(
-                  { href: 'javascript:;', class: 'btn btn-icon btn-label-twitter' },
-                  I({ class: 'tf-icons bx bxl-twitter' }),
-                ),
-              ),
+              // DIV({ class: 'divider my-4' }, DIV({ class: 'divider-text' }, SPAN({ text: 'or' }))),
+              // DIV(
+              //   { class: 'd-flex justify-content-center' },
+              //   A(
+              //     { href: 'javascript:;', class: 'btn btn-icon btn-label-facebook me-3' },
+              //     I({ class: 'tf-icons bx bxl-facebook' }),
+              //   ),
+              //   A(
+              //     { href: 'javascript:;', class: 'btn btn-icon btn-label-google-plus me-3' },
+              //     I({ class: 'tf-icons bx bxl-google-plus' }),
+              //   ),
+              //   A(
+              //     { href: 'javascript:;', class: 'btn btn-icon btn-label-twitter' },
+              //     I({ class: 'tf-icons bx bxl-twitter' }),
+              //   ),
+              // ),
             ),
           ),
         ),

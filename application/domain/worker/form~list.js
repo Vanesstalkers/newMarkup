@@ -30,6 +30,9 @@
       },
       links: { worker: { 'ce~worker': false, ce: '__ce' }, 'ce~worker': false, ce: '__worker' },
       tableFilter: { limit: 10 },
+      add: {
+        presetFields: user.current.link ? { company: [user.current.link] } : {},
+      },
     }),
   ],
   func: () => {},

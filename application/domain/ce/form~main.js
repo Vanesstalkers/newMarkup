@@ -10,7 +10,7 @@
     const id = query._id || user.current.link?.value;
     return id ? [this.db.mongo.ObjectID(id)] : [];
   },
-  tpl: () => [
+  tpl: ({ data }) => [
     HTML('core/default~breadcrumbs', { items: ['Компании', data.name] }),
     FIELD({ name: 'name', type: 'json' }),
 
@@ -98,6 +98,7 @@
           html: [
             HTML('worker~table', {
               hideFilters: true,
+              hideCols: ['ce'],
               tableId: async ({ user, query = {}, parentData, complex }) => {
                 const find = { '__ce.l': { $elemMatch: { $eq: parentData._id } } };
                 const findData = await db.mongo.find(
@@ -110,7 +111,14 @@
               },
               tableFilter: { limit: 2 },
               links: { worker: { 'ce~main': '__ce' }, 'ce~main': '__worker' },
-              add: { modal: { toggleButton: { simple: true } } },
+              add: {
+                modal: { toggleButton: { simple: true } },
+                presetFields: { company: true },
+                beforeAdd: async function ({ data, parentData }) {
+                  data.company = [{ value: parentData._id, label: parentData.name }];
+                  return data;
+                },
+              },
             }),
           ],
         }),

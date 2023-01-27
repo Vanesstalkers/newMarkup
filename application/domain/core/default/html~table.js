@@ -148,6 +148,18 @@
                                   name: 'tmp_obj_' + config.col,
                                   col: 'tmp_obj',
                                   add: { auto: true },
+                                  custom: { presetFields: config.add.presetFields || {} },
+                                  handlers: {
+                                    beforeAdd:
+                                      config.add.beforeAdd ||
+                                      async function ({ data, complex }) {
+                                        console.log("beforeAdd presetField=", complex.custom.presetField);
+                                        for (const [key, value] of Object.entries(complex.custom.presetFields)) {
+                                          data[key] = value;
+                                        }
+                                        return data;
+                                      },
+                                  },
                                   controls: { reload: true, config: { hide: true } },
                                   item: { controls: {}, custom: { items: config.add?.items || [] } },
                                 },

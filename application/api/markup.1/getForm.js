@@ -1,4 +1,5 @@
 ({
+  access: 'public',
   method: async ({ form, _id, codeSfx }) => {
     try {
       if (!context.user) context.user = {};

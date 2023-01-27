@@ -89,7 +89,7 @@
                   form.fields[field.code] = field;
                   const value = skipArray.includes(baseType)
                     ? null
-                    : lib.utils.getDeep(form.data[parent.code] || {}, field.keyvalue) || '';
+                    : lib.utils.getDeep(form.data[parent.code] || {}, field.keyvalue) || field.defValue || '';
                   return { ...field, value };
                 }
               },
