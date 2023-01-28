@@ -1,8 +1,8 @@
 ({
   tpl: ({ data }, { config } = {}) => [
     FIELD({
-      name: 'kpp',
-      label: 'КПП',
+      name: 'ogrn',
+      label: 'ОГРН',
       config: {
         ...(config || {}),
         mask: '000000000000000',

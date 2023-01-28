@@ -1,4 +1,5 @@
 ({
+  access: 'public',
   method: async ({ form, code, data }) => {
     try {
       const user = context.user;

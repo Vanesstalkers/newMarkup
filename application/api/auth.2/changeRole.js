@@ -23,7 +23,6 @@
     const newCurrent = domain.user['lst~roles'].find(({ v }) => v === roleCode) || {};
     newCurrent.link = link;
     context.user = { ...user, current: newCurrent };
-    console.log('context.user=', context.user);
     return true;
   },
 });

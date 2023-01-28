@@ -224,16 +224,14 @@ window.addEventListener('load', async () => {
   }
 
   if (!logged) {
-    // const demoUser = { login: Math.random(), password: 'guest', roles: ['guest', 'admin'] };
-    // await api.auth.register({ ...demoUser });
-    // const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
-    if (!location.href.includes('/login.html') && !location.href.includes('/web.html') ) {
+    const demoUser = { login: Math.random(), password: 'guest', roles: ['guest'] };
+    await api.auth.register({ ...demoUser });
+    const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
+    if (res.token) localStorage.setItem('xaoc.session.token', res.token);
+    if (!location.href.includes('/login.html') && !location.href.includes('/web.html')) {
       location.href = '/login.html';
       return;
     }
-    // if (res.token) {
-    //   localStorage.setItem('xaoc.session.token', res.token);
-    // }
   } else {
     document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
   }

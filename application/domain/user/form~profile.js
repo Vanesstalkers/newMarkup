@@ -1,6 +1,10 @@
 ({
+  config: {
+    menu: { label: 'Профиль пользователя', icon: 'fa-solid fa-user' },
+    access: ['registrator'],
+    disableCardStyle: true,
+  },
   col: 'user',
-  config: { disableCardStyle: true },
   id: function ({ user, query }) {
     return [this.db.mongo.ObjectID(user._id)];
   },

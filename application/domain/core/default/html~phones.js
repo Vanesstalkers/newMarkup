@@ -1,11 +1,11 @@
 ({
-  tpl: ({ data, parent }, { links, name } = {}) => [
+  tpl: ({ data, parent }, { links, name, config = {} } = {}) => [
     COMPLEX(
       {
         label: 'Телефоны',
         name: name || 'phone',
         col: 'phone',
-        config: { inline: true },
+        config: { inline: true, ...config },
         add: { label: 'Добавить телефон' },
         item: { bodyClass: 'p-0', controls: { delete: true, config: { simple: true } } },
         links,

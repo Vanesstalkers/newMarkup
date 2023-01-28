@@ -57,7 +57,7 @@
           from: 'user_role',
           localField: '__user_role.l',
           foreignField: '_id',
-          pipeline: [{ $project: { _id: 1, role: 1, link: 1 } }],
+          pipeline: [{ $project: { _id: 1, role: 1, link: 1, reg_request_id: 1 } }],
           as: 'roles',
         },
       },

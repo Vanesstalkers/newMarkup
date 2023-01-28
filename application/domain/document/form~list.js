@@ -1,6 +1,7 @@
 ({
   config: {
     menu: { label: 'Документы', icon: 'fa-solid fa-folder-open' },
+    access: ['admin', 'fabricator_manager', 'customer_manager'],
     disableCardStyle: true,
   },
   col: 'document',

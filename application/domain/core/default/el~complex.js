@@ -79,7 +79,7 @@
                 {
                   class:
                     'page-item next p-0 ' +
-                    (filterLimit && Object.keys(data.items||{}).length < filterLimit ? 'disabled' : ''),
+                    (filterLimit && Object.keys(data.items || {}).length < filterLimit ? 'disabled' : ''),
                 },
                 [
                   [
@@ -432,6 +432,11 @@
 		});*/
     },
     style: `
+
+      .complex-block .card-header.collapsed .btn-add, 
+      .complex-block .card-header.collapsed .el-complex-add {
+        display: none;
+      }
 
       .complex-block .pagination {
         position: absolute;

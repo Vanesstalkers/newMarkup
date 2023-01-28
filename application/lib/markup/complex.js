@@ -84,7 +84,7 @@
             result = lib.markup.helpers.addProxifiedContextToTplFunc(
               tplFunc,
               proxyData,
-            )({ data: form.data[code], custom: item.custom || {} });
+            )({ data: form.data[code] || {}, custom: item.custom || {} });
           } catch (err) {
             result = [['div', { class: 'inline-error', error: err.message }]];
           }

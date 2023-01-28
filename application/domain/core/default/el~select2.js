@@ -5,7 +5,6 @@
     },
     front: {
       prepare: async function ({ $el, data }) {
-        console.log('prepare', { data });
         window.el['core/default/el~select|select'].prepare({ $el, data, addListener: false });
 
         const $select = $el.querySelector('select');

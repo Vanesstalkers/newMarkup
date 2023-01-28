@@ -8,11 +8,14 @@
       const img = data.config?.img ? (data.config?.img === true ? { class: 'w-100' } : data.config?.img) : null;
 
       return [
-        data.label === false ? [] : ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
         [
           'div',
-          { code: data.code, class: 'input-group upload-file-input-group ' + data.class },
+          {
+            code: data.code,
+            class: 'input-group upload-file-input-group ' + data.class + (data.label ? ' has-label' : ''),
+          },
           [
+            data.label === false ? [] : ['label', { class: 'form-label', for: 'input-' + data.code, text: data.label }],
             data.value.l
               ? img
                 ? [
@@ -52,20 +55,23 @@
                 : [
                     [
                       'label',
-                      { class: 'form-floating input-group-text' },
+                      { class: 'form-floating input-group-text border-0' },
                       [
-                        ['a', { target: '_blank', href: data.value.l, text: data.value.n }],
+                        ['a', { target: '_blank', href: data.value.l, text: data.value.n, class: `css
+                          text-overflow: ellipsis;
+                          overflow: hidden;
+                        ` }],
                         ['input', { ...inputConfig, type: 'file', class: 'form-control', id: 'input-' + data.code }],
                       ],
                     ],
                     [
                       'button',
-                      { class: 'btn btn-outline-primary edit-btn', type: 'button' },
+                      { class: 'btn btn-outline-primary btn-xs border-0 edit-btn', type: 'button' },
                       [['i', { class: 'bx bx-edit-alt' }]],
                     ],
                     [
                       'button',
-                      { class: 'btn btn-outline-primary delete-btn', type: 'button' },
+                      { class: 'btn btn-outline-primary btn-xs border-0 delete-btn', type: 'button' },
                       [['i', { class: 'bx bx-trash' }]],
                     ],
                   ]
@@ -121,6 +127,7 @@
           let i = 0;
           const uploadNext = async () => {
             const file = files[i];
+            file.name = 'upload.' + file.name.split('.').slice(-1)[0]; // метарихия не переваривает кириллицу
             const {
               uploadPath,
               uploadedFile: { name },
@@ -175,6 +182,13 @@
     style: `
       .upload-file-input-group > label > input {
         display: none!important;
+      }
+      .upload-file-input-group.has-label {
+        padding-top: 40px;
+      }
+      .upload-file-input-group.has-label > label.form-label {
+        position: absolute;
+        top: 10px;
       }
     `,
   },

@@ -92,6 +92,7 @@
               content: [
                 HTML('token~table', {
                   hideFilters: true,
+                  hideCols: ['buy'],
                   tableId: async ({ user, query = {}, parentData, complex }) => {
                     const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
                     const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });

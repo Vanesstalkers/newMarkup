@@ -4,6 +4,7 @@
       label: 'Сотрудники',
       icon: 'fa-solid fa-address-card',
     },
+    access: ['admin', 'fabricator_manager', 'customer_manager'],
   },
   col: 'user',
   id: function ({ user, query }) {

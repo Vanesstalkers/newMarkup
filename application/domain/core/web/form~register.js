@@ -24,24 +24,33 @@
         if (existCompany !== null) throw new Error(`Company with INN='${data.inn}' already exists.`);
 
         const ce = await db.mongo.insertOne('ce', { inn: data.inn });
-        await db.addComplex({
+        const company = await db.addComplex({
           name: 'company',
           col: data.type,
           data: { title: data.title },
           parents: [{ name: 'ce', _id: ce._id }],
           links: { company: { ce: '__ce' }, ce: `__${data.type}` },
         });
-        await db.addComplex({
+        const regRequest = await db.addComplex({
           name: 'reg_request',
-          parents: [{ name: 'ce', _id: ce._id }],
-          links: { reg_request: { ce: '__ce' }, ce: `__reg_request` },
-          data: { status: [domain.reg_request['lst~status'].find(({ v }) => v === 'draft')], registration: false },
+          parents: [{ name: data.type, _id: company._id }],
+          links: { reg_request: { [data.type]: `__${data.type}` }, [data.type]: `__reg_request` },
+          data: {
+            status: [domain.reg_request['lst~status'].find(({ v }) => v === 'draft')],
+            registration: false,
+            company_type: data.type,
+          },
         });
 
-        // const formName = form.name;
         const login = Math.random().toString().slice(-5);
         const hash = await metarhia.metautil.hashPassword(data.password);
-        const roles = [{ role: data.type + '_manager', link: [{ label: data.title, value: ce._id.toString() }] }];
+        const roles = [
+          {
+            role: 'registrator',
+            reg_request_id: regRequest._id,
+            link: [{ label: data.title, value: ce._id.toString() }],
+          },
+        ];
 
         const user = await db.mongo.insertOne('user', { login, password: hash });
         const pp = await db.addComplex({
@@ -49,13 +58,13 @@
           parents: [{ name: 'user', _id: user._id }],
           links: { pp: { user: '__user' }, user: '__pp' },
         });
-        for (const { role, link, initial } of roles) {
+        for (const { role, link, reg_request_id } of roles) {
           const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
           await db.addComplex({
             name: 'user_role',
             parents: [{ name: 'user', _id: user._id }],
             links: { user_role: { user: '__user' }, user: '__user_role' },
-            data: { role: [{ label, value }], link, initial },
+            data: { role: [{ label, value }], link, reg_request_id },
           });
         }
         if (data.email) {
@@ -90,7 +99,7 @@
           return data;
         },
         afterHandler: (event, data) => {
-          if (data.login){
+          if (data.login) {
             const $userLogin = document.getElementById('userLogin');
             $userLogin.innerHTML = data.login;
             $userLogin.closest('.d-none').classList.remove('d-none');
@@ -4116,15 +4125,20 @@
                           { class: 'mt-4 text-center d-none' },
                           P(
                             { class: 'text-white-50 mb-0' },
-                            SPAN({ text: 'Регистрация пользователя завершена. Логин для авторизации:'}),
-                            DIV({ id: 'userLogin', class: 'ms-2 me-2'+`css
+                            SPAN({ text: 'Регистрация пользователя завершена. Логин для авторизации:' }),
+                            DIV({
+                              id: 'userLogin',
+                              class:
+                                'ms-2 me-2' +
+                                `css
                               .*css* {
                                 background-color: grey;
                                 color: white;
                                 border-radius: 5px;
                                 padding: 2px 10px;
                               }
-                            ` }),
+                            `,
+                            }),
                             A(
                               { href: 'login.html', class: 'fw-medium text-success text-decoration-underline' },
                               SPAN({ text: 'Вход в систему' }),

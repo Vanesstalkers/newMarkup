@@ -26,7 +26,6 @@
                 if (!complexData.type) complexData.type = 'complex';
                 if (!complexData.item) complexData.item = {};
                 if (!complexData.config) complexData.config = {};
-
                 return prepareCall
                   ? (() => {
                       const elPath = `core/default/el~complex|block`;

@@ -1,9 +1,7 @@
 ({
   config: {
-    menu: {
-      label: 'Панель индикаторов',
-      icon: 'fa-solid fa-house-user',
-    },
+    menu: { label: 'Панель индикаторов', icon: 'fa-solid fa-house-user' },
+    access: ['admin', 'fabricator_manager', 'customer_manager'],
     disableCardStyle: true,
   },
   col: 'user',

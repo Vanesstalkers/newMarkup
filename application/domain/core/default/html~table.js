@@ -153,7 +153,6 @@
                                     beforeAdd:
                                       config.add.beforeAdd ||
                                       async function ({ data, complex }) {
-                                        console.log("beforeAdd presetField=", complex.custom.presetField);
                                         for (const [key, value] of Object.entries(complex.custom.presetFields)) {
                                           data[key] = value;
                                         }
@@ -294,7 +293,9 @@
                 {},
                 TR(
                   {},
-                  ...table.cols.filter(({ label }) => label).map((col) => TH({ text: col.label })),
+                  ...table.cols
+                    .filter(({ label }) => label)
+                    .map((col) => TH({ text: col.label === true ? '' : col.label })),
                   table.addRowLink ? TH() : undefined,
                 ),
               ),

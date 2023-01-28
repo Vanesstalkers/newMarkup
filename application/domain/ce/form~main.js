@@ -1,9 +1,5 @@
 ({
-  config: {
-    menu: { label: 'Карточка юр.лица', icon: 'fa-solid fa-city' },
-    access: ['fabricator_manager', 'customer_manager'],
-    disableCardStyle: true,
-  },
+  config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'ce',
   id: function ({ user, query }) {
