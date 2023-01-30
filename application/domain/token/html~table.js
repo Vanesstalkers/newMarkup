@@ -69,19 +69,28 @@
       add: {
         modal: add.modal || false,
         items: [
-          { f: { label: 'Количество', name: 'count' } },
-          { f: { label: 'Качество', name: 'type', type: 'select', lst: 'token~quality' } },
+          // { f: { label: 'Количество', name: 'count' } },
+          // { f: { label: 'Качество', name: 'type', type: 'select', lst: 'token~quality' } },
           {
             html: () => [
-              COMPLEX(
-                {
-                  name: 'file',
-                  add: { type: 'file', placeholder: 'Добавить документ', field: 'file', multiple: true },
-                  config: { disableCardStyle: true },
-                  links: { file: { tmp_obj_token: '__token' }, tmp_obj_token: '__file' },
-                  item: { controls: { delete: true, config: { simple: true } } },
-                },
-                () => [FIELD({ name: 'file', type: 'file', label: false })],
+              DIV(
+                { class: 'row' },
+                DIV({ class: 'col-4' }, FIELD({ label: 'Количество', name: 'count' })),
+                DIV({ class: 'col-4' }, FIELD({ label: 'Цена', name: 'price' })),
+                DIV({ class: 'col-4' }, FIELD({ label: 'Качество', name: 'type', type: 'select', lst: 'token~quality' })),
+                DIV(
+                  { class: 'col-12' },
+                  COMPLEX(
+                    {
+                      name: 'file',
+                      add: { type: 'file', placeholder: 'Добавить документ', field: 'file', multiple: true },
+                      config: { disableCardStyle: true },
+                      links: { file: { tmp_obj_token: '__token' }, tmp_obj_token: '__file' },
+                      item: { controls: { delete: true, config: { simple: true } } },
+                    },
+                    () => [FIELD({ name: 'file', type: 'file', label: false })],
+                  ),
+                ),
               ),
             ],
           },

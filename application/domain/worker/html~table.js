@@ -61,15 +61,16 @@
         beforeAdd: add.beforeAdd,
         modal: add.modal || { toggleButton: { label: 'Добавить сотрудника' } },
         items: [
-          {
-            f: {
-              label: 'Компания',
-              name: 'company',
-              type: 'select2',
-              lst: { action: 'ce~search' },
-              disabled: !!add.presetFields?.company,
-            },
-          },
+          !!add.presetFields?.company
+            ? null
+            : {
+                f: {
+                  label: 'Компания',
+                  name: 'company',
+                  type: 'select2',
+                  lst: { action: 'ce~search' },
+                },
+              },
           {
             html: () => [
               COMPLEX(
@@ -85,7 +86,7 @@
           },
           { f: { label: 'Тип должности', name: 'type', type: 'select', lst: 'worker~type' } },
           { f: { label: 'Название должности', name: 'position' } },
-        ],
+        ].filter((item) => item),
       },
     }),
   ],

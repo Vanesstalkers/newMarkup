@@ -140,13 +140,20 @@
                   () => [
                     HTML('worker~table', {
                       hideFilters: true,
+                      hideCols: ['ce'],
                       tableId: async ({ user, query = {}, parentData, complex }) => {
                         const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
                         const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
                         return findData.map(({ _id }) => _id);
                       },
                       links: { worker: { ce_workers: '__ce' }, ce_workers: '__worker' },
-                      // add: { modal: { toggleButton: { simple: true } } },
+                      add: {
+                        presetFields: { company: true },
+                        beforeAdd: async function ({ data, parentData }) {
+                          data.company = [{ value: parentData._id, label: parentData.name }];
+                          return data;
+                        },
+                      },
                     }),
                   ],
                 ),

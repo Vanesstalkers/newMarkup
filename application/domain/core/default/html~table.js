@@ -6,7 +6,7 @@
     const filterCount = tableConfig ? { limit: +tableConfig } : {};
     return [
       DIV(
-        { class: 'card' },
+        { class: 'card shadow-none' },
         IF(filters.length, () => [
           DIV(
             { class: 'card-header border-bottom' },

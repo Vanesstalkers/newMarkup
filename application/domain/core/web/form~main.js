@@ -75,7 +75,7 @@
         { class: 'navbar navbar-expand-lg fixed-top sticky', id: 'navbar' },
         DIV(
           { class: 'container-fluid custom-container' },
-          A({ class: 'navbar-brand text-dark fw-bold me-auto', href: '/web.html' }, SPAN({ text: 'ИнертТокен' })),
+          A({ class: 'navbar-brand text-dark fw-bold me-auto', href: '/index.html' }, SPAN({ text: 'ИнертТокен' })),
           DIV(
             {},
             BUTTON(

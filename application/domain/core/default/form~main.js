@@ -44,7 +44,11 @@
   },
   func: () => {
     window.initForm = function ($el, form) {
-      showForm(location.hash ? JSON.parse(decodeURI(location.hash.substring(1))) : { form, container: $el });
+      if (location.hash) {
+        showForm(JSON.parse(decodeURI(location.hash.substring(1))));
+      } else {
+        location.hash = JSON.stringify({ form: form, container: $el.id });
+      }
     };
   },
 });

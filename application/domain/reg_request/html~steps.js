@@ -474,9 +474,8 @@
                   },
                   on: {
                     afterHandler: async (e, data) => {
-                      console.log('afterHandler', data);
                       await api.auth.changeRole({ roleId: data.roleId });
-                      location.reload();
+                      location.href = '';
                     },
                   },
                 }),

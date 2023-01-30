@@ -89,9 +89,15 @@
                       ),
                     ),
                   ),
-                  SPAN({ class: 'app-brand-text demo text-body fw-bolder' }, SPAN({ text: 'ИнертТокен', class: `css
+                  SPAN(
+                    { class: 'app-brand-text demo text-body fw-bolder' },
+                    SPAN({
+                      text: 'ИнертТокен',
+                      class: `css
                     text-transform: none;
-                  ` })),
+                  `,
+                    }),
+                  ),
                 ),
               ),
               H4({ class: 'mb-2' }, SPAN({ text: 'Добро пожаловать на платформу ИнертТокен!' })),
@@ -122,7 +128,10 @@
                   DIV(
                     { class: 'd-flex justify-content-between' },
                     LABEL({ class: 'form-label', for: 'password' }, SPAN({ text: 'Пароль' })),
-                    A({ href: 'auth-forgot-password-basic.html', class: 'disabled' }, SMALL({}, SPAN({ text: 'Забыли пароль?' }))),
+                    A(
+                      { href: 'auth-forgot-password-basic.html', class: 'disabled' },
+                      SMALL({}, SPAN({ text: 'Забыли пароль?' })),
+                    ),
                   ),
                   DIV(
                     { class: 'input-group input-group-merge has-validation' },
@@ -168,7 +177,7 @@
                           localStorage.setItem('xaoc.session.token', res.token);
                         }
                         document.cookie = `token=${localStorage.getItem('xaoc.session.token')}`;
-                        if (res.status === 'logged') location.href = 'index.html';
+                        if (res.status === 'logged') location.href = '/core.html';
                       },
                     },
                   }),
@@ -178,7 +187,10 @@
               P(
                 { class: 'text-center' },
                 SPAN({}, SPAN({ text: 'Впервые на платформе?' })),
-                A({ href: `/web.html#${JSON.stringify({ form: `core/web~register` })}`, class: 'ms-2' }, SPAN({}, SPAN({ text: 'Создать аккаунт' }))),
+                A(
+                  { href: `/index.html#${JSON.stringify({ form: `core/web~register` })}`, class: 'ms-2' },
+                  SPAN({}, SPAN({ text: 'Создать аккаунт' })),
+                ),
               ),
               // DIV({ class: 'divider my-4' }, DIV({ class: 'divider-text' }, SPAN({ text: 'or' }))),
               // DIV(

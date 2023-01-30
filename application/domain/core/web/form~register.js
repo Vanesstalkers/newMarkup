@@ -185,7 +185,7 @@
                               'aria-labelledby': 'pills-home-tab',
                             },
                             FORM(
-                              { action: 'index.html' },
+                              { action: 'core.html' },
                               DIV(
                                 { class: 'mb-3' },
                                 LABEL(

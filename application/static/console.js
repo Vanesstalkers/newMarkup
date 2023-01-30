@@ -206,8 +206,12 @@ class Application {
 }
 
 window.addEventListener('hashchange', async (event) => {
-  const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
-  await showForm(routeQuery);
+  try {
+    const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
+    await showForm(routeQuery);
+  } catch (err) {
+    location.href = '';
+  }
 });
 
 window.addEventListener('load', async () => {
@@ -228,7 +232,7 @@ window.addEventListener('load', async () => {
     await api.auth.register({ ...demoUser });
     const res = await api.auth.signin({ login: demoUser.login, password: demoUser.password });
     if (res.token) localStorage.setItem('xaoc.session.token', res.token);
-    if (!location.href.includes('/login.html') && !location.href.includes('/web.html')) {
+    if (location.pathname !== '/' && !location.href.includes('/index.html') && !location.href.includes('/login.html')) {
       location.href = '/login.html';
       return;
     }

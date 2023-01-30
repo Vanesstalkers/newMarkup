@@ -182,7 +182,7 @@
                       { class: 'dropdown-shortcuts-icon bg-label-secondary rounded-circle mb-2' },
                       I({ class: 'bx bx-pie-chart-alt-2 fs-4' }),
                     ),
-                    A({ href: 'index.html', class: 'stretched-link' }, SPAN({ text: 'Dashboard' })),
+                    A({ href: 'core.html', class: 'stretched-link' }, SPAN({ text: 'Dashboard' })),
                     SMALL({ class: 'text-muted mb-0' }, SPAN({ text: 'User Profile' })),
                   ),
                   DIV(

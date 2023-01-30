@@ -2,8 +2,13 @@
   config: { disableCardStyle: true },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'fabricator',
-  id: function ({ user, query }) {
-    return query._id ? [this.db.mongo.ObjectID(query._id)] : [];
+  id: async function ({ user, query }) {
+    let id = query._id;
+    if (!id) {
+      const ce = await this.db.mongo.findOne('ce', user.current.link?.value);
+      if (ce) id = ce.__fabricator.l[0];
+    }
+    return id ? [this.db.mongo.ObjectID(id)] : [];
   },
   tpl: () => [
     HTML('core/default~breadcrumbs', { items: ['Производители', data.name] }),
@@ -39,12 +44,12 @@
               DIV(
                 { class: 'd-flex align-items-start me-4 mt-3 gap-3' },
                 SPAN({ class: 'badge bg-label-primary p-2 rounded' }, I({ class: 'bx bx-check bx-sm' })),
-                DIV({}, H5({ class: 'mb-0' }, SPAN({ text: '1.23k' })), SPAN({}, SPAN({ text: 'Tasks Done' }))),
+                DIV({}, H5({ class: 'mb-0' }, SPAN({ text: '1.23k' })), SPAN({}, SPAN({ text: 'Токенов' }))),
               ),
               DIV(
                 { class: 'd-flex align-items-start mt-3 gap-3' },
                 SPAN({ class: 'badge bg-label-primary p-2 rounded' }, I({ class: 'bx bx-customize bx-sm' })),
-                DIV({}, H5({ class: 'mb-0' }, SPAN({ text: '568' })), SPAN({}, SPAN({ text: 'Projects Done' }))),
+                DIV({}, H5({ class: 'mb-0' }, SPAN({ text: '568' })), SPAN({}, SPAN({ text: 'Инвестиций получено' }))),
               ),
             ),
             H5({ class: 'pb-2 border-bottom mb-4' }, SPAN({ text: 'Информация' })),
@@ -124,13 +129,20 @@
                   () => [
                     HTML('worker~table', {
                       hideFilters: true,
+                      hideCols: ['ce'],
                       tableId: async ({ user, query = {}, parentData, complex }) => {
                         const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
                         const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
                         return findData.map(({ _id }) => _id);
                       },
                       links: { worker: { ce_workers: '__ce' }, ce_workers: '__worker' },
-                      // add: { modal: { toggleButton: { simple: true } } },
+                      add: {
+                        presetFields: { company: true },
+                        beforeAdd: async function ({ data, parentData }) {
+                          data.company = [{ value: parentData._id, label: parentData.name }];
+                          return data;
+                        },
+                      },
                     }),
                   ],
                 ),

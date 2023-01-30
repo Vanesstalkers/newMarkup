@@ -5,7 +5,7 @@
       DIV(
         { class: 'app-brand demo' },
         A(
-          { href: 'index.html', class: 'app-brand-link' },
+          { href: 'core.html', class: 'app-brand-link' },
           SPAN(
             { class: 'app-brand-logo demo' },
             SVG(
