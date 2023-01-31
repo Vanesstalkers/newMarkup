@@ -37,12 +37,11 @@
       links: { pp: { user: '__user' }, user: '__pp' },
     });
     for (const role of roles) {
-      const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
       await db.addComplex({
         name: 'user_role',
         parents: [{ name: 'user', _id: user._id }],
         links: { user_role: { user: '__user' }, user: '__user_role' },
-        data: { role: [{ label, value }] },
+        data: { role: [domain.user['lst~roles'].find(({ v }) => v === role)] },
       });
     }
     return user;

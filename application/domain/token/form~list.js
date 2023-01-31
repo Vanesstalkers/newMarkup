@@ -16,10 +16,26 @@
       hideCols: user.current.v === 'customer_manager' ? [] : ['buy'],
       tableId: async ({ user, query = {}, parentData, complex }) => {
         const find = {};
-        // if (query['filter.find_text']) find.second_name = { $regex: query['filter.find_text'] || '' };
-        const findData = await db.mongo.find('token', find);
-        return findData.map(({ _id }) => _id) || [];
+        let findData = [];
+        if (user.current.parentType === 'fabricator') {
+          if (!user.current.parentType) return [];
+          if (!user.current.link?.v) return [];
+          findData = await db.mongo.aggregate('token', [
+            { $lookup: { from: 'fabricator', localField: '__fabricator.l', foreignField: '_id', as: 'fabricator' } },
+            { $lookup: { from: 'ce', localField: 'fabricator.__ce.l', foreignField: '_id', as: 'ce' } },
+            { $match: { 'ce._id': { $eq: db.mongo.ObjectID(user.current.link?.v) } } },
+          ]);
+        } else {
+          findData = await db.mongo.find(
+            'token',
+            find,
+            { projection: { _id: 1 } },
+            { ...complex.filter, ...(query.filter || {}) },
+          );
+        }
+        return findData.map(({ _id }) => _id);
       },
+      tableFilter: { limit: 10 },
       // links: { token: { 'ce~worker': false }, 'ce~worker': false },
     }),
   ],

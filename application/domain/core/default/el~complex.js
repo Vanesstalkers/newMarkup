@@ -11,6 +11,7 @@
         data.controls.add = data.add;
       }
       const hasControls = Object.keys(data.controls).length;
+      const collapsed = data.controls.config?.collapsed;
 
       // if (controls.show || data.l) {
       //   if (typeof controls.show != 'object') controls.show = { label: controls.show };
@@ -97,14 +98,17 @@
         data.config?.tag || 'div',
         { class: data.class, code: data.code, type: data.type },
         [
-          !hasControls
+          !hasControls && !data.label
             ? []
             : [
                 [
                   'div',
                   {
                     'parent-code': data.code,
-                    class: 'card-header header-elements p-0 ' + (data.controls.config?.hide ? ' d-none' : ''),
+                    class:
+                      'card-header header-elements p-0 ' +
+                      (data.controls.config?.hide ? ' d-none' : '') +
+                      (collapsed ? ' collapsed' : ''),
                   },
                   [
                     data.label === false ? [] : ['h5', { class: 'm-3', text: data.label }],
@@ -154,13 +158,21 @@
                         !data.controls.expand
                           ? []
                           : ['a', { class: 'card-expand' }, [['i', { class: 'tf-icons bx bx-fullscreen' }]]],
-                        ['a', { class: 'card-collapsible' }, [['i', { class: 'tf-icons bx bx-chevron-up' }]]],
+                        !data.controls.collapse
+                          ? []
+                          : [
+                              'a',
+                              { class: 'card-collapsible' },
+                              [['i', { class: 'tf-icons bx bx-chevron-' + (collapsed ? 'down' : 'up') }]],
+                            ],
                       ],
                     ],
                   ],
                 ],
               ],
-          disableCardView ? [filterHtml] : ['div', { class: 'card-body collapse show p-0 content-holder' }, filterHtml],
+          disableCardView
+            ? [filterHtml]
+            : ['div', { class: 'card-body collapse p-0 content-holder' + (!collapsed ? ' show' : '') }, filterHtml],
         ],
 
         // !controls.show
@@ -236,7 +248,7 @@
           if (data.controls.add.type) {
             if (!data.controls.add.field) console.error('Add field is not defined', data);
             data.controls.add.onChange = async (value) => {
-              if (!value?.[0]?.value && !value?.l) return;
+              if (!value?.[0]?.v && !value?.l) return;
               const form = $el.closest('[type="form"]').dataset.name;
               const {
                 result,

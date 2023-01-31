@@ -191,12 +191,14 @@
                                 type: 'button',
                                 config: { btnType: 'primary' },
                                 handler: async ({ form, field, user, data }) => {
-                                  const tmpObjData = form.data[data.tmpObjCode];
+                                  const { _id: tmpObjId } = form.data[data.tmpObjCode];
+                                  const tmpObjData = await db.mongo.findOne('tmp_obj', tmpObjId);
                                   const formName = form.name;
                                   const parents = [];
                                   if (tmpObjData.company?.length)
-                                    parents.push({ name: 'ce', _id: tmpObjData.company[0].value });
+                                    parents.push({ name: 'ce', _id: tmpObjData.company[0].v });
 
+                                  tmpObjData.add_time = new Date().toISOString();
                                   const newItem = await lib.markup.actions.addComplex({
                                     form: formName,
                                     code: data.tableCode,

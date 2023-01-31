@@ -1,5 +1,7 @@
-async ({ col, name, parents = [], links, data }) => {
-  const insertData = {};
+async ({ col, name, parents = [], links, data = {} }) => {
+  const insertData = {
+    add_time: new Date().toISOString(),
+  };
   for (const parent of parents) {
     if (typeof parent._id === 'string') parent._id = db.mongo.ObjectID(parent._id);
     if (!parent.col) parent.col = parent.name;

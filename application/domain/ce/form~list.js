@@ -33,9 +33,9 @@
         },
         filter: { limit: 5 },
         cols: [
-          { label: 'Добавлена', f: { name: 'add_time', config: { inputType: 'datetime' } } },
-          { label: 'Название', f: { name: 'name', type: 'input' } },
-          { label: 'ИНН', f: { name: 'inn', type: 'input' } },
+          { label: 'Время добавления', f: { name: 'add_time', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Название', f: { name: 'name' } },
+          { label: 'ИНН', f: { name: 'inn' } },
         ],
       },
       add: {

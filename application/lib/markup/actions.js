@@ -3,7 +3,7 @@
     const processForm = user.forms[form];
     const field = processForm.fields[code];
     const parent = processForm.fields[field.parentCode];
-    const { _id: parentId } = processForm.data[field.parentCode];
+    const parentData = processForm.data[field.parentCode];
 
     let result = null;
     if (typeof field.handler === 'string') {
@@ -15,7 +15,7 @@
         domain,
         [...form.split('~')[0].split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
       );
-      if (typeof handler === 'function') result = await handler({ form: processForm, field, user, data });
+      if (typeof handler === 'function') result = await handler({ form: processForm, field, parent, user, data, parentData });
     }
     return result;
   },
@@ -44,7 +44,6 @@
 
     if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data, parentData });
 
-    if (!data.add_time) data.add_time = new Date().toISOString();
     if (complex.links?.[complex.name]?.[complex.parent.name]) {
       data[complex.links?.[complex.name]?.[complex.parent.name]] = { l: [parentData._id], c: 1 };
     }

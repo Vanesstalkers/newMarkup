@@ -27,12 +27,8 @@
           return findData.map(({ _id }) => _id);
         },
         cols: [
-          {
-            label: 'Добавлена',
-            f: { name: 'add_time', type: 'label', label: false, config: { inputType: 'datetime' } },
-          },
-          { label: 'Тип', f: { name: 'type', type: 'select', lst: 'document~type' } },
-          // { label: 'ИНН', c: { name: 'customer', c: { name: 'ce', f: { name: 'inn', type: 'label', label: false } } } },
+          { label: 'Время добавления', f: { name: 'add_time', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Тип', f: { name: 'type', lst: 'document~type' } },
           {
             label: 'ИНН',
             html: ({ data }) => [

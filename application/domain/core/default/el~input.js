@@ -20,6 +20,7 @@
                 class: 'form-control el-value',
                 value: data.value || '',
                 id: 'input-' + data.code,
+                name: data.name,
                 placeholder: data.placeholder || ' ',
                 ...(data.disabled ? { disabled: '' } : {}),
               },

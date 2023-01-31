@@ -206,12 +206,14 @@ class Application {
 }
 
 window.addEventListener('hashchange', async (event) => {
+  let routeQuery;
   try {
-    const routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
-    await showForm(routeQuery);
+    routeQuery = JSON.parse(decodeURI(location.hash.substring(1)));
   } catch (err) {
     location.href = '';
+    return;
   }
+  await showForm(routeQuery);
 });
 
 window.addEventListener('load', async () => {

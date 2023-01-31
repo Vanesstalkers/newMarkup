@@ -14,7 +14,7 @@
         roles: [
           {
             _id: roleId,
-            role: [{ value: roleCode }],
+            role: [{ v: roleCode }],
             link: [link] = [],
             reg_request_id,
           },

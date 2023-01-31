@@ -1,7 +1,7 @@
 ({
-  tpl: ({ data }, { title, hide, html }) => [
+  tpl: ({ data }, { title, hide, html, cls = '' }) => [
     DIV(
-      { class: 'card card-action mb-4' },
+      { class: 'card card-action mb-4 ' + cls },
       DIV(
         { class: 'card-header ' + (hide ? 'collapsed' : '') },
         DIV({ class: 'card-action-title' }, SPAN({ text: title || '' })),

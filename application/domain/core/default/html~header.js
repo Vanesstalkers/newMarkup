@@ -83,8 +83,8 @@
                       FIELD({ name: 'link', type: 'json' }),
                       SPAN(
                         { class: 'align-middle' },
-                        SPAN({ text: data.role?.[0].label }),
-                        data.link?.[0] ? SPAN({ text: ` (${data.link?.[0].label})` }) : [],
+                        SPAN({ text: data.role?.[0].l }),
+                        data.link?.[0] ? SPAN({ text: ` (${data.link?.[0].l})` }) : [],
                       ),
                     ),
                   ),

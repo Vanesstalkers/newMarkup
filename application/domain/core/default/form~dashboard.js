@@ -1392,9 +1392,4 @@
     },
     itemLoad: () => {},
   },
-  func: () => {
-    window.initForm = function ($el, form) {
-      showForm(location.hash ? JSON.parse(decodeURI(location.hash.substring(1))) : { form, container: $el });
-    };
-  },
 });

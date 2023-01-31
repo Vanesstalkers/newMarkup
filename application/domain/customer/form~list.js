@@ -82,15 +82,15 @@
         },
         filter: { limit: 10 },
         cols: [
-          { label: 'Добавлена', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
-          { label: 'Название', f: { name: 'name', type: 'label' } },
+          { label: 'Время добавления', f: { name: 'add_time', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Название', f: { name: 'name' } },
           {
             label: 'ИНН',
-            c: { name: 'ce_inn', col: 'ce', f: { name: 'inn', type: 'label' }, links: { customer: '__ce' } },
+            c: { name: 'ce_inn', col: 'ce', f: { name: 'inn' }, links: { customer: '__ce' } },
           },
           {
             label: 'Юр.лицо',
-            c: { name: 'ce_name', col: 'ce', f: { name: 'name', type: 'label' }, links: { customer: '__ce' } },
+            c: { name: 'ce_name', col: 'ce', f: { name: 'name' }, links: { customer: '__ce' } },
           },
         ],
       },

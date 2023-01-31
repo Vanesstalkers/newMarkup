@@ -23,11 +23,11 @@
         const existCompany = await db.mongo.findOne('ce', { inn: data.inn });
         if (existCompany !== null) throw new Error(`Company with INN='${data.inn}' already exists.`);
 
-        const ce = await db.mongo.insertOne('ce', { inn: data.inn });
+        const ce = await db.addComplex({ name: 'ce', data: { name: data.name, inn: data.inn } });
         const company = await db.addComplex({
           name: 'company',
           col: data.type,
-          data: { title: data.title },
+          data: { name: data.name },
           parents: [{ name: 'ce', _id: ce._id }],
           links: { company: { ce: '__ce' }, ce: `__${data.type}` },
         });
@@ -48,7 +48,7 @@
           {
             role: 'registrator',
             reg_request_id: regRequest._id,
-            link: [{ label: data.title, value: ce._id.toString() }],
+            link: [{ l: data.name, v: ce._id.toString() }],
           },
         ];
 
@@ -59,12 +59,19 @@
           links: { pp: { user: '__user' }, user: '__pp' },
         });
         for (const { role, link, reg_request_id } of roles) {
-          const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
           await db.addComplex({
             name: 'user_role',
             parents: [{ name: 'user', _id: user._id }],
             links: { user_role: { user: '__user' }, user: '__user_role' },
-            data: { role: [{ label, value }], link, reg_request_id },
+            data: { role: [domain.user['lst~roles'].find(({ v }) => v === role)], link, reg_request_id },
+          });
+        }
+        if (data.phone) {
+          await db.addComplex({
+            name: 'phone',
+            parents: [{ name: 'pp', _id: pp._id }],
+            links: { phone: { pp: '__pp' }, pp: '__phone' },
+            data: { num: data.phone },
           });
         }
         if (data.email) {
@@ -75,6 +82,17 @@
             data: { mail: data.email },
           });
         }
+
+        await db.addComplex({
+          name: 'worker',
+          parents: [
+            { name: 'pp', _id: pp._id },
+            { name: 'ce', _id: ce._id },
+          ],
+          links: { worker: { pp: '__pp', ce: '__ce' }, pp: '__worker', ce: '__worker' },
+          data: { type: [domain.worker['lst~type'].find(({ v }) => v === 'manager')] },
+        });
+
         return { login, user };
       },
       on: {
@@ -92,7 +110,7 @@
             {},
           );
 
-          if (!data.title) throw new Error('Название компании должно быть указано');
+          if (!data.name) throw new Error('Название компании должно быть указано');
           if (!data.inn) throw new Error('ИНН компании должен быть указан');
           if (!data.type) throw new Error('Тип компании должен быть указан');
 
@@ -215,11 +233,11 @@
                               ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
+                                LABEL({ for: 'nameInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
                                 INPUT({
-                                  name: 'title',
+                                  name: 'name',
                                   class: 'form-control',
-                                  id: 'titleInput2',
+                                  id: 'nameInput2',
                                   placeholder: 'Введите название компании',
                                   required: '',
                                 }),
@@ -4036,11 +4054,11 @@
                               // ),
                               DIV(
                                 { class: 'mb-3' },
-                                LABEL({ for: 'titleInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
+                                LABEL({ for: 'nameInput2', class: 'form-label' }, SPAN({ text: 'Название компании' })),
                                 INPUT({
-                                  name: 'title',
+                                  name: 'name',
                                   class: 'form-control',
-                                  id: 'titleInput2',
+                                  id: 'nameInput2',
                                   placeholder: 'Введите название компании',
                                   required: '',
                                 }),

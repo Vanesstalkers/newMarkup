@@ -10,9 +10,9 @@
         text = data.value || '';
         if (typeof data.value == 'object') {
           if (Array.isArray(data.value)) {
-            text = data.value.map(({ label }) => label).join(', ');
+            text = data.value.map(({ l }) => l).join(', ');
           } else {
-            text = data.value.label;
+            text = data.value.l;
           }
         }
       }

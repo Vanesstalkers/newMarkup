@@ -10,12 +10,13 @@
             name: 'pp_doc',
             add: { type: 'search', label: false, placeholder: 'Добавить документ', lst: 'pp~doc_type', field: 'type' },
             config: { disableCardStyle: true },
+            controls: { collapse: true },
             item: { controls: { delete: true, config: { simple: true } } },
           },
           ({ data }) => {
             if (!data.type) data.type = [{}];
             const {
-              type: [{ value: docType }],
+              type: [{ v: docType }],
             } = data;
             return [
               DIV(

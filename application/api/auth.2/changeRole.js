@@ -17,7 +17,7 @@
     const $set = { current: db.mongo.ObjectID(roleId) };
     db.mongo.updateOne('user', user._id, { $set });
     const {
-      role: [{ value: roleCode }],
+      role: [{ v: roleCode }],
       link: [link] = [],
     } = dbUser.roles.find(({ _id }) => _id.toString() === roleId);
     const newCurrent = domain.user['lst~roles'].find(({ v }) => v === roleCode) || {};

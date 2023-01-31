@@ -20,7 +20,7 @@
         id: tableId,
         filter: tableFilter,
         cols: [
-          { label: 'Добавлен', f: { name: 'add_time', type: 'label', on: { prepareValue: 'toLocaleString' } } },
+          { label: 'Время добавления', f: { name: 'add_time', on: { prepareValue: 'toLocaleString' } } },
           hideCols.includes('ce')
             ? null
             : { label: 'Юр.лицо', c: { name: 'ce', add: false, f: { name: 'name', type: 'label', label: false } } },

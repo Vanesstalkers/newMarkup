@@ -17,9 +17,7 @@
             },
             [
               (data.config.element = function (e) {
-                const selected = (data.value || []).filter(({ value }) => value === e.v).length
-                  ? { selected: 'selected' }
-                  : {};
+                const selected = (data.value || []).filter(({ v }) => v === e.v).length ? { selected: 'selected' } : {};
                 return ['option', { text: e.l, value: e.v, ...selected }];
               }),
             ],
@@ -31,11 +29,9 @@
       prepare: function ({ $el, data, addListener = true }) {
         if (!data.lst) return;
         if (typeof data.lst === 'object' && Array.isArray(data.lst)) {
-          data.lst = data.lst.map(({ value, label }) => ({ v: value, l: label }));
         } else if (!window.LST[data.lst] || data.lst === 'object') {
           window.LST[data.lst] = [];
-          if ((data.value || []).length)
-            window.LST[data.lst].push(...data.value.map(({ value, label }) => ({ v: value, l: label })));
+          if ((data.value || []).length) window.LST[data.lst].push(...data.value);
           if (window.LST[data.lst].filter(({ v }) => v === '').length === 0)
             window.LST[data.lst].unshift({ v: '', l: 'н/д' });
         }
@@ -56,7 +52,7 @@
             const code = $select.closest('.el').dataset.code;
             const value = Array.from($select.options)
               .filter((opt) => opt.selected)
-              .map((opt) => ({ label: opt.label, value: opt.value }));
+              .map((opt) => ({ l: opt.label, v: opt.value }));
             if (typeof beforeSave === 'function' && (await beforeSave({ value, event })) !== true) return;
             const { result, msg, stack } = await api.markup.saveField({ form, code, value });
             if (result === 'error') console.error({ msg, stack });

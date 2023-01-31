@@ -14,9 +14,7 @@
             },
           ],
           (data.config.element = function (e) {
-            const checked = (data.value || []).filter(({ value }) => value === e.v).length
-              ? { checked: 'checked' }
-              : {};
+            const checked = (data.value || []).filter(({ v }) => v === e.v).length ? { checked: 'checked' } : {};
             return [
               [
                 'div',
@@ -48,8 +46,7 @@
 
         if (typeof data.lst === 'object' || !window.LST[data.lst]) {
           window.LST[data.lst] = [];
-          if ((data.value || []).length)
-            window.LST[data.lst].push(...data.value.map(({ value, label }) => ({ v: value, l: label })));
+          if ((data.value || []).length) window.LST[data.lst].push(...data.value);
           if (window.LST[data.lst].filter(({ v }) => v === '').length === 0)
             window.LST[data.lst].unshift({ v: '', l: 'н/д' });
         }
@@ -67,7 +64,7 @@
             const code = $radio.closest('.el').dataset.code;
             const value = Array.from($radioArr)
               .filter((opt) => opt.checked)
-              .map((opt) => ({ label: opt.parentElement.querySelector('label').innerHTML, value: opt.value }));
+              .map((opt) => ({ l: opt.parentElement.querySelector('label').innerHTML, v: opt.value }));
             const { result, msg, stack } = await api.markup.saveField({ form, code, value });
             if (result === 'error') console.error({ msg, stack });
           });

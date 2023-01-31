@@ -162,7 +162,7 @@
           if (data.controls.add.type) {
             if (!data.controls.add.field) console.error('Add field is not defined', data);
             data.controls.add.onChange = async (value) => {
-              if (!value?.[0]?.value && !value?.l) return;
+              if (!value?.[0]?.v && !value?.l) return;
               const form = $el.closest('[type="form"]').dataset.name;
               const {
                 result,

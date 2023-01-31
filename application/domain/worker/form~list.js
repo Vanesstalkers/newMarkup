@@ -18,8 +18,8 @@
         const find = {};
         if (!admin) {
           if (!user.current.parentType) return [];
-          if (!user.current.link?.value) return [];
-          find['__ce.l'] = { $elemMatch: { $eq: db.mongo.ObjectID(user.current.link?.value) } };
+          if (!user.current.link?.v) return [];
+          find['__ce.l'] = { $elemMatch: { $eq: db.mongo.ObjectID(user.current.link?.v) } };
         }
         const findData = await db.mongo.find(
           'worker',

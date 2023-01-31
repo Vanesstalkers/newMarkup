@@ -468,8 +468,9 @@
                   handler: async ({ user }) => {
                     const req = await db.mongo.findOne('reg_request', user.current.reg_request_id);
                     const role = `${req.company_type}_manager`;
-                    const { l: label, v: value } = domain.user['lst~roles'].find(({ v }) => v === role) || {};
-                    await db.mongo.updateOne('user_role', user.current._id, { $set: { role: [{ label, value }] } });
+                    await db.mongo.updateOne('user_role', user.current._id, {
+                      $set: { role: [domain.user['lst~roles'].find(({ v }) => v === role)] },
+                    });
                     return { roleId: user.current._id };
                   },
                   on: {

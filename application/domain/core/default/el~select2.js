@@ -47,7 +47,7 @@
               },
         );
         $$select.on('change.select2', async function () {
-          const value = $$select.select2('data').map(({ text, id }) => ({ label: text, value: id }));
+          const value = $$select.select2('data').map(({ text, id }) => ({ l: text, v: id }));
           if (data.onChange) return await data.onChange(value);
           const { result, msg, stack } = await api.markup.saveField({ form, code, value });
           if (result === 'error') return console.error({ msg, stack });

@@ -1,11 +1,12 @@
 ({
-  tpl: ({ data }, { links, name } = {}) => [
+  tpl: ({ data }, { links, name, config = {} } = {}) => [
     COMPLEX(
       {
         label: 'Электронные адреса',
         name: name || 'email',
         col: 'email',
-        config: { inline: true },
+        config: { inline: true, ...config },
+        controls: { collapse: true },
         add: { label: 'Добавить адрес' },
         item: { bodyClass: 'p-0', controls: { delete: true, config: { simple: true } } },
         links,
