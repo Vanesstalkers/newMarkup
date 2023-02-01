@@ -38,7 +38,12 @@
               const code = $btn.dataset.code;
               let handlerData = {};
               if (typeof window[beforeHandler] === 'function') handlerData = await window[beforeHandler](event);
-              const handleActionData = await api.markup.handleAction({ form, code, data: handlerData });
+              const handleActionData = await api.markup.handleAction({
+                form,
+                code,
+                handler: data.handler,
+                data: handlerData,
+              });
               const { result, data: actionData, msg, stack } = handleActionData;
               if (result === 'error') throw new Error(msg);
               if (typeof window[afterHandler] === 'function') await window[afterHandler](event, actionData);

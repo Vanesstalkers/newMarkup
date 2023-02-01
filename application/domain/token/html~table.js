@@ -23,7 +23,7 @@
           { label: 'Качество', f: { name: 'type', lst: 'token~quality' } },
           { label: 'Цена', f: { name: 'price' } },
           {
-            label: 'Количество / выпущено',
+            label: 'Осталось / выпущено',
             html: ({ data }) => [
               SPAN({ text: data.count - (data.sold || 0) + '/' + data.count }),
               FIELD({ label: 'Продано', name: 'sold', type: 'json' }),
@@ -97,14 +97,29 @@
                             type: 'label',
                             name: 'type',
                             lst: 'token~quality',
-                            class: 'col-4',
+                            class: 'col-3',
                           }),
-                          FIELD({ label: 'Цена', type: 'label', name: 'price', class: 'col-4' }),
-                          FIELD({ label: 'Количество', name: 'buyCount', class: 'col-4' }),
+                          FIELD({ label: 'Цена', type: 'label', name: 'price', class: 'col-3' }),
+                          FIELD({
+                            label: 'Осталось / выпущено',
+                            type: 'label',
+                            name: 'soldCount',
+                            defValue: data.count - (data.sold || 0) + '/' + data.count,
+                            class: 'col-6',
+                          }),
+                          FIELD({ label: 'Продано', name: 'sold', type: 'json' }),
+                          FIELD({ label: 'Количество', name: 'count', type: 'json' }),
                           HR(),
 
+                          DIV({ class: 'col-8' }, FIELD({ label: 'Количество для покупки', name: 'buyCount' })),
                           DIV(
-                            { class: 'col-12 text-end' },
+                            {
+                              class:
+                                'col-4 text-end' +
+                                `css
+                              margin-top: auto;
+                            `,
+                            },
                             FIELD({
                               name: 'buyAction',
                               type: 'button',
@@ -114,13 +129,39 @@
                                 label: true,
                                 popover: {
                                   trigger: 'manual',
-                                  placement: 'left',
+                                  placement: 'bottom',
                                   'custom-class': 'popover-danger',
                                   content: '-',
                                   'original-title': 'Ошибка заполнения формы',
                                 },
                               },
                               handler: async ({ form, field, parent, user, data, parentData }) => {
+                                const token = await db.mongo.findOne('token', parentData._id, {
+                                  projection: { count: true, sold: true },
+                                });
+                                if (+data.buyCount > +token.count - token.sold)
+                                  throw new Error('Такого количества токенов нет в наличии');
+
+                                const {
+                                  __customer: {
+                                    l: [customerId],
+                                  },
+                                } = await db.mongo.findOne('ce', user.current.link.v);
+                                await db.addComplex({
+                                  name: 'purchase',
+                                  parents: [
+                                    { name: 'customer', _id: customerId },
+                                    { name: 'token', _id: parentData._id },
+                                  ],
+                                  links: {
+                                    purchase: { customer: '__customer', token: '__token' },
+                                    customer: '__purchase',
+                                    token: '__purchase',
+                                  },
+                                  data: { count: data.buyCount },
+                                });
+                                await db.mongo.updateOne('token', parentData._id, { $inc: { sold: +data.buyCount } });
+
                                 return data;
                               },
                               on: {

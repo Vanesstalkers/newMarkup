@@ -400,7 +400,7 @@
               { class: 'header-item' },
               A(
                 {
-                  href: 'login.html',
+                  href: 'core.html',
                   class: 'btn btn-primary btn-sm',
                 },
                 I({ class: 'uil uil-lock-alt me-2' }),

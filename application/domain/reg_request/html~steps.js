@@ -144,6 +144,7 @@
                     config: { disableCardView: true },
                   },
                   () => [
+                    FIELD({ name: 'name', type: 'json' }),
                     COMPLEX(
                       {
                         label: 'Руководители',
@@ -155,6 +156,12 @@
                           type: 'search',
                           lst: 'worker~type',
                           field: 'type',
+                        },
+                        handlers: {
+                          beforeAdd: async function ({ data, parentData }) {
+                            data.company = [{ v: parentData._id, l: parentData.name }];
+                            return data;
+                          },
                         },
                         item: { class: 'm-2' },
                       },

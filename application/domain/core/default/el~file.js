@@ -141,7 +141,7 @@
             }
             i++;
             if (i < files.length) return uploadNext();
-            await sleep(1000); // ждем пока бэк обновит библиотеку статики
+            await sleep(2000); // ждем пока бэк обновит библиотеку статики
             if (!data.onChange) {
               await reloadEl(value);
             }

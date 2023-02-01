@@ -1,7 +1,7 @@
 ({
   config: {
     menu: { label: 'Покупатели', icon: 'fa-solid fa-cart-shopping' },
-    access: ['admin', 'customer_manager'],
+    access: ['admin', 'fabricator_manager'],
     disableCardStyle: true,
   },
   col: 'user',

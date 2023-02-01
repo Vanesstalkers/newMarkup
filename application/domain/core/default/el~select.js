@@ -28,17 +28,19 @@
     front: {
       prepare: function ({ $el, data, addListener = true }) {
         if (!data.lst) return;
-        if (typeof data.lst === 'object' && Array.isArray(data.lst)) {
-        } else if (!window.LST[data.lst] || data.lst === 'object') {
-          window.LST[data.lst] = [];
-          if ((data.value || []).length) window.LST[data.lst].push(...data.value);
-          if (window.LST[data.lst].filter(({ v }) => v === '').length === 0)
-            window.LST[data.lst].unshift({ v: '', l: 'н/д' });
+        let usedLST = window.LST[data.lst];
+        if (!usedLST) {
+          usedLST = [];
+          if (typeof data.lst === 'object') {
+            if (Array.isArray(data.lst)) usedLST.push(...data.lst);
+            if ((data.value || []).length) usedLST.push(...data.value);
+            if (usedLST.filter(({ v }) => v === '').length === 0) usedLST.unshift({ v: '', l: 'н/д' });
+          }
         }
 
         const $select = $el.querySelector('select');
         if (typeof data.config.element === 'function') {
-          for (const l of window.LST[data.lst] || data.lst) {
+          for (const l of usedLST) {
             // if (!l.hide) nativeTplToHTML([data.config.element(l)], $select);
             nativeTplToHTML([data.config.element(l)], $select);
           }

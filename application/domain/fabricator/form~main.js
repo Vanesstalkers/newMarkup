@@ -1,5 +1,9 @@
 ({
-  config: { disableCardStyle: true },
+  config: {
+    menu: { label: 'Карточка компании', icon: 'fas fa-person-digging' },
+    access: ['fabricator_manager'],
+    disableCardStyle: true,
+  },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'fabricator',
   id: async function ({ user, query }) {
@@ -127,6 +131,7 @@
                 COMPLEX(
                   { name: 'ce_workers', col: 'ce', label: false, add: false, links: { 'fabricator~main': '__ce' } },
                   () => [
+                    FIELD({ name: 'name', type: 'json' }),
                     HTML('worker~table', {
                       hideFilters: true,
                       hideCols: ['ce'],

@@ -1,21 +1,22 @@
 ({
-  handler: async ({ form, code, user, data }) => {
-    const processForm = user.forms[form];
-    const field = processForm.fields[code];
-    const parent = processForm.fields[field.parentCode];
-    const parentData = processForm.data[field.parentCode];
+  handler: async ({ form, code, user, data, handler }) => {
+    const processForm = user?.forms[form];
+    const field = processForm?.fields[code] || { handler }; // для публичных форм (пользователь отсутствует)
+    const parent = processForm?.fields[field.parentCode];
+    const parentData = processForm?.data[field.parentCode];
 
     let result = null;
     if (typeof field.handler === 'string') {
       const [block, name] = field.handler.split('~');
       const action = lib.utils.getDeep(domain, block.replace(/\//g, '.') + '.' + `action~${name}`);
-      if (typeof action === 'function') result = await action({ query: '1' });
+      if (typeof action === 'function') result = await action({ data });
     } else {
       const handler = lib.utils.getDeep(
         domain,
         [...form.split('~')[0].split('/'), 'cache', 'handlers', parent.linecode, field.name].join('.'),
       );
-      if (typeof handler === 'function') result = await handler({ form: processForm, field, parent, user, data, parentData });
+      if (typeof handler === 'function')
+        result = await handler({ form: processForm, field, parent, user, data, parentData });
     }
     return result;
   },
@@ -42,13 +43,14 @@
     const handlers =
       lib.utils.getDeep(domain, [...block.split('/'), 'cache', 'handlers', complex.linecode].join('.')) || {};
 
-    if (typeof handlers.beforeAdd === 'function') await handlers.beforeAdd({ form, complex, user, data, parentData });
+    if (typeof handlers.beforeAdd === 'function')
+      await handlers.beforeAdd({ form: processForm, complex, user, data, parentData });
 
     if (complex.links?.[complex.name]?.[complex.parent.name]) {
       data[complex.links?.[complex.name]?.[complex.parent.name]] = { l: [parentData._id], c: 1 };
     }
 
-    parents.push({ ...complex.parent, _id: parentData._id });
+    if(parentData?._id) parents.push({ ...complex.parent, _id: parentData._id });
     const newItem = await db.addComplex({ ...complex, data, parents });
     const itemCode = lib.markup.helpers.nextCode(processForm);
 
@@ -60,7 +62,8 @@
       parentData[complex.links[complex.parent.name]].c++;
     }
 
-    if (typeof handlers.afterAdd === 'function') await handlers.afterAdd({ form, complex, user, data, newItem });
+    if (typeof handlers.afterAdd === 'function')
+      await handlers.afterAdd({ form: processForm, complex, user, data, newItem });
     return returnId // !!! переделать защиту от form.fields[item.code] в showComplexItem
       ? newItem._id
       : await lib.markup.actions.showComplexItem({ itemCode, complexCode: code, user, form: processForm });

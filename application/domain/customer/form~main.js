@@ -1,5 +1,9 @@
 ({
-  config: { disableCardStyle: true },
+  config: {
+    menu: { label: 'Карточка компании', icon: 'fa-solid fa-cart-shopping' },
+    access: ['customer_manager'],
+    disableCardStyle: true,
+  },
   item: { controls: { reload: true, config: { simple: true } } },
   col: 'customer',
   id: async function ({ user, query }) {
@@ -95,17 +99,149 @@
                 text: 'Токены',
               },
               content: [
-                HTML('token~table', {
-                  hideFilters: true,
-                  hideCols: ['buy'],
-                  tableId: async ({ user, query = {}, parentData, complex }) => {
-                    const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
-                    const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
-                    return findData.map(({ _id }) => _id);
-                  },
-                  links: { token: { 'customer~main': '__customer' }, 'customer~main': '__token' },
-                }),
+                COMPLEX({ name: 'purchase', label: false, config: { disableCardStyle: true } }, ({ data }) => [
+                  DIV(
+                    { class: 'row' },
+                    FIELD({
+                      label: 'Дата покупки',
+                      name: 'add_time',
+                      type: 'label',
+                      on: { prepareValue: 'toLocaleString' },
+                      class: 'col-3',
+                    }),
+                    FIELD({ label: 'Количество', name: 'count', type: 'label', class: 'col-2' }),
+                    COMPLEX(
+                      {
+                        name: 'token',
+                        add: false,
+                        class: 'col-5',
+                        item: { class: 'row' },
+                        config: { disableCardView: true },
+                      },
+                      () => [
+                        FIELD({ label: 'Качество', type: 'label', name: 'type', lst: 'token~quality', class: 'col-6' }),
+                        COMPLEX(
+                          {
+                            name: 'fabricator',
+                            add: false,
+                            class: 'col-6',
+                            config: { disableCardView: true },
+                          },
+                          () => [FIELD({ label: 'Производитель', name: 'name', type: 'label' })],
+                        ),
+                      ],
+                    ),
+
+                    HTML('core/default~offcanvas', {
+                      title: 'Запрос поставки',
+                      id: data._id,
+                      button: { label: 'Запросить поставку', type: 'info', cls: 'col-2' },
+                      html: {
+                        body: [
+                          DIV(
+                            { class: 'row' },
+                            FIELD({
+                              label: 'Дата поставки',
+                              name: 'deliveryDate',
+                              config: { inputType: 'datetime-local' },
+                              class: 'col-12',
+                            }),
+                            FIELD({
+                              label: 'Комментарий к поставке',
+                              name: 'deliveryComment',
+                              type: 'textarea',
+                              class: 'col-12',
+                            }),
+                            DIV(
+                              {
+                                class:
+                                  'col-12 text-center' +
+                                  `css
+                                    margin-top: auto;
+                                  `,
+                              },
+                              FIELD({
+                                name: 'deliveryAction',
+                                type: 'button',
+                                label: 'Отправить запрос',
+                                config: {
+                                  btnType: 'success',
+                                  label: true,
+                                  popover: {
+                                    trigger: 'manual',
+                                    placement: 'bottom',
+                                    'custom-class': 'popover-danger',
+                                    content: '-',
+                                    'original-title': 'Ошибка заполнения формы',
+                                  },
+                                },
+                                handler: async ({ form, field, parent, user, data, parentData }) => {
+                                  const purchase = await db.mongo.findOne('purchase', parentData._id);
+                                  const tokenId = purchase.__token.l[0];
+                                  const token = await db.mongo.findOne('token', tokenId);
+                                  await db.addComplex({
+                                    name: 'invoice',
+                                    parents: [
+                                      { name: 'customer', _id: purchase.__customer.l[0] },
+                                      { name: 'fabricator', _id: token.__fabricator.l[0] },
+                                      { name: 'token', _id: tokenId },
+                                      { name: 'purchase', _id: parentData._id },
+                                    ],
+                                    links: {
+                                      invoice: {
+                                        customer: '__customer',
+                                        token: '__token',
+                                        purchase: '__purchase',
+                                        fabricator: '__fabricator',
+                                      },
+                                      customer: '__invoice',
+                                      token: '__invoice',
+                                      purchase: '__invoice',
+                                      fabricator: '__invoice',
+                                    },
+                                    data: { date: data.deliveryDate, comment: data.deliveryComment },
+                                  });
+
+                                  return data;
+                                },
+                                on: {
+                                  beforeHandler: async (event) => {
+                                    const data = Array.from(
+                                      event.target.closest('.offcanvas-body').querySelectorAll('input'),
+                                    ).reduce((obj, { name, value, type, checked }) => {
+                                      if (type === 'checkbox' || type === 'radio') {
+                                        if (type === 'checkbox') obj[name] = checked;
+                                        if (type === 'radio' && checked) obj[name] = value;
+                                      } else {
+                                        obj[name] = value;
+                                      }
+                                      return obj;
+                                    }, {});
+                                    console.log({data});
+                                    return { deliveryDate: data.deliveryDate, deliveryComment: data.deliveryComment };
+                                  },
+                                },
+                              }),
+                            ),
+                          ),
+                        ],
+                      },
+                    }),
+                  ),
+                ]),
               ],
+              // content: [
+              //   HTML('token~table', {
+              //     hideFilters: true,
+              //     hideCols: ['buy'],
+              //     tableId: async ({ user, query = {}, parentData, complex }) => {
+              //       const find = { _id: { $in: parentData[complex.links[complex.parent.name]]?.l || [] } };
+              //       const findData = await db.mongo.find(complex.col, find, { projection: { _id: 1 } });
+              //       return findData.map(({ _id }) => _id);
+              //     },
+              //     links: { token: { 'customer~main': '__customer' }, 'customer~main': '__token' },
+              //   }),
+              // ],
             },
             {
               button: {
@@ -140,6 +276,7 @@
                 COMPLEX(
                   { name: 'ce_workers', col: 'ce', label: false, add: false, links: { 'customer~main': '__ce' } },
                   () => [
+                    FIELD({ name: 'name', type: 'json' }),
                     HTML('worker~table', {
                       hideFilters: true,
                       hideCols: ['ce'],
