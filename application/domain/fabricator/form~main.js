@@ -95,7 +95,7 @@
           items: [
             {
               button: {
-                icon: 'fa-solid fa-database fa-fw',
+                icon: 'fa-solid fa-database fa-fw me-1',
                 text: 'Токены',
               },
               content: [
@@ -110,21 +110,81 @@
                   links: { token: { 'fabricator~main': '__fabricator' }, 'fabricator~main': '__token' },
                   add: { modal: { toggleButton: { simple: true } } },
                 }),
-                // COMPLEX({ name: 'token', label: 'Выпуски токенов', add: { label: 'Выпустить токены' } }, ({ data }) => [
-                //   DIV({ text: data._id }),
-                // ]),
               ],
             },
             {
               button: {
-                icon: 'fa-solid fa-database fa-fw',
+                icon: 'fa-solid fa-truck-arrow-right fa-fw me-1',
                 text: 'Заявки на поставку',
               },
-              content: [COMPLEX({ name: 'req', label: false, add: true }, ({ data }) => [DIV({ text: data._id })])],
+              content: [
+                COMPLEX({ name: 'invoice', label: false, config: { disableCardStyle: true }, controls: { reload: true } }, ({ data }) => [
+                  DIV(
+                    { class: 'row' },
+                    DIV(
+                      { class: 'col-12' },
+                      DIV(
+                        { class: 'row' },
+                        FIELD({
+                          label: 'Дата заявки',
+                          name: 'add_time',
+                          type: 'label',
+                          on: { prepareValue: 'toLocaleString' },
+                          class: 'col-4',
+                        }),
+                        FIELD({
+                          label: 'Идентификатор токена',
+                          name: '__token',
+                          defValue: data.__token?.l[0],
+                          type: 'label',
+                          class: 'col-5',
+                        }),
+                        COMPLEX(
+                          {
+                            name: 'customer',
+                            add: false,
+                            class: 'col-3',
+                            config: { disableCardView: true },
+                          },
+                          () => [FIELD({ label: 'Покупатель', name: 'name', type: 'label' })],
+                        ),
+                      ),
+                    ),
+                    DIV(
+                      { class: 'col-12' },
+                      DIV(
+                        { class: 'row' },
+                        FIELD({
+                          label: 'Дата поставки',
+                          name: 'date',
+                          type: 'input',
+                          disabled: true,
+                          config: { inputType: 'date' },
+                          class: 'col-4',
+                        }),
+                        FIELD({
+                          label: 'Статус поставки',
+                          name: 'status',
+                          lst: 'token~invoice_status',
+                          type: 'label',
+                          class: 'col-4 ',
+                        }),
+                      ),
+                    ),
+                    FIELD({
+                      label: 'Комментарий',
+                      name: 'comment',
+                      type: 'label',
+                      class: 'col-12 ',
+                    }),
+                    HR(),
+                  ),
+                ]),
+              ],
             },
             {
               button: {
-                icon: 'fa-solid fa-address-card fa-fw',
+                icon: 'fa-solid fa-address-card fa-fw me-1',
                 text: 'Сотрудники',
               },
               content: [

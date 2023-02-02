@@ -14,6 +14,7 @@
               {
                 class: 'form-control el-value',
                 text: data.value,
+                name: data.name,
                 rows: config.rows || 3,
                 ...(data.disabled ? { disabled: '' } : {}),
               },
