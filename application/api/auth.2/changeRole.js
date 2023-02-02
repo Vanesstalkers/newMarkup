@@ -7,9 +7,15 @@
       {
         $lookup: {
           from: 'user_role',
-          localField: '__user_role.l',
-          foreignField: '_id',
-          pipeline: [{ $project: { _id: 1, role: 1, link: 1 } }],
+          let: { roleIds: '$__user_role.l' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $in: ['$_id', '$$roleIds'] },
+              },
+            },
+            { $project: { _id: 1, role: 1, link: 1, reg_request_id: 1 } },
+          ],
           as: 'roles',
         },
       },

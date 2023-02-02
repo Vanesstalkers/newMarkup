@@ -49,15 +49,21 @@
 
   async getUser(login) {
     // return db.pg.row('Account', { login });
-    const [user] = await db.mongo.aggregate('user', [
-      { $match: { login } },
+    const [user] = await db.mongo.aggregate("user", [
+      {$match: {login}},
       {
         $lookup: {
-          from: 'user_role',
-          localField: '__user_role.l',
-          foreignField: '_id',
-          pipeline: [{ $project: { _id: 1, role: 1, link: 1, reg_request_id: 1 } }],
-          as: 'roles',
+          from: "user_role",
+          let: {roleIds: "$__user_role.l"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {$in: ["$_id", "$$roleIds"]},
+              },
+            },
+            {$project: {_id: 1, role: 1, link: 1, reg_request_id: 1}},
+          ],
+          as: "roles",
         },
       },
     ]);
